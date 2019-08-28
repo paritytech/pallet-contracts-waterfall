@@ -1,0 +1,3 @@
+[submodule "ink"]
+	path = ink
+	url = git@github.com:paritytech/ink.git

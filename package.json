@@ -1,0 +1,18 @@
+{
+  "name": "srml-contract-integrations",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Sergey Pepyakin <sergei@parity.io>",
+  "license": "MIT",
+  "dependencies": {
+    "@polkadot/api": "^0.91.0-beta.2",
+    "@polkadot/api-contract": "^0.91.0-beta.2",
+    "@polkadot/keyring": "^1.2.0-beta.2",
+    "bn": "^1.0.4",
+    "bn.js": "^5.0.0",
+    "jest": "^24.9.0"
+  },
+  "scripts": {
+    "test": "jest"
+  }
+}
