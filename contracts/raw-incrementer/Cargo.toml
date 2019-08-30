@@ -1,0 +1,17 @@
+[package]
+name = "raw-incrementer"
+version = "0.1.0"
+authors = ["Sergey Pepyakin <sergei@parity.io>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+parity-codec = { version = "2.0.2", default-features = false }
+parity-codec-derive = { version = "2.0.2", default-features = false }
+wee_alloc = "0.4"
+
+[profile.release]
+panic = "abort"
+lto = true
