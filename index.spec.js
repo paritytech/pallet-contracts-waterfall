@@ -69,6 +69,7 @@ describe('simplest contract', () => {
 
         test('flip', async (done) => {
             const CREATION_FEE = DOT.muln(200);
+            const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
             await api.tx.contracts.create(CREATION_FEE, 500000, codeHash, abi.deploy())
                 .signAndSend(testOrigin, async (result) => {
                     if (result.status.isFinalized) {
@@ -82,9 +83,10 @@ describe('simplest contract', () => {
                             let flipFlag = await getContractStorage(
                                 api,
                                 contractAddress,
-                                '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77'
+                                FLIP_FLAG_STORAGE_KEY
                             );
-                            console.log(flipFlag); // should be 0
+                            console.log(flipFlag.unwrap());
+                            expect(flipFlag.unwrap().toString()).toBe("0x00");
 
                             api.tx.contracts.call(contractAddress, 0, 500000, abi.messages.flip())
                                 .signAndSend(testOrigin, async (result) => {
@@ -92,9 +94,9 @@ describe('simplest contract', () => {
                                         let flipFlag = await getContractStorage(
                                             api,
                                             contractAddress,
-                                            '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77'
+                                            FLIP_FLAG_STORAGE_KEY
                                         );
-                                        console.log(flipFlag);
+                                        expect(flipFlag.unwrap().toString()).toBe("0x01");
                                         done();
                                     }
                                 });
