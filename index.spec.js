@@ -11,6 +11,7 @@ const DOT = new BN('1000000000000000');
 async function getContractStorage(api, contractAddress, storageKey) {
     let contractInfo = await api.query.contracts.contractInfoOf(contractAddress);
     let trieId = contractInfo.unwrap().asAlive.trieId.toString('hex');
+    console.log(trieId);
     return await api.rpc.state.getChildStorage(trieId, storageKey);
 }
 
@@ -97,6 +98,61 @@ describe('simplest contract', () => {
                                             FLIP_FLAG_STORAGE_KEY
                                         );
                                         expect(flipFlag.unwrap().toString()).toBe("0x01");
+                                        done();
+                                    }
+                                });
+                        }
+                    }
+                });
+        });
+    });
+
+    describe('raw-incrementer', () => {
+        let codeHash;
+
+        beforeEach(async (done) => {
+            let rawIncrementerWasm = fs.readFileSync(
+                'contracts/raw-incrementer/target/raw_incrementer-pruned.wasm'
+            )
+            .toString('hex');
+
+            await api.tx.contracts.putCode(500000, `0x${rawIncrementerWasm}`)
+                .signAndSend(testOrigin, (result) => {
+                    if (result.status.isFinalized) {
+                        const record = result.findRecord('contracts', 'CodeStored');
+                        if (record) {
+                            codeHash = record.event.data[0];
+                            done();
+                        }
+                    }
+                });
+        });
+
+        test('raw incrementer', async (done) => {
+            const CREATION_FEE = DOT.muln(200);
+
+            await api.tx.contracts.create(CREATION_FEE, 500000, codeHash, '0x00')
+                .signAndSend(testOrigin, async (result) => {
+                    if (result.status.isFinalized) {
+                        const record = result.findRecord('contracts', 'Instantiated');
+                        if (record) {
+                            let contractAddress = record.event.data[1];
+
+                            // 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+                            let msg = '0x002a000000';
+
+                            api.tx.contracts.call(contractAddress, 0, 500000, msg)
+                                .signAndSend(testOrigin, async (result) => {
+                                    if (result.status.isFinalized) {
+                                        // The key actually is 0x010101..01. However, it seems to be
+                                        // hashed before putting into the storage.
+                                        const KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
+                                        let counter = await getContractStorage(
+                                            api,
+                                            contractAddress,
+                                            KEY
+                                        );
+                                        expect(counter.unwrap().toString()).toBe("0x2a000000");
                                         done();
                                     }
                                 });

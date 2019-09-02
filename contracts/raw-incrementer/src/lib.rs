@@ -50,12 +50,14 @@ fn handle(input: &[u8]) -> Vec<u8> {
 
     match action {
         Action::Inc(by) => {
+            ext::println("inc");
             let mut counter = ext::get_storage(&COUNTER_KEY).and_then(|v| u32::decode(&mut &v[..])).unwrap_or(0);
             counter += by;
             ext::set_storage(&COUNTER_KEY, Some(&u32::encode(&counter)));
             Vec::new()
         }
         Action::Get => {
+            ext::println("get");
             let raw_counter = ext::get_storage(&COUNTER_KEY).unwrap_or(vec![]);
             raw_counter.to_vec()
         }
