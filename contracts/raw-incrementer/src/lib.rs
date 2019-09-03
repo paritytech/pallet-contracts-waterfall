@@ -41,6 +41,7 @@ pub extern fn oom(_: ::core::alloc::Layout) -> ! {
 enum Action {
     Inc(u32),
     Get,
+    SelfEvict,
 }
 
 static COUNTER_KEY: ext::Key = ext::Key([1; 32]);
@@ -60,6 +61,12 @@ fn handle(input: &[u8]) -> Vec<u8> {
             ext::println("get");
             let raw_counter = ext::get_storage(&COUNTER_KEY).unwrap_or(vec![]);
             raw_counter.to_vec()
+        }
+        Action::SelfEvict => {
+            // Effectively self-evict.
+            ext::println("self-evict");
+            ext::set_rent_allowance(0);
+            Vec::new()
         }
     }
 }

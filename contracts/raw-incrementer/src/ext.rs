@@ -1,5 +1,6 @@
 
 use alloc::vec::Vec;
+use codec::Encode;
 
 mod cabi {
     extern "C" {
@@ -9,6 +10,7 @@ mod cabi {
         pub fn ext_scratch_read(dest_ptr: u32, offset: u32, len: u32);
         pub fn ext_scratch_write(src_ptr: u32, len: u32);
         pub fn ext_println(ptr: u32, len: u32);
+        pub fn ext_set_rent_allowance(value_ptr: u32, value_len: u32);
     }
 }
 
@@ -74,5 +76,15 @@ pub fn scratch_buf_set(data: &[u8]) {
 pub fn println(msg: &str) {
     unsafe {
         cabi::ext_println(msg.as_ptr() as u32, msg.len() as u32);
+    }
+}
+
+pub fn set_rent_allowance(value: u128) {
+    let value_buf = value.encode();
+    unsafe {
+        cabi::ext_set_rent_allowance(
+            value_buf.as_ptr() as usize as u32,
+            value_buf.len() as u32,
+        );
     }
 }

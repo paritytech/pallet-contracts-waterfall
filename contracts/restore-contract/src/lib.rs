@@ -51,7 +51,8 @@ enum Action {
     },
 }
 
-static OWNER_KEY: ext::Key = [1; 32];
+// This is very important to not collide with the restored contract.
+static OWNER_KEY: ext::Key = [0x42; 32];
 
 fn handle(action: Action) {
     let owner = {
