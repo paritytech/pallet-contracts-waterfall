@@ -8,3 +8,7 @@ cd -
 cd contracts/raw-incrementer
 ./build.sh
 cd -
+
+cd contracts/restore-contract
+./build.sh
+cd -
