@@ -98,5 +98,6 @@ pub extern "C" fn call() -> u32 {
 pub extern "C" fn deploy() -> u32 {
     let caller = ext::caller();
     ext::set_storage(&OWNER_KEY, Some(&caller.encode()));
+    ext::scratch_buf_set(&[]);
     0
 }
