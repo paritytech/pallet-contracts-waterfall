@@ -1,8 +1,8 @@
 {
-  "name": "srml-contract-integrations",
+  "name": "srml-contract-waterfall",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Sergey Pepyakin <sergei@parity.io>",
+  "author": "Sergey Shulepov <sergei@parity.io>",
   "license": "MIT",
   "dependencies": {
     "@polkadot/api": "^0.91.0-beta.14",
