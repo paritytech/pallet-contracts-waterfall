@@ -94,7 +94,7 @@ async function putCodeViaFile(api, signer, fileName, gasRequired=500000) {
 }
 
 async function instantiate(api, signer, codeHash, inputData, endowment, gasRequired=50000) {
-    let tx = api.tx.contracts.create(endowment, gasRequired, codeHash, inputData);
+    let tx = api.tx.contracts.instantiate(endowment, gasRequired, codeHash, inputData);
     let result = await sendAndFinalize(signer, tx);
 
     const record = result.findRecord('contracts', 'Instantiated');
