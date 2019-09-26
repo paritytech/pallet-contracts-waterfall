@@ -133,7 +133,7 @@ describe('simplest contract', () => {
         done(); // TODO: Remove along with the `done` param?
     });
 
-    test('flip', async (done) => {
+    test('ink!-flip', async (done) => {
         const CREATION_FEE = DOT.muln(200);
         const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
 
@@ -170,12 +170,12 @@ describe('simplest contract', () => {
         done(); // TODO: Remove along with the `done` param?
     });
 
-    test('raw-incrementer', async (done) => {
+    test('ink!-raw-incrementer', async (done) => {
         const CREATION_FEE = DOT.muln(200);
         let codeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'contracts/raw-incrementer/target/raw_incrementer-pruned.wasm'
+            'contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm'
         );
         let address = await instantiate(api, testOrigin, codeHash, '0x00', CREATION_FEE);
 
@@ -196,7 +196,7 @@ describe('simplest contract', () => {
         done();
     });
 
-    test('restoration', async (done) => {
+    test('ink!-restoration', async (done) => {
         const COUNTER_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
 
         // This test does the following:
@@ -215,7 +215,7 @@ describe('simplest contract', () => {
         let incrementerCodeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'contracts/raw-incrementer/target/raw_incrementer-pruned.wasm'
+            'contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm'
         );
         let address = await instantiate(
             api,
@@ -318,6 +318,33 @@ describe('simplest contract', () => {
         );
         expect(counterNew.unwrap().toString()).toBe("0x2a000000");
 
+        done();
+    });
+
+
+    test('AssemblyScript-incrementer', async (done) => {
+        const CREATION_FEE = DOT.muln(200);
+        let codeHash = await putCodeViaFile(
+            api,
+            testOrigin,
+            'contracts-assemblyscript/raw-incrementer/target/raw_incrementer-pruned.wasm'
+        );
+        let address = await instantiate(api, testOrigin, codeHash, '0x00', CREATION_FEE);
+
+        // 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+        let msg = '0x002a000000';
+
+        await call(api, testOrigin, address, msg);
+
+        // The key actually is 0x010101..01. However, it seems to be
+        // hashed before putting into the storage.
+        const KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
+        let counter = await getContractStorage(
+            api,
+            address,
+            KEY
+        );
+        expect(counter.unwrap().toString()).toBe("0x2a000000");
         done();
     });
 });
