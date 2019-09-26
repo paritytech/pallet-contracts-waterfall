@@ -1,2 +1,3 @@
 /node_modules
 *.log
+/contracts-assemblyscript/**/node_modules
