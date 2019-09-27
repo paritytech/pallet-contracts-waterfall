@@ -14,21 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Substrate. If not, see <http://www.gnu.org/licenses/>.
 
-const { ApiPromise, WsProvider } = require('@polkadot/api');
-const { Abi } = require('@polkadot/api-contract');
-const testKeyring = require('@polkadot/keyring/testing');
-const { randomAsU8a } = require('@polkadot/util-crypto');
-const { Option, Vec, u8, Bytes, Tuple, Enum, AccountId, U256, H256, U128, ClassOf } = require('@polkadot/types');
-const fs = require('fs');
-const path = require('path');
-const BN = require('bn.js');
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { Abi } from '@polkadot/api-contract';
+import testKeyring from '@polkadot/keyring/testing';
+import { randomAsU8a } from '@polkadot/util-crypto';
+import { ClassOf, Enum, H256, Option, Tuple, u256 } from '@polkadot/types';
+import { Address } from '@polkadot/types/interfaces';
+import fs from 'fs';
+import path from 'path';
+import BN from 'bn.js';
 
 const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 const DOT = new BN('1000000000000000');
 const CREATION_FEE = DOT.muln(200);
 
 class Restore extends Tuple {
-    constructor(value) {
+    constructor(value: any) {
       super({
         dest_addr: ClassOf('AccountId'),
         code_hash: H256,
@@ -38,16 +39,16 @@ class Restore extends Tuple {
   }
 
   class Put extends Tuple {
-    constructor(value) {
+    constructor(value: any) {
       super({
-        key: U256,
-        value: Option.with(Bytes)
+        key: u256,
+        value: Option
       }, value);
     }
   }
 
   class Action extends Enum {
-    constructor(value, index) {
+    constructor(value: any, index: number) {
       super({
         put: Put,
         restore: Restore
@@ -55,9 +56,9 @@ class Restore extends Tuple {
     }
   }
 
-async function sendAndFinalize(signer, tx) {
+async function sendAndFinalize(signer: any, tx: any) {
     return new Promise(function(resolve, reject) {
-        tx.signAndSend(signer, (result) => {
+        tx.signAndSend(signer, (result: any) => {
             if (result.status.isFinalized) {
                 resolve(result);
             }
@@ -65,8 +66,8 @@ async function sendAndFinalize(signer, tx) {
     });
 }
 
-async function createTestOrigin(api) {
-    const keyring = testKeyring.default();
+async function createTestOrigin(api: ApiPromise) {
+    const keyring = testKeyring();
     const alicePair = keyring.getPair(ALICE);
     let testOrigin = keyring.addFromSeed(randomAsU8a(32));
 
@@ -81,7 +82,7 @@ async function createTestOrigin(api) {
 // TODO: Introduce a class, that has `api` and `testOrigin`.
 
 /// Returns code hash.
-async function putCodeViaFile(api, signer, fileName, gasRequired=500000) {
+async function putCodeViaFile(api: ApiPromise, signer: any, fileName: string, gasRequired=500000) {
     let wasmCode = fs.readFileSync(path.join(__dirname, fileName)).toString('hex');
     let tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
     let result = await sendAndFinalize(signer, tx);
@@ -95,7 +96,7 @@ async function putCodeViaFile(api, signer, fileName, gasRequired=500000) {
     return record.event.data[0];
 }
 
-async function instantiate(api, signer, codeHash, inputData, endowment, gasRequired=50000) {
+async function instantiate(api: ApiPromise, signer: any, codeHash: string, inputData: any, endowment: BN, gasRequired=50000) {
     let tx = api.tx.contracts.instantiate(endowment, gasRequired, codeHash, inputData);
     let result = await sendAndFinalize(signer, tx);
 
@@ -108,12 +109,12 @@ async function instantiate(api, signer, codeHash, inputData, endowment, gasRequi
     return record.event.data[1];
 }
 
-async function call(api, signer, contractAddress, inputData, gasRequired=50000, endowment=0) {
+async function call(api: ApiPromise, signer: any, contractAddress: Address, inputData: any, gasRequired=50000, endowment=0) {
     let tx = api.tx.contracts.call(contractAddress, endowment, gasRequired, inputData);
     await sendAndFinalize(signer, tx);
 }
 
-async function getContractStorage(api, contractAddress, storageKey) {
+async function getContractStorage(api: ApiPromise, contractAddress: Address, storageKey: string) {
     let contractInfo = await api.query.contracts.contractInfoOf(contractAddress);
     let trieId = contractInfo.unwrap().asAlive.trieId.toString('hex');
     console.log(trieId);
@@ -122,8 +123,8 @@ async function getContractStorage(api, contractAddress, storageKey) {
 
 describe('simplest contract', () => {
     // This is a test account that is going to be created and funded each test.
-    let testOrigin;
-    let api;
+    let testOrigin: any;
+    let api: ApiPromise;
 
     beforeEach(async (done) => {
         jest.setTimeout(45000);
@@ -139,9 +140,9 @@ describe('simplest contract', () => {
         const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
 
         let flipperAbi = JSON.parse(
-            fs.readFileSync('ink/examples/lang/flipper/target/old_abi.json')
+            fs.readFileSync('../ink/examples/lang/flipper/target/old_abi.json')
         );
-        const abi = new Abi(flipperAbi);
+        const abi: Abi = new Abi(flipperAbi);
 
         let codeHash = await putCodeViaFile(
             api,
