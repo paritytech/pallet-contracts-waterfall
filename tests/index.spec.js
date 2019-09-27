@@ -16,16 +16,16 @@
 
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { Abi } = require('@polkadot/api-contract');
-const testingPairs = require('@polkadot/keyring/testingPairs');
+const testKeyring = require('@polkadot/keyring/testing');
 const { randomAsU8a } = require('@polkadot/util-crypto');
-import { Option, Vec, u8, Bytes, Tuple, Enum, AccountId, U256, H256, U128, ClassOf } from '@polkadot/types';
+const { Option, Vec, u8, Bytes, Tuple, Enum, AccountId, U256, H256, U128, ClassOf } = require('@polkadot/types');
+const fs = require('fs');
+const path = require('path');
 const BN = require('bn.js');
-import fs from 'fs';
 
 const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 const DOT = new BN('1000000000000000');
 const CREATION_FEE = DOT.muln(200);
-const keyring = testingPairs({ type: 'sr25519' });
 
 class Restore extends Tuple {
     constructor(value) {
@@ -58,7 +58,6 @@ class Restore extends Tuple {
 async function sendAndFinalize(signer, tx) {
     return new Promise(function(resolve, reject) {
         tx.signAndSend(signer, (result) => {
-            console.log(result.status)
             if (result.status.isFinalized) {
                 resolve(result);
             }
@@ -83,23 +82,11 @@ async function createTestOrigin(api) {
 
 /// Returns code hash.
 async function putCodeViaFile(api, signer, fileName, gasRequired=500000) {
-    let wasmCode = fs.readFileSync(fileName).toString('hex');
-    let res = api.tx.contracts
-        .putCode(gasRequired, `0x${wasmCode}`)
-        .signAndSend(keyring.eve, (result) => {
-            if (result.status.isFinalized) {
-              const record = result.findRecord('contracts', 'CodeStored');
-              if (record) {
-                codeHash = record.event.data[0];
-                done();
-              }
-            }
-          })
-    // let result = await sendAndFinalize(signer, tx);
-    console.log('RESULT')
-    console.log(res)
+    let wasmCode = fs.readFileSync(path.join(__dirname, fileName)).toString('hex');
+    let tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
+    let result = await sendAndFinalize(signer, tx);
 
-    const record = res.findRecord('contracts', 'CodeStored');
+    const record = result.findRecord('contracts', 'CodeStored');
     if (!record) {
         throw 'no code stored event';
     }
@@ -133,7 +120,7 @@ async function getContractStorage(api, contractAddress, storageKey) {
     return await api.rpc.state.getChildStorage(trieId, storageKey);
 }
 
-describe('Test Suite of basic contracts', () => {
+describe('simplest contract', () => {
     // This is a test account that is going to be created and funded each test.
     let testOrigin;
     let api;
@@ -148,18 +135,18 @@ describe('Test Suite of basic contracts', () => {
         done(); // TODO: Remove along with the `done` param?
     });
 
-    test('ink!-flip', async (done) => {
+    test('flip', async (done) => {
         const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
 
         let flipperAbi = JSON.parse(
             fs.readFileSync('ink/examples/lang/flipper/target/old_abi.json')
         );
-        abi = new Abi(flipperAbi);
+        const abi = new Abi(flipperAbi);
 
         let codeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'ink/examples/lang/flipper/target/flipper-pruned.wasm'
+            '../ink/examples/lang/flipper/target/flipper-pruned.wasm'
         );
         let address = await instantiate(api, testOrigin, codeHash, abi.deploy(), CREATION_FEE);
 
@@ -184,11 +171,11 @@ describe('Test Suite of basic contracts', () => {
         done(); // TODO: Remove along with the `done` param?
     });
 
-    test('ink!-raw-incrementer', async (done) => {
+    test('raw-incrementer', async (done) => {
         let codeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm'
+            '../contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm'
         );
         let address = await instantiate(api, testOrigin, codeHash, '0x00', CREATION_FEE);
 
@@ -209,7 +196,7 @@ describe('Test Suite of basic contracts', () => {
         done();
     });
 
-    test('ink!-restoration', async (done) => {
+    test('restoration', async (done) => {
         const COUNTER_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
 
         // This test does the following:
@@ -221,13 +208,11 @@ describe('Test Suite of basic contracts', () => {
         // 6. restores the contract
         // 7. checks that the restored contract is equivalent to the evicted.
 
-        //
-        // Instantiate a contract.
-        //
+        // 1. Instantiate a contract.
         let incrementerCodeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm'
+            '../contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm'
         );
         let address = await instantiate(
             api,
@@ -239,10 +224,7 @@ describe('Test Suite of basic contracts', () => {
         console.log("address: ", address); // TODO: Remove
         console.log("incrementerCodeHash: ", incrementerCodeHash);
 
-        //
-        // Fill it with initial data.
-        //
-
+        // 2. Fill it with initial data.
         // 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
         await call(api, testOrigin, address, '0x002a000000');
 
@@ -253,10 +235,7 @@ describe('Test Suite of basic contracts', () => {
         );
         expect(counter.unwrap().toString()).toBe("0x2a000000");
 
-        //
-        // Evict the contract
-        //
-
+        // 3. Evict the contract
         // 0x02 = Action::SelfEvict
         await call(api, testOrigin, address, '0x02');
 
@@ -268,14 +247,11 @@ describe('Test Suite of basic contracts', () => {
         let contractInfo = await api.query.contracts.contractInfoOf(address);
         expect(contractInfo.unwrap().isTombstone).toBe(true);
 
-        //
-        // Create a restoration contract
-        //
-
+        // 4. Create a restoration contract
         let restoreCodeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'contracts-ink/restore-contract/target/restore_contract-pruned.wasm'
+            '../contracts-ink/restore-contract/target/restore_contract-pruned.wasm'
         );
         let restoreContractAddress = await instantiate(
             api,
@@ -287,10 +263,7 @@ describe('Test Suite of basic contracts', () => {
 
         // TODO: Validate that the contract doesn't accept calls from non-owner.
 
-        //
-        // Build [almost] identical state to the restored contract.
-        //
-
+        // 5. Build [almost] identical state to the restored contract.
         // Action::Put {
         //   key: [0x01; 32],
         //   value: Some(42u32.encode()),
@@ -306,10 +279,7 @@ describe('Test Suite of basic contracts', () => {
             '0x00010101010101010101010101010101010101010101010101010101010101010101102a000000';
         await call(api, testOrigin, restoreContractAddress, encodedPutAction);
 
-        //
-        // Restore the contract
-        //
-
+        // 6. Restore the contract
         // Action::Restore {
         //   dest_addr,
         //   code_hash,

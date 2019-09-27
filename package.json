@@ -9,17 +9,23 @@
   "license": "MIT",
   "dependencies": {
     "@polkadot/api": "^0.91.0-beta.23",
+    "@polkadot/api-contract": "^0.91.0-beta.23",
     "@polkadot/keyring": "^1.2.0-beta.7",
     "@polkadot/util-crypto": "^1.2.0-beta.7",
     "typescript": "^3.2.2"
   },
   "devDependencies": {
+    "@types/jest": "^24.0.18",
     "@types/node": "^10.12.18",
     "bn.js": "^5.0.0",
     "jest": "^24.9.0",
+    "ts-jest": "^24.1.0",
     "ts-loader": "^5.3.2"
   },
+  "jest": {
+    "preset": "ts-jest/presets/js-with-ts"
+  },
   "scripts": {
-    "test": "NODE_ENV=abc jest /tests"
+    "test": "NODE_ENV=abc jest"
   }
 }
