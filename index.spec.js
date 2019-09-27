@@ -16,14 +16,16 @@
 
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const { Abi } = require('@polkadot/api-contract');
-const testKeyring = require('@polkadot/keyring/testing');
+const testingPairs = require('@polkadot/keyring/testingPairs');
 const { randomAsU8a } = require('@polkadot/util-crypto');
-const { Option, Vec, u8, Bytes, Tuple, Enum, AccountId, U256, H256, U128, ClassOf } = require('@polkadot/types');
+import { Option, Vec, u8, Bytes, Tuple, Enum, AccountId, U256, H256, U128, ClassOf } from '@polkadot/types';
 const BN = require('bn.js');
-const fs = require('fs');
+import fs from 'fs';
 
 const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
 const DOT = new BN('1000000000000000');
+const CREATION_FEE = DOT.muln(200);
+const keyring = testingPairs({ type: 'sr25519' });
 
 class Restore extends Tuple {
     constructor(value) {
@@ -56,6 +58,7 @@ class Restore extends Tuple {
 async function sendAndFinalize(signer, tx) {
     return new Promise(function(resolve, reject) {
         tx.signAndSend(signer, (result) => {
+            console.log(result.status)
             if (result.status.isFinalized) {
                 resolve(result);
             }
@@ -81,10 +84,22 @@ async function createTestOrigin(api) {
 /// Returns code hash.
 async function putCodeViaFile(api, signer, fileName, gasRequired=500000) {
     let wasmCode = fs.readFileSync(fileName).toString('hex');
-    let tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
-    let result = await sendAndFinalize(signer, tx);
+    let res = api.tx.contracts
+        .putCode(gasRequired, `0x${wasmCode}`)
+        .signAndSend(keyring.eve, (result) => {
+            if (result.status.isFinalized) {
+              const record = result.findRecord('contracts', 'CodeStored');
+              if (record) {
+                codeHash = record.event.data[0];
+                done();
+              }
+            }
+          })
+    // let result = await sendAndFinalize(signer, tx);
+    console.log('RESULT')
+    console.log(res)
 
-    const record = result.findRecord('contracts', 'CodeStored');
+    const record = res.findRecord('contracts', 'CodeStored');
     if (!record) {
         throw 'no code stored event';
     }
@@ -118,7 +133,7 @@ async function getContractStorage(api, contractAddress, storageKey) {
     return await api.rpc.state.getChildStorage(trieId, storageKey);
 }
 
-describe('simplest contract', () => {
+describe('Test Suite of basic contracts', () => {
     // This is a test account that is going to be created and funded each test.
     let testOrigin;
     let api;
@@ -134,7 +149,6 @@ describe('simplest contract', () => {
     });
 
     test('ink!-flip', async (done) => {
-        const CREATION_FEE = DOT.muln(200);
         const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
 
         let flipperAbi = JSON.parse(
@@ -171,7 +185,6 @@ describe('simplest contract', () => {
     });
 
     test('ink!-raw-incrementer', async (done) => {
-        const CREATION_FEE = DOT.muln(200);
         let codeHash = await putCodeViaFile(
             api,
             testOrigin,
@@ -211,7 +224,6 @@ describe('simplest contract', () => {
         //
         // Instantiate a contract.
         //
-        const CREATION_FEE = DOT.muln(200);
         let incrementerCodeHash = await putCodeViaFile(
             api,
             testOrigin,
@@ -263,7 +275,7 @@ describe('simplest contract', () => {
         let restoreCodeHash = await putCodeViaFile(
             api,
             testOrigin,
-            'contracts/restore-contract/target/restore_contract-pruned.wasm'
+            'contracts-ink/restore-contract/target/restore_contract-pruned.wasm'
         );
         let restoreContractAddress = await instantiate(
             api,
@@ -318,33 +330,6 @@ describe('simplest contract', () => {
         );
         expect(counterNew.unwrap().toString()).toBe("0x2a000000");
 
-        done();
-    });
-
-
-    test('AssemblyScript-incrementer', async (done) => {
-        const CREATION_FEE = DOT.muln(200);
-        let codeHash = await putCodeViaFile(
-            api,
-            testOrigin,
-            'contracts-assemblyscript/raw-incrementer/target/raw_incrementer-pruned.wasm'
-        );
-        let address = await instantiate(api, testOrigin, codeHash, '0x00', CREATION_FEE);
-
-        // 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
-        let msg = '0x002a000000';
-
-        await call(api, testOrigin, address, msg);
-
-        // The key actually is 0x010101..01. However, it seems to be
-        // hashed before putting into the storage.
-        const KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
-        let counter = await getContractStorage(
-            api,
-            address,
-            KEY
-        );
-        expect(counter.unwrap().toString()).toBe("0x2a000000");
         done();
     });
 });
