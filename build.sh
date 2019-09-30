@@ -7,10 +7,14 @@ cd ink/examples/lang/flipper
 cargo +nightly build --features ink-generate-abi
 cd -
 
-cd contracts/raw-incrementer
+cd contracts-ink/raw-incrementer
 ./build.sh
 cd -
 
-cd contracts/restore-contract
+cd contracts-ink/restore-contract
 ./build.sh
+cd -
+
+cd contracts-assemblyscript/incrementer
+yarn && yarn build
 cd -
