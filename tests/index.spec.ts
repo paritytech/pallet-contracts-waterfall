@@ -34,7 +34,7 @@ let testAccount: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
-  jest.setTimeout(35000);
+  jest.setTimeout(30000);
 });
 afterAll((): void => {
   jest.setTimeout(5000);
@@ -93,12 +93,7 @@ describe('Rust Smart Contracts', () => {
     const address: Address = await instantiate(api, testAccount, codeHash, '0x00', CREATION_FEE);
     expect(address).toBeDefined();
 
-    const addressHex = '0x01' + u8aToHex(address.toU8a(), 256, false) + u8aToHex(codeHash.toU8a(), 256, false) + 'C800000000000000';
-
-    console.log('codeHashBuffer', addressHex)
-
-
-    // // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
     await callContract(api, testAccount, address, '0x002a000000');
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
@@ -107,7 +102,7 @@ describe('Rust Smart Contracts', () => {
     done();
   });
 
-  test.only('Restoration contract', async (done): Promise<void>  => {
+  test('Restoration contract', async (done): Promise<void>  => {
     // This test does the following:
     // 1. instantiates a contract
     // 2. fills it with data
@@ -155,21 +150,22 @@ describe('Rust Smart Contracts', () => {
     expect(restoredAddress).toBeDefined();
     
     // 5. performs calls that rebuild the state of the evicted contract
-    let encodedPutAction = '0x00010101010101010101010101010101010101010101010101010101010101010101102a000000';
+    let encodedPutAction =
+      '0x00' // idx:  0x00 = Action::Inc
+      + '01010101010101010101010101010101010101010101010101010101010101010110' // storage key
+      + '2a000000'; // // little endian 32-bit integer, decimal number `42` toHex() === `2a`
     await callContract(api, testAccount, restoredAddress, encodedPutAction);
 
     // 6. Restore evicted contract 
     const encodedRestoreAction = 
-      '0x01' // idx
+      '0x01' // idx: 0x01 = Action::Get
       + u8aToHex(address.toU8a(), 256, false) // address to hex string without prefix
       + u8aToHex(codeHash.toU8a(), 256, false) // codeHash to hex string without prefix
-      + '80000000000000000000000000000000'; // little endian 128 bit integer, decimal number `128` toHex() === 80
+      + '80000000000000000000000000000000'; // little endian 128 bit integer, decimal number `128` toHex() === `80`
     await callContract(api, testAccount, restoredAddress, encodedRestoreAction);
 
-    console.log(encodedRestoreAction)
-
     // 7. Check that the restored contract is equivalent to the evicted.
-    const newCounterValue =  await getContractStorage(api, restoredAddress, STORAGE_KEY);
+    const newCounterValue =  await getContractStorage(api, address, STORAGE_KEY);
     expect(newCounterValue.toString()).toBe('0x2a000000');
 
     done();
