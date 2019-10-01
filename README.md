@@ -75,6 +75,6 @@ Usage:
 2. INFO: Run `docker ps` to get a list of Docker containers running in the background including their mapped ports on localhost
 3. QUIT: Run `docker-compose down` to stop and remove all running containers.
 
-Provided endpoints for localhost: Substrate Master ws://127.0.0.1:9944/
+Provided endpoint for localhost: Substrate Master ws://127.0.0.1:9944/
 
 Find more Docker images of Substrate https://hub.docker.com/r/parity/substrate/tags
