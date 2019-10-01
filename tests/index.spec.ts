@@ -18,126 +18,78 @@ import { ApiPromise, SubmittableResult, WsProvider } from '@polkadot/api';
 import { Abi } from '@polkadot/api-contract';
 import testKeyring from '@polkadot/keyring/testing';
 import { randomAsU8a } from '@polkadot/util-crypto';
-import { ClassOf, Enum, H256, Option, StorageData, Tuple, u256 } from '@polkadot/types';
-import { Address, ContractInfo, Hash, EventRecord } from '@polkadot/types/interfaces';
-import fs from 'fs';
-import path from 'path';
-import BN from 'bn.js';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { StorageEntry } from '@polkadot/types/primitive/StorageKey';
+import { Address, Hash } from '@polkadot/types/interfaces';
+import BN from 'bn.js';
 
-const WSURL = 'ws://127.0.0.1:9944';
-const ALICE = '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY';
-const DOT: BN = new BN('1000000000000000');
-const CREATION_FEE: BN = DOT.muln(200);
+import { ALICE, CREATION_FEE, GAS_REQUIRED, WSURL } from './consts';
+import { instantiate, getContractStorage, putCode, sendAndReturnFinalized } from './utils';
 
-async function sendAndReturnResult(signer: KeyringPair, tx: any) {
-  return new Promise(function(resolve) {
-      tx.signAndSend(signer, (result: SubmittableResult) => {
-          if (result.status.isFinalized) {
-              resolve(result as SubmittableResult);
-          }
-      });
-  });
-}
+// This is a test account that is going to be created and funded each test.
+const keyring = testKeyring({ type: 'sr25519' });
+const alicePair = keyring.getPair(ALICE);
+let testAccount: KeyringPair;
+let api: ApiPromise;
 
-async function putCode(api: ApiPromise, signer: KeyringPair, fileName: string, gasRequired: number = 500000) {
-  const wasmCode = fs.readFileSync(path.join(__dirname, fileName)).toString('hex');
-  const tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
-  const result: any = await sendAndReturnResult(signer, tx);
-  const record = result.findRecord('contracts', 'CodeStored');
+beforeAll((): void => {
+  jest.setTimeout(12000);
+});
+afterAll((): void => {
+  jest.setTimeout(5000);
+});
 
-  if (!record) {
-      throw 'no code stored event';
-  }
-  // Return code hash.
-  return record.event.data[0];
-}
+beforeEach(async (done): Promise<() => void> => {
+  api = await ApiPromise.create({ provider: new WsProvider( WSURL) });
+  testAccount = keyring.addFromSeed(randomAsU8a(32));
 
-async function instantiate(api: ApiPromise, signer: KeyringPair, codeHash: string, inputData: any, endowment: BN, gasRequired: number = 50000) {
-  const tx = api.tx.contracts.instantiate(endowment, gasRequired, codeHash, inputData);
-  const result: any = await sendAndReturnResult(signer, tx);
-  const record = result.findRecord('contracts', 'Instantiated');
+  return (
+    api.tx.balances
+      .transfer(testAccount.address, CREATION_FEE.muln(3))
+      .signAndSend(alicePair, (result: SubmittableResult): void => {
+        if (result.status.isFinalized && result.findRecord('system', 'ExtrinsicSuccess')) {
+          console.log('YAY DONE!!')
+          done();
+        }
+      })
+  )
+});
 
-  if (!record) {
-      throw 'no instantiated event';
-  }
+describe('Rust Smart Contracts', () => {
+  test('Flip contract', async (done): Promise<void>  => {
+    const flipperAbi = require('../ink/examples/lang/flipper/target/old_abi.json');
+    const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
+    const abi: Abi = new Abi(flipperAbi);
 
-  // Return the address of instantiated contract.
-  return record.event.data[1];
-}
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash: Hash = await putCode(api, testAccount, '../ink/examples/lang/flipper/target/flipper-pruned.wasm');
+    expect(codeHash).toBeDefined();
 
-async function getContractStorage(api: ApiPromise, contractAddress: Address, storageKey: string) {
-  const contractInfo = await api.query.contracts.contractInfoOf(contractAddress);
-  return await api.rpc.state.getChildStorage(
-    (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
-    storageKey
-  );
-}
+    // Instantiate a new contract instance and retrieve the contracts address
+    const address: Address = await instantiate(api, testAccount, codeHash, abi.deploy(), CREATION_FEE);
+    expect(address).toBeDefined();
 
-describe('Basic contract examples', () => {
-  // This is a test account that is going to be created and funded each test.
-  let testAccount: KeyringPair;
-  let api: ApiPromise;
-  const keyring = testKeyring({ type: 'sr25519' });
-  const alicePair = keyring.getPair(ALICE);
+    const initialValue: Uint8Array = await getContractStorage(api, address, FLIP_FLAG_STORAGE_KEY);
+    expect(initialValue).toBeDefined();
+    expect(initialValue.toString()).toEqual('0x00');
 
-  beforeAll((): void => {
-    jest.setTimeout(12000);
-  });
-  afterAll((): void => {
-    jest.setTimeout(5000);
+    const tx = api.tx.contracts.call(address, 0, GAS_REQUIRED, abi.messages.flip());
+    await sendAndReturnFinalized(testAccount, tx);
+
+    const newValue = await getContractStorage(api, address, FLIP_FLAG_STORAGE_KEY);
+    expect(newValue.toString()).toEqual('0x01');
+
+    done();
   });
 
-  beforeEach(async (done): Promise<() => void> => {
-    api = await ApiPromise.create({ provider: new WsProvider( WSURL) });
-    testAccount = keyring.addFromSeed(randomAsU8a(32));
+});
 
-    return (
-      api.tx.balances
-        .transfer(testAccount.address, DOT.muln(500))
-        .signAndSend(alicePair, (result: SubmittableResult): void => {
-          if (result.status.isFinalized && result.findRecord('system', 'ExtrinsicSuccess')) {
-            console.log('YAY DONE!!')
-            done();
-          }
-        })
-    )
-  });
+describe('AssemblyScript Smart Contracts', () => {
+  test('Flip contract', async (done): Promise<void>  => {
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash = await putCode(api, testAccount, '../contracts-assemblyscript/optimized.wasm');
+    expect(codeHash).toBeDefined();
+    console.log(codeHash)
 
-  describe('Rust Smart Contracts', () => {
-    test('Flip contract', async (done): Promise<void>  => {
-      const flipperAbi = require('../ink/examples/lang/flipper/target/old_abi.json');
-      const FLIP_FLAG_STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
-      const abi: Abi = new Abi(flipperAbi);
-
-      // Deploy contract code on chain and retrieve the code hash
-      const codeHash = await putCode(api, testAccount, '../ink/examples/lang/flipper/target/flipper-pruned.wasm');
-      expect(codeHash).toBeDefined();
-
-      // Instantiate a new contract instance and retrieve the contracts address
-      const address = await instantiate(api, testAccount, codeHash, abi.deploy(), CREATION_FEE);
-      expect(address).toBeDefined();
-
-      const initialValue = await getContractStorage(api, address, FLIP_FLAG_STORAGE_KEY);
-      expect(initialValue).toBeDefined();
-      // expect(initialValue).toEqual('0x00');
-
-      console.log(codeHash, address, initialValue)
-
-      done();
-    });
-
-  });
-
-  describe('AssemblyScript Smart Contracts', () => {
-    test('Flip contract', async (done): Promise<void>  => {
-      // Deploy contract code on chain and retrieve the code hash
-      const codeHash = await putCode(api, testAccount, '../contracts-assemblyscript/optimized.wasm');
-      expect(codeHash).toBeDefined();
-      console.log(codeHash)
-
-      done();
-    });
+    done();
   });
 });
