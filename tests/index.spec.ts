@@ -172,7 +172,7 @@ describe('Rust Smart Contracts', () => {
 });
 
 describe.only('AssemblyScript Smart Contracts', () => {
-  const STORAGE_KEY = '0x1111111111111111111111111111111111111111111111111111111111111111';
+  const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
   test('Flip contract', async (done): Promise<void>  => {
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm');
