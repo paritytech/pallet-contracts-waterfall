@@ -7,8 +7,8 @@
   "types": "build/index.d.ts",
   "license": "Apache-2.0",
   "scripts": {
-    "build:untouched": "asc assembly/index.ts -b build/untouched.wasm -t build/untouched.wat --importMemory --sourceMap --validate --debug",
-    "build:optimized": "asc assembly/index.ts -b build/optimized.wasm -t build/optimized.wat --importMemory --validate --optimize",
+    "build:untouched": "asc assembly/index.ts -b build/incrementer-raw.wasm -t build/incrementer-raw.wat --importMemory --sourceMap --validate --debug",
+    "build:optimized": "asc assembly/index.ts -b build/incrementer.wasm -t build/incrementer.wat --importMemory --validate --optimize",
     "build:tsd": "asc assembly/index.ts -d build/index.d.ts",
     "build": "yarn run build:untouched && yarn run build:optimized && yarn run build:tsd"
   },
