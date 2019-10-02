@@ -1,6 +1,6 @@
 import { ApiPromise, SubmittableResult } from '@polkadot/api';
 import { KeyringPair } from '@polkadot/keyring/types';
-import { Option } from '@polkadot/types';
+import { Option, StorageData } from '@polkadot/types';
 import { Address, ContractInfo, Hash } from '@polkadot/types/interfaces';
 import BN from 'bn.js';
 import fs from 'fs';
@@ -31,7 +31,7 @@ export async function putCode(
   signer: KeyringPair,
   fileName: string,
   gasRequired: number = GAS_REQUIRED
-) {
+): Promise<Hash> {
   const wasmCode = fs.readFileSync(path.join(__dirname, fileName)).toString('hex');
   const tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
   const result: any = await sendAndReturnFinalized(signer, tx);
@@ -51,7 +51,7 @@ export async function instantiate(
   inputData: any,
   endowment: BN,
   gasRequired: number = GAS_REQUIRED
-) {
+): Promise<Address> {
   const tx = api.tx.contracts.instantiate(endowment, gasRequired, codeHash, inputData);
   const result: any = await sendAndReturnFinalized(signer, tx);
   const record = result.findRecord('contracts', 'Instantiated');
@@ -70,7 +70,7 @@ export async function callContract(
   inputData: any,
   gasRequired: number = GAS_REQUIRED,
   endowment: number = 0
-) {
+): Promise<void> {
   const tx = api.tx.contracts.call(contractAddress, endowment, gasRequired, inputData);
   await sendAndReturnFinalized(signer, tx);
 }
@@ -79,7 +79,7 @@ export async function getContractStorage(
   api: ApiPromise,
   contractAddress: Address,
   storageKey: string
-) {
+): Promise<StorageData> {
   const contractInfo = await api.query.contracts.contractInfoOf(contractAddress);
   // Return the value of the contracts storage
   return await api.rpc.state.getChildStorage(
