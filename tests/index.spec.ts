@@ -22,7 +22,6 @@ import { randomAsU8a } from '@polkadot/util-crypto';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { Option } from '@polkadot/types';
 import { Address, ContractInfo, Hash } from '@polkadot/types/interfaces';
-import BN from 'bn.js';
 
 import { ALICE, CREATION_FEE, WSURL } from './consts';
 import { callContract, instantiate, getContractStorage, putCode } from './utils';
@@ -86,7 +85,7 @@ describe('Rust Smart Contracts', () => {
   test('Raw incrementer contract', async (done): Promise<void>  => {
     const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
     // Deploy contract code on chain and retrieve the code hash
-    const codeHash: Hash = await putCode(api, testAccount, '../contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm');
+    const codeHash: Hash = await putCode(api, testAccount, '../contracts/rust/raw-incrementer/target/raw_incrementer-pruned.wasm');
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
@@ -115,7 +114,7 @@ describe('Rust Smart Contracts', () => {
     const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
 
     // Deploy contract code on chain and retrieve the code hash
-    const codeHash: Hash = await putCode(api, testAccount, '../contracts-ink/raw-incrementer/target/raw_incrementer-pruned.wasm');
+    const codeHash: Hash = await putCode(api, testAccount, '../contracts/rust/raw-incrementer/target/raw_incrementer-pruned.wasm');
     expect(codeHash).toBeDefined();
 
     // 1. Instantiate a new contract instance and retrieve the contracts address
@@ -143,7 +142,7 @@ describe('Rust Smart Contracts', () => {
     expect((contractInfo as Option<ContractInfo>).unwrap().isTombstone).toBe(true);
 
     // 4. Re-deploy contract code on chain and retrieve the code hash
-    const restoredCodeHash: Hash = await putCode(api, testAccount, '../contracts-ink/restore-contract/target/restore_contract-pruned.wasm');
+    const restoredCodeHash: Hash = await putCode(api, testAccount, '../contracts/rust/restore-contract/target/restore_contract-pruned.wasm');
     expect(restoredCodeHash).toBeDefined();
 
     const restoredAddress: Address = await instantiate(api, testAccount, restoredCodeHash, '0x00', CREATION_FEE);
