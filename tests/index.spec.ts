@@ -171,15 +171,13 @@ describe('Rust Smart Contracts', () => {
   });
 });
 
-// 
+describe.only('AssemblyScript Smart Contracts', () => {
+  test('Flip contract', async (done): Promise<void>  => {
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm');
+    expect(codeHash).toBeDefined();
+    console.log(codeHash)
 
-// describe('AssemblyScript Smart Contracts', () => {
-//   test('Flip contract', async (done): Promise<void>  => {
-//     // Deploy contract code on chain and retrieve the code hash
-//     const codeHash = await putCode(api, testAccount, '../contracts-assemblyscript/optimized.wasm');
-//     expect(codeHash).toBeDefined();
-//     console.log(codeHash)
-
-//     done();
-//   });
-// });
+    done();
+  });
+});
