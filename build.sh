@@ -16,5 +16,7 @@ cd contracts/restore-contract
 cd -
 
 cd contracts-assemblyscript/incrementer
+rm -rf build
 yarn && yarn build
+./build.sh
 cd -
