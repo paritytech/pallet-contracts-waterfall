@@ -18,7 +18,7 @@
   },
   "exclude": [
     "assembly",
-    "contracts-ink",
+    "contracts/rust",
     "ink",
     "node_modules",
   ]
