@@ -60,3 +60,21 @@ To run the tests, launch the substrate node locally and run
 ```
 yarn && yarn test
 ```
+
+## Using a Docker image of Substrate for testing
+
+To run this tests, you need to run a local Substrate on port `ws://127.0.0.1:9944`. The other alternative is to use one of the Docker images that are being automatically generated with every update to the master branch and published https://hub.docker.com/r/parity/substrate/.
+
+The script to run this container is `docker-compose.yml` file in the root of this repository.
+
+Before you can run this script, you need to install Docker and 'Docker Compose' on your machine.
+Please follow the steps described here (including the prerequisites): https://docs.docker.com/compose/install/
+
+Usage:
+1. BUILD: Run `docker-compose pull && docker-compose up` to pull the latest docker imaged and run the Docker image of the latest Subtrate master.
+2. INFO: Run `docker ps` to get a list of Docker containers running in the background including their mapped ports on localhost
+3. QUIT: Run `docker-compose down` to stop and remove all running containers.
+
+Provided endpoint for localhost: Substrate Master ws://127.0.0.1:9944/
+
+Find more Docker images of Substrate https://hub.docker.com/r/parity/substrate/tags
