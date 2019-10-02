@@ -172,11 +172,22 @@ describe('Rust Smart Contracts', () => {
 });
 
 describe.only('AssemblyScript Smart Contracts', () => {
+  const STORAGE_KEY = '0x1111111111111111111111111111111111111111111111111111111111111111';
   test('Flip contract', async (done): Promise<void>  => {
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm');
     expect(codeHash).toBeDefined();
-    console.log(codeHash)
+
+    // Instantiate a new contract instance and retrieve the contracts address
+    // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    const address: Address = await instantiate(api, testAccount, codeHash, '0x00', CREATION_FEE);
+    expect(address).toBeDefined();
+
+    // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    await callContract(api, testAccount, address, '0x002a000000');
+
+    const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    expect(newValue.toString()).toBe('0x2a000000');
 
     done();
   });
