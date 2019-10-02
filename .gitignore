@@ -1,3 +1,5 @@
 /node_modules
 *.log
 /contracts-assemblyscript/**/node_modules
+contracts-ink/**/target/release
+contracts-ink/**/target/wasm32-unknown-unknown
