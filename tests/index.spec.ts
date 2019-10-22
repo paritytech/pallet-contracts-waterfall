@@ -57,7 +57,7 @@ beforeEach(async (done): Promise<() => void> => {
 
 describe('Rust Smart Contracts', () => {
   test('Flip contract', async (done): Promise<void>  => {
-    const flipperAbi = require('../ink/examples/lang/flipper/target/old_abi.json');
+    const flipperAbi = require('../ink/examples/lang/flipper/target/abi.json');
     const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
     const abi: Abi = new Abi(flipperAbi);
 
@@ -171,7 +171,7 @@ describe('Rust Smart Contracts', () => {
   });
 });
 
-describe.only('AssemblyScript Smart Contracts', () => {
+describe('AssemblyScript Smart Contracts', () => {
   const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
   test('Flip contract', async (done): Promise<void>  => {
     // Deploy contract code on chain and retrieve the code hash

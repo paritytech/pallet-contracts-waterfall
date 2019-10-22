@@ -4,7 +4,7 @@ set -e
 
 cd ink/examples/lang/flipper
 ./build.sh
-cargo +nightly build --features ink-generate-abi
+cargo +nightly run -p abi-gen
 cd -
 
 cd contracts/rust/raw-incrementer
