@@ -1,7 +1,10 @@
-### A basic Parity Substrate `srml-contract` smart contract
-## Written in AssemblyScript
+# Incrementer example
+**A basic Parity Substrate `srml-contract` smart contract**
+Written in AssemblyScript
 
+### How to use it
 **It uses:**
+
 - `yarn` as a package manager
 
 **Install dependencies:**
