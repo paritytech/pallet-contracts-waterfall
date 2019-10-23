@@ -2,8 +2,8 @@
 
 set -e
 
-cd ink/examples/lang/flipper
-./build.sh
+cd lib/ink/examples/lang/flipper
+cargo contract build
 cargo +nightly run -p abi-gen
 cd -
 
