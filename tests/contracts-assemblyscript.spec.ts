@@ -56,8 +56,30 @@ beforeEach(async (done): Promise<() => void> => {
 });
 
 describe('AssemblyScript Smart Contracts', () => {
-  const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
-  test('Flip contract', async (done): Promise<void>  => {
+  test('Raw Incrementer contract', async (done): Promise<void>  => {
+    // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about how to get the STORAGE_KEY
+    const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm');
+    expect(codeHash).toBeDefined();
+
+    // Instantiate a new contract instance and retrieve the contracts address
+    // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    const address: Address = await instantiate(api, testAccount, codeHash, '0x00', CREATION_FEE);
+    expect(address).toBeDefined();
+
+    // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    await callContract(api, testAccount, address, '0x002a000000');
+
+    const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    expect(newValue.toString()).toBe('0x2a000000');
+
+    done();
+  });
+  
+  test('Raw Incrementer contract', async (done): Promise<void>  => {
+    // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about how to get the STORAGE_KEY
+    const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm');
     expect(codeHash).toBeDefined();

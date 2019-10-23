@@ -5,8 +5,7 @@ import {
   getStorage,
   setRentAllowance,
   setScratchBuffer,
-  setStorage,
-  u32ToU8a
+  setStorage
 } from './lib';
 
 
