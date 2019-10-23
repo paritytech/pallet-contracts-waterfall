@@ -15,6 +15,12 @@ cd contracts/rust/restore-contract
 ./build.sh
 cd -
 
+cd contracts/assemblyscript/flipper
+rm -rf build
+yarn && yarn build
+./build.sh
+cd -
+
 cd contracts/assemblyscript/incrementer
 rm -rf build
 yarn && yarn build
