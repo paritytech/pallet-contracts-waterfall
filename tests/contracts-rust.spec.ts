@@ -56,13 +56,13 @@ beforeEach(async (done): Promise<() => void> => {
 });
 
 describe('Rust Smart Contracts', () => {
-  test.skip('Flip contract', async (done): Promise<void>  => {
-    const flipperAbi = require('../contracts/rust/lang-flipper/target/abi.json');
+  test('Flip contract', async (done): Promise<void>  => {
+    const flipperAbi = require('../lib/ink/examples/lang/flipper/target/abi.json');
     const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
     const abi: Abi = new Abi(flipperAbi);
 
     // Deploy contract code on chain and retrieve the code hash
-    const codeHash: Hash = await putCode(api, testAccount, '../contracts/rust/lang-flipper/target/flipper.wasm');
+    const codeHash: Hash = await putCode(api, testAccount, '../lib/ink/examples/lang/flipper/target/flipper.wasm');
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
