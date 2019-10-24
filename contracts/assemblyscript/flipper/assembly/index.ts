@@ -35,13 +35,13 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
   // Get action from first byte of the input U8A
   switch (input[0]) {
     case Action.Flip:
-      const newFlipperValue: bool = !<bool>flipperValue;
-      const newFlipper: Uint8Array = new Uint8Array(1);
-      newFlipper[0] = newFlipperValue;
-      setStorage(FLIPPER_KEY, newFlipper)
+      const newFlipperBool: bool = !<bool>flipperValue;
+      const newFlipperU8a: Uint8Array = new Uint8Array(1);
+      newFlipperU8a[0] = newFlipperBool;
+      setStorage(FLIPPER_KEY, newFlipperU8a)
       break;
     case Action.Get:
-      // return the counter from storage
+      // return the flipper value from storage
       if (flipper.length)
         return flipper;
       break;
