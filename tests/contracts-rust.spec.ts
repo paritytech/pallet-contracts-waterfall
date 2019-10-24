@@ -35,9 +35,6 @@ let api: ApiPromise;
 beforeAll((): void => {
   jest.setTimeout(30000);
 });
-afterAll((): void => {
-  jest.setTimeout(5000);
-});
 
 beforeEach(async (done): Promise<() => void> => {
   api = await ApiPromise.create({ provider: new WsProvider( WSURL) });

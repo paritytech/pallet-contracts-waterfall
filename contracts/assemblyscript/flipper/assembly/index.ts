@@ -35,8 +35,9 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
   // Get action from first byte of the input U8A
   switch (input[0]) {
     case Action.Flip:
-      const by: Uint8Array = new Uint8Array(1);
-      const newFlipper: Uint8Array =  by.fill(1);
+      const newFlipperValue: bool = !<bool>flipperValue;
+      const newFlipper: Uint8Array = new Uint8Array(1);
+      newFlipper[0] = newFlipperValue;
       setStorage(FLIPPER_KEY, newFlipper)
       break;
     case Action.Get:
@@ -52,27 +53,6 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
   return value;
 }
 
-// function handle(input: Uint8Array): Uint8Array {
-//   const value : Uint8Array = new Uint8Array(0); // new value that will be returned
-//   const flipper: Uint8Array = getStorage(FLIPPER_KEY); // existing storage at storage kez
-//   // const dataFlipper: DataView = new DataView(flipper.buffer);
-//   const flipperValue: u32 = 1;
-
-//   // Get action from first byte of the input U8A
-//   switch (input[0]) {
-//     case Action.Flip:
-//       const newFlipper: Uint8Array = u32ToU8a(flipperValue);
-//       setStorage(FLIPPER_KEY, newFlipper)
-//       break;
-//     case Action.Get:
-//       // return the flipper from storage
-//       if (flipper.length)
-//         return flipper;
-//       break;  
-//   }
-//   return value;
-// }
-
 export function call(): u32 {
   const input: Uint8Array = getScratchBuffer();
 
@@ -81,10 +61,12 @@ export function call(): u32 {
   return 0;
 }
 
-// deploy a new instance of the contract
+// deploy a new instance of the contract with the default value 0x00 (false)
 export function deploy(): u32 {
-  const value : Uint8Array = new Uint8Array(1);
-  value.fill(0)
-  setStorage(FLIPPER_KEY, value)
+  const value: bool = false;
+  const newFlipper: Uint8Array = new Uint8Array(1);
+  newFlipper[0] = value;
+
+  setStorage(FLIPPER_KEY, newFlipper)
   return 0
 }
