@@ -8,11 +8,6 @@ import {
   setStorage
 } from './lib';
 
-import {
-  u32ToU8a
-} from './../../incrementer/assembly/lib';
-
-
 // This simple dummy contract has a `bool` value that can
 // alter between `true` and `false` using the `flip` message.
 
@@ -24,7 +19,6 @@ enum Action {
   Get,
   SelfEvict
 }
-// class Action with parameter value & method incBy
 
 function handle(input: Uint8Array): Uint8Array { // vec<u8>
   const value: Uint8Array = new Uint8Array(0);

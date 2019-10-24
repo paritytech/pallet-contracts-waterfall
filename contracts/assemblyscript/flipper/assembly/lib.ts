@@ -30,22 +30,13 @@ export function setStorage(key: Uint8Array, value: Uint8Array): void {
 
 // check for length 32 bytes 
 export function getStorage(key: Uint8Array): Uint8Array {
-  // request storage at key, will be written in the scratch buffer
-  // If there is an entry at the given location then this function will return 0,
-  // if not it will return 1 and clear the scratch buffer.
-
-  const result: u32 = ext_get_storage(key.dataStart); // pointer to key 32 bytes in static WASM memory
-
+  const result: u32 = ext_get_storage(key.dataStart);
   let value = new Uint8Array(0);
 
   // if value is found
   if (result === Storage.HAS_VALUE) {
     // // getting size of scratch buffer to allocate the buffer of corresponding size to fit the contents of the scratch buffer
     const size: u32 = ext_scratch_size(); 
-    // @TODO Q: Why are we not passing the size to the getStorage function?
-    // It's living outside the memory and there'S no way to be sure that it
-    // hasn't been overwritten by a new contract call already?
-
     // if value is not null or not an empty array
     if (size >  0) {
       // create empty array (Vec in Rust)
