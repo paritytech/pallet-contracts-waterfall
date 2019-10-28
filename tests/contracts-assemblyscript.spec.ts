@@ -23,20 +23,17 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { Option } from '@polkadot/types';
 import { Address, ContractInfo, Hash } from '@polkadot/types/interfaces';
 
-import { ALICE, CREATION_FEE, WSURL } from './consts';
+import { BOB, CREATION_FEE, WSURL } from './consts';
 import { callContract, instantiate, getContractStorage, putCode } from './utils';
 
 // This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: 'sr25519' });
-const alicePair = keyring.getPair(ALICE);
+const alicePair = keyring.getPair(BOB);
 let testAccount: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
   jest.setTimeout(30000);
-});
-afterAll((): void => {
-  jest.setTimeout(5000);
 });
 
 beforeEach(async (done): Promise<() => void> => {
@@ -56,14 +53,45 @@ beforeEach(async (done): Promise<() => void> => {
 });
 
 describe('AssemblyScript Smart Contracts', () => {
-  const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
-  test('Flip contract', async (done): Promise<void>  => {
+  test('Raw Flipper contract', async (done): Promise<void>  => {
+    // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about
+    // how to get the STORAGE_KEY of an instantiated contract
+    const STORAGE_KEY = '0xd9818087de7244abc1b5fcf28e55e42c7ff9c678c0605181f37ac5d7414a7b95';
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/flipper/build/flipper-pruned.wasm');
+    expect(codeHash).toBeDefined();
+
+    // Instantiate a new contract instance and retrieve the contracts address
+    // Call contract with Action: 0x00 = Action::Inc()
+    const address: Address = await instantiate(api, testAccount, codeHash, '0x00', CREATION_FEE);
+    expect(address).toBeDefined();
+
+    const initialValue: Uint8Array = await getContractStorage(api, address, STORAGE_KEY);
+    expect(initialValue).toBeDefined();
+    expect(initialValue.toString()).toEqual('0x00');
+
+    await callContract(api, testAccount, address, '0x00');
+
+    const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    expect(newValue.toString()).toEqual('0x01');
+
+    await callContract(api, testAccount, address, '0x00');
+
+    const flipBack = await getContractStorage(api, address, STORAGE_KEY);
+    expect(flipBack.toString()).toEqual('0x00');
+
+    done();
+  });
+
+  
+  test('Raw Incrementer contract', async (done): Promise<void>  => {
+    const STORAGE_KEY = '0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c';
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm');
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    // Call contract with Action: 0x00 = Action::Inc()
     const address: Address = await instantiate(api, testAccount, codeHash, '0x00', CREATION_FEE);
     expect(address).toBeDefined();
 

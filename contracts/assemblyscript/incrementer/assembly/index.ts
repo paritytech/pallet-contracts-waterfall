@@ -1,6 +1,5 @@
 import { u128 } from "bignum";
 
-
 import {
   getScratchBuffer,
   getStorage,
