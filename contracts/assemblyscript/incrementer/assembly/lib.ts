@@ -76,10 +76,12 @@ export function getScratchBuffer(): Uint8Array {
   return value;
 }
 
+@inline
 export function setScratchBuffer(data: Uint8Array): void {
   ext_scratch_write(data.dataStart, data.length);
 }
 
+@inline
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
   ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
