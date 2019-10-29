@@ -4,46 +4,48 @@ import {
   ext_scratch_read,
   ext_scratch_size,
   ext_scratch_write,
-  ext_set_rent_allowance, 
+  ext_set_rent_allowance,
   ext_set_storage
 } from './env';
 
-enum Storage {
-  HAS_VALUE,
-  NO_VALUE
+export enum StorageResult {
+  Value,
+  None
 }
 
-// See https://stackoverflow.com/questions/15761790/convert-a-32bit-integer-into-4-bytes-of-data-in-javascript
-export function u32ToU8a (num: u32): Uint8Array {
-  const arr = new ArrayBuffer(4); // an u32 takes 4 bytes
-  const view = new DataView(arr);
-  view.setUint32(0, num, true); // byteOffset = 0; litteEndian = true
-  return Uint8Array.wrap(arr);
+export function toBytes<T>(num: T, le = true): Uint8Array {
+  // accept only integers and booleans
+  if (isInteger<T>()) {
+    const arr = new Uint8Array(sizeof<T>());
+    store<T>(arr.dataStart, le ? num : bswap(num));
+    return arr;
+  }
+  assert(false);
 }
 
 
 export function setStorage(key: Uint8Array, value: Uint8Array): void {
   const pointer = value ? value.dataStart : 0;
   const length = value ? value.length : 0;
-  const valueNonNull = value ? 1 : 0;
-  
+  const valueNonNull = i32(value !== null);
+
   ext_set_storage(key.dataStart, valueNonNull, pointer, length);
 }
 
-// check for length 32 bytes 
+// check for length 32 bytes
 export function getStorage(key: Uint8Array): Uint8Array {
   // request storage at key, will be written in the scratch buffer
   // If there is an entry at the given location then this function will return 0,
   // if not it will return 1 and clear the scratch buffer.
 
-  const result: u32 = ext_get_storage(key.dataStart); // pointer to key 32 bytes in static WASM memory
+  const result = ext_get_storage(key.dataStart); // pointer to key 32 bytes in static WASM memory
 
   let value = new Uint8Array(0);
 
   // if value is found
-  if (result === Storage.HAS_VALUE) {
+  if (result === StorageResult.Value) {
     // // getting size of scratch buffer to allocate the buffer of corresponding size to fit the contents of the scratch buffer
-    const size: u32 = ext_scratch_size(); 
+    const size = ext_scratch_size();
     // @TODO Q: Why are we not passing the size to the getStorage function?
     // It's living outside the memory and there'S no way to be sure that it
     // hasn't been overwritten by a new contract call already?
@@ -55,7 +57,7 @@ export function getStorage(key: Uint8Array): Uint8Array {
       // call
       ext_scratch_read(value.dataStart, 0, size);
     }
-  } 
+  }
   return value;
 }
 
@@ -66,7 +68,7 @@ export function getScratchBuffer(): Uint8Array {
 
   if (size > 0) {
       value = new Uint8Array(size);
-      // copy data from scratch buffer 
+      // copy data from scratch buffer
       ext_scratch_read(value.dataStart, 0, size);
   }
   return value;
@@ -77,6 +79,6 @@ export function setScratchBuffer(data: Uint8Array): void {
 }
 
 export function setRentAllowance(value: u128): void {
-  const valueBuffer: Uint8Array = value.toUint8Array();
+  const valueBuffer = value.toUint8Array();
   ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
 }

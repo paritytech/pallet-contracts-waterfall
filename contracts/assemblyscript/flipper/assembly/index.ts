@@ -11,8 +11,7 @@ import {
 // This simple dummy contract has a `bool` value that can
 // alter between `true` and `false` using the `flip` message.
 
-const FLIPPER_KEY: Uint8Array = new Uint8Array(32);
-FLIPPER_KEY.fill(2);
+const FLIPPER_KEY = (new Uint8Array(32)).fill(2);
 
 enum Action {
   Flip,
@@ -21,44 +20,46 @@ enum Action {
 }
 
 function handle(input: Uint8Array): Uint8Array { // vec<u8>
-  const value: Uint8Array = new Uint8Array(0);
-  const flipper: Uint8Array = getStorage(FLIPPER_KEY);
-  const dataFlipper: DataView = new DataView(flipper.buffer);
+  const value = new Uint8Array(0);
+  const flipper = getStorage(FLIPPER_KEY);
+  const dataFlipper = new DataView(flipper.buffer);
   const flipperValue: u8 = dataFlipper.byteLength ? dataFlipper.getUint8(0) : 0;
 
   // Get action from first byte of the input U8A
   switch (input[0]) {
-    case Action.Flip:
-      const newFlipperBool: bool = !<bool>flipperValue;
-      const newFlipperU8a: Uint8Array = new Uint8Array(1);
+    case Action.Flip: {
+      const newFlipperBool = !flipperValue;
+      const newFlipperU8a = new Uint8Array(1);
       newFlipperU8a[0] = newFlipperBool;
       setStorage(FLIPPER_KEY, newFlipperU8a)
       break;
-    case Action.Get:
+    }
+    case Action.Get: {
       // return the flipper value from storage
       if (flipper.length)
         return flipper;
       break;
-    case Action.SelfEvict:
+    }
+    case Action.SelfEvict: {
       const allowance = u128.from<u32>(0);
       setRentAllowance(allowance)
       break;
+    }
   }
   return value;
 }
 
 export function call(): u32 {
-  const input: Uint8Array = getScratchBuffer();
-
-  const output: Uint8Array = handle(input);
+  const input = getScratchBuffer();
+  const output = handle(input);
   setScratchBuffer(output);
   return 0;
 }
 
 // deploy a new instance of the contract with the default value 0x00 (false)
 export function deploy(): u32 {
-  const value: bool = false;
-  const newFlipper: Uint8Array = new Uint8Array(1);
+  const newFlipper = new Uint8Array(1);
+  const value = false;
   newFlipper[0] = value;
 
   setStorage(FLIPPER_KEY, newFlipper)
