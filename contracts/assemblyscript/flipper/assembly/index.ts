@@ -5,7 +5,8 @@ import {
   getStorage,
   setRentAllowance,
   setScratchBuffer,
-  setStorage
+  setStorage,
+  toBytes
 } from './lib';
 
 // This simple dummy contract has a `bool` value that can
@@ -29,9 +30,8 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
   switch (input[0]) {
     case Action.Flip: {
       const newFlipperBool = !flipperValue;
-      const newFlipperU8a = new Uint8Array(1);
-      newFlipperU8a[0] = newFlipperBool;
-      setStorage(FLIPPER_KEY, newFlipperU8a)
+      const newFlipperValue = toBytes(newFlipperBool);
+      setStorage(FLIPPER_KEY, newFlipperValue);
       break;
     }
     case Action.Get: {
@@ -58,10 +58,7 @@ export function call(): u32 {
 
 // deploy a new instance of the contract with the default value 0x00 (false)
 export function deploy(): u32 {
-  const newFlipper = new Uint8Array(1);
-  const value = false;
-  newFlipper[0] = value;
-
-  setStorage(FLIPPER_KEY, newFlipper)
-  return 0
+  const newFlipper = toBytes(false);
+  setStorage(FLIPPER_KEY, newFlipper);
+  return 0;
 }
