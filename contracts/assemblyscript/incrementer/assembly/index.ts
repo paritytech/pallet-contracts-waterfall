@@ -6,13 +6,12 @@ import {
   setRentAllowance,
   setScratchBuffer,
   setStorage,
-  u32ToU8a
+  toBytes
 } from './lib';
 
-const COUNTER_KEY: Uint8Array = new Uint8Array(32); // [1,1,1,1,1,1,1,1,1,...] in Rust impl, here [0,0,0,0,0,0,0,.....].
-COUNTER_KEY.fill(1);
+const COUNTER_KEY = (new Uint8Array(32)).fill(1); // [1,1,1, ... 1]
 
-// Inc(648) => 0088020000 
+// Inc(648) => 0088020000
 // decimal: [0,136,2,0,0]
 // Hex: 0x00000288
 
@@ -24,17 +23,17 @@ enum Action {
 // class Action with parameter value & method incBy
 
 function handle(input: Uint8Array): Uint8Array { // vec<u8>
-  const value : Uint8Array = new Uint8Array(0);
-  const counter: Uint8Array = getStorage(COUNTER_KEY);
-  const dataCounter: DataView = new DataView(counter.buffer);
+  const value = new Uint8Array(0);
+  const counter = getStorage(COUNTER_KEY);
+  const dataCounter = new DataView(counter.buffer);
   const counterValue: u32 = dataCounter.byteLength ? dataCounter.getUint32(0, true) : 0;
 
   // Get action from first byte of the input U8A
   switch (input[0]) {
     case Action.Inc:
-      // read 4 bytes (u32) from storageBuffer with offset 1 
-      const by: u32 = load<u32>(input.dataStart, 1);
-      const newCounter: Uint8Array = u32ToU8a(counterValue + by);
+      // read 4 bytes (u32) from storageBuffer with offset 1
+      const by = load<u32>(input.dataStart, 1);
+      const newCounter = toBytes(counterValue + by);
       setStorage(COUNTER_KEY, newCounter)
       break;
     case Action.Get:
@@ -56,10 +55,10 @@ export function call(): u32 {
   // decode byte array to array/ enum Action (0,1,2,3) --> SCALE CODEC
 
   // scratch buffer filled with initial data
-  const input: Uint8Array = getScratchBuffer();
+  const input = getScratchBuffer();
 
   // @TODO: What'S the logic behind resetting scratchBuffer in handle()? Not happening in Get()
-  const output: Uint8Array = handle(input);
+  const output = handle(input);
   setScratchBuffer(output);
   return 0;
 }
