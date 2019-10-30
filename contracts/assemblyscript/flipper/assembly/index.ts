@@ -28,23 +28,20 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
 
   // Get action from first byte of the input U8A
   switch (input[0]) {
-    case Action.Flip: {
+    case Action.Flip:
       const newFlipperBool = !flipperValue;
       const newFlipperValue = toBytes(newFlipperBool);
       setStorage(FLIPPER_KEY, newFlipperValue);
       break;
-    }
-    case Action.Get: {
+    case Action.Get:
       // return the flipper value from storage
       if (flipper.length)
         return flipper;
       break;
-    }
-    case Action.SelfEvict: {
+    case Action.SelfEvict:
       const allowance = u128.from<u32>(0);
       setRentAllowance(allowance)
       break;
-    }
   }
   return value;
 }

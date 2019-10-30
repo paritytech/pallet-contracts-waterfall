@@ -30,24 +30,21 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
 
   // Get action from first byte of the input U8A
   switch (input[0]) {
-    case Action.Inc: {
+    case Action.Inc:
       // read 4 bytes (u32) from storageBuffer with offset 1
       const by = load<u32>(input.dataStart, 1);
       const newCounter = toBytes(counterValue + by);
       setStorage(COUNTER_KEY, newCounter)
       break;
-    }
-    case Action.Get: {
+    case Action.Get:
       // return the counter from storage
       if (counter.length)
         return counter;
       break;
-    }
-    case Action.SelfEvict: {
+    case Action.SelfEvict:
       const allowance = u128.from<u32>(0);
       setRentAllowance(allowance)
       break;
-    }
   }
   return value;
 }
