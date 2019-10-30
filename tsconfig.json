@@ -1,15 +1,15 @@
 {
+
   "compilerOptions": {
     "target": "esnext",
     "module": "commonjs",
     "lib": ["dom", "es2018"],
-    "outDir": "./dist/",
     "resolveJsonModule": true,
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "strictBindCallApply": true, 
+    "strictBindCallApply": true,
     "strictPropertyInitialization": true,
     "noImplicitThis": true,
     "alwaysStrict": true,
@@ -17,9 +17,8 @@
     "esModuleInterop": true
   },
   "exclude": [
-    "assembly",
     "contracts/rust",
-    "ink",
+    "lib",
     "node_modules",
   ]
 }

@@ -8,7 +8,7 @@ import {
   ext_scratch_write,
   ext_set_rent_allowance,
   ext_set_storage
-} from './env';
+} from "./env";
 
 export enum StorageResult {
   Value,
@@ -24,7 +24,6 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
   }
   assert(false);
 }
-
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
   const pointer = value ? value.dataStart : 0;
@@ -48,12 +47,8 @@ export function getStorage(key: Uint8Array): Uint8Array {
   if (result === StorageResult.Value) {
     // // getting size of scratch buffer to allocate the buffer of corresponding size to fit the contents of the scratch buffer
     const size = ext_scratch_size();
-    // @TODO Q: Why are we not passing the size to the getStorage function?
-    // It's living outside the memory and there'S no way to be sure that it
-    // hasn't been overwritten by a new contract call already?
-
     // if value is not null or not an empty array
-    if (size >  0) {
+    if (size > 0) {
       // create empty array (Vec in Rust)
       value = new Uint8Array(size);
       // call
@@ -69,19 +64,17 @@ export function getScratchBuffer(): Uint8Array {
   const size = ext_scratch_size();
 
   if (size > 0) {
-      value = new Uint8Array(size);
-      // copy data from scratch buffer
-      ext_scratch_read(value.dataStart, 0, size);
+    value = new Uint8Array(size);
+    // copy data from scratch buffer
+    ext_scratch_read(value.dataStart, 0, size);
   }
   return value;
 }
 
-@inline
 export function setScratchBuffer(data: Uint8Array): void {
   ext_scratch_write(data.dataStart, data.length);
 }
 
-@inline
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
   ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
