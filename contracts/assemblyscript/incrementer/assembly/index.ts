@@ -7,9 +7,9 @@ import {
   setScratchBuffer,
   setStorage,
   toBytes
-} from './lib';
+} from "./lib";
 
-const COUNTER_KEY = (new Uint8Array(32)).fill(1); // [1,1,1, ... 1]
+const COUNTER_KEY = new Uint8Array(32).fill(1); // [1,1,1, ... 1]
 
 // Inc(648) => 0088020000
 // decimal: [0,136,2,0,0]
@@ -22,11 +22,15 @@ enum Action {
 }
 // class Action with parameter value & method incBy
 
-function handle(input: Uint8Array): Uint8Array { // vec<u8>
+function handle(input: Uint8Array): Uint8Array {
+  // vec<u8>
   const value = new Uint8Array(0);
   const counter = getStorage(COUNTER_KEY);
+
   const dataCounter = new DataView(counter.buffer);
-  const counterValue: u32 = dataCounter.byteLength ? dataCounter.getUint32(0, true) : 0;
+  const counterValue: u32 = dataCounter.byteLength
+    ? dataCounter.getUint32(0, true)
+    : 0;
 
   // Get action from first byte of the input U8A
   switch (input[0]) {
@@ -34,16 +38,15 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
       // read 4 bytes (u32) from storageBuffer with offset 1
       const by = load<u32>(input.dataStart, 1);
       const newCounter = toBytes(counterValue + by);
-      setStorage(COUNTER_KEY, newCounter)
+      setStorage(COUNTER_KEY, newCounter);
       break;
     case Action.Get:
       // return the counter from storage
-      if (counter.length)
-        return counter;
+      if (counter.length) return counter;
       break;
     case Action.SelfEvict:
       const allowance = u128.from<u32>(0);
-      setRentAllowance(allowance)
+      setRentAllowance(allowance);
       break;
   }
   return value;
@@ -57,7 +60,6 @@ export function call(): u32 {
   // scratch buffer filled with initial data
   const input = getScratchBuffer();
 
-  // @TODO: What'S the logic behind resetting scratchBuffer in handle()? Not happening in Get()
   const output = handle(input);
   setScratchBuffer(output);
   return 0;
@@ -65,5 +67,5 @@ export function call(): u32 {
 
 // deploy a new instance of the contract
 export function deploy(): u32 {
-  return 0
+  return 0;
 }

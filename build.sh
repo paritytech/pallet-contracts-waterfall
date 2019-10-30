@@ -17,12 +17,14 @@ cd -
 
 cd contracts/assemblyscript/flipper
 rm -rf build
+rm yarn.lock # temporary workaround for "Error: Cannot find module 'ts-node'" Bug
 yarn && yarn build
 ./build.sh
 cd -
 
 cd contracts/assemblyscript/incrementer
 rm -rf build
+rm yarn.lock # temporary workaround for "Error: Cannot find module 'ts-node'" Bug
 yarn && yarn build
 ./build.sh
 cd -

@@ -7,12 +7,12 @@ import {
   setScratchBuffer,
   setStorage,
   toBytes
-} from './lib';
+} from "./lib";
 
 // This simple dummy contract has a `bool` value that can
 // alter between `true` and `false` using the `flip` message.
 
-const FLIPPER_KEY = (new Uint8Array(32)).fill(2); // [2,2,2, ... 2]
+const FLIPPER_KEY = new Uint8Array(32).fill(2); // [2,2,2, ... 2]
 
 enum Action {
   Flip,
@@ -20,27 +20,28 @@ enum Action {
   SelfEvict
 }
 
-function handle(input: Uint8Array): Uint8Array { // vec<u8>
+function handle(input: Uint8Array): Uint8Array {
+  // vec<u8>
   const value = new Uint8Array(0);
   const flipper = getStorage(FLIPPER_KEY);
   const dataFlipper = new DataView(flipper.buffer);
-  const flipperValue: u8 = dataFlipper.byteLength ? dataFlipper.getUint8(0) : 0;
+  const flipperValue = dataFlipper.byteLength ? dataFlipper.getUint8(0) : 0;
 
   // Get action from first byte of the input U8A
   switch (input[0]) {
     case Action.Flip:
       const newFlipperBool = !flipperValue;
       const newFlipperValue = toBytes(newFlipperBool);
+
       setStorage(FLIPPER_KEY, newFlipperValue);
       break;
     case Action.Get:
       // return the flipper value from storage
-      if (flipper.length)
-        return flipper;
+      if (flipper.length) return flipper;
       break;
     case Action.SelfEvict:
       const allowance = u128.from<u32>(0);
-      setRentAllowance(allowance)
+      setRentAllowance(allowance);
       break;
   }
   return value;
@@ -49,6 +50,7 @@ function handle(input: Uint8Array): Uint8Array { // vec<u8>
 export function call(): u32 {
   const input = getScratchBuffer();
   const output = handle(input);
+
   setScratchBuffer(output);
   return 0;
 }
