@@ -9,7 +9,7 @@
   "scripts": {
     "build:optimized": "asc assembly/index.ts -b build/incrementer.wasm -t build/incrementer.wat --importMemory --noAssert --use abort= --validate --optimize",
     "build:tsd": "asc assembly/index.ts -d build/index.d.ts",
-    "build": "yarn build:optimized && yarn run build:tsd"
+    "build": "yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
     "assemblyscript": "AssemblyScript/assemblyscript",

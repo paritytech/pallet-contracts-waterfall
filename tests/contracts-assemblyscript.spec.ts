@@ -56,6 +56,7 @@ describe('AssemblyScript Smart Contracts', () => {
   test('Raw Flipper contract', async (done): Promise<void>  => {
     // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
+
     const STORAGE_KEY = '0xd9818087de7244abc1b5fcf28e55e42c7ff9c678c0605181f37ac5d7414a7b95';
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(api, testAccount, '../contracts/assemblyscript/flipper/build/flipper-pruned.wasm');
