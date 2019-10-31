@@ -7,21 +7,21 @@
   resolved "https://registry.yarnpkg.com/@protobufjs/utf8/-/utf8-1.1.0.tgz#a777360b5b39a1a2e5106f8e858f2fd2d060c570"
   integrity sha1-p3c2C1s5oaLlEG+OhY8v0tBgxXA=
 
-"@types/node@^10.12.18":
-  version "10.17.0"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.0.tgz#537c61a1df699a8331c79dab2ccc2c8799873c66"
-  integrity sha512-wuJwN2KV4tIRz1bu9vq5kSPasJ8IsEjZaP1ZR7KlmdUZvGF/rXy8DmXOVwUD0kAtvtJ7aqMKPqUXC0NUTDbrDg==
+"@types/node@10.17.2":
+  version "10.17.2"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.2.tgz#41b5afbcde1a5a805302a4da3cf399499f1bbf64"
+  integrity sha512-sAh60KDol+MpwOr1RTK0+HgBEYejKsxdpmrOS1Wts5bI03dLzq8F7T0sRXDKeaEK8iWDlGfdzxrzg6vx/c5pNA==
 
 assemblyscript@AssemblyScript/assemblyscript:
   version "0.7.0"
   resolved "https://codeload.github.com/AssemblyScript/assemblyscript/tar.gz/6ef1f75b3e2315f1eb8e0a35de19d9cf7fe590b5"
   dependencies:
     "@protobufjs/utf8" "^1.1.0"
-    binaryen "89.0.0-nightly.20191012"
+    binaryen "87.0.0-nightly.20190716"
     glob "^7.1.4"
     long "^4.0.0"
     opencollective-postinstall "^2.0.0"
-    source-map-support "^0.5.13"
+    source-map-support "^0.5.12"
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -32,10 +32,10 @@ bignum@MaxGraey/bignum.wasm:
   version "0.1.1"
   resolved "https://codeload.github.com/MaxGraey/bignum.wasm/tar.gz/5403267df2d9a6792fdc6d34f4f11854ccf49719"
 
-binaryen@89.0.0-nightly.20191012:
-  version "89.0.0-nightly.20191012"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-89.0.0-nightly.20191012.tgz#4079f4399cd3961f876aa1c913c0c9546f1c23f8"
-  integrity sha512-ipKFZEyrMnFuEPCzEsXZ80DwZhGzrPldQ+vtcyCfdr8O75PKawfll1gmdWg4sUtzjSnfdvK9NiYfzm021lDNUg==
+binaryen@87.0.0-nightly.20190716:
+  version "87.0.0-nightly.20190716"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-87.0.0-nightly.20190716.tgz#5aaad26885c53cfac3163d21592cea46e3ed5c64"
+  integrity sha512-qRGfV8cLV4HVVo1oUCtTaDmOhbwctaW7vyW0G6HKftywWOJI9t9IsCrUEFKya50RqyEnanuS2w3nfOg4bxTGqg==
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -114,7 +114,7 @@ path-is-absolute@^1.0.0:
   resolved "https://registry.yarnpkg.com/path-is-absolute/-/path-is-absolute-1.0.1.tgz#174b9268735534ffbc7ace6bf53a5a9e1b5c5f5f"
   integrity sha1-F0uSaHNVNP+8es5r9TpanhtcX18=
 
-source-map-support@^0.5.13:
+source-map-support@^0.5.12:
   version "0.5.16"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.16.tgz#0ae069e7fe3ba7538c64c98515e35339eac5a042"
   integrity sha512-efyLRJDr68D9hBBNIPWFjhpFzURh+KJykQwvMyW5UiZzYwoF6l4YMMDIJJEyFWxWCqfyxLzz6tSfUFR+kXXsVQ==
