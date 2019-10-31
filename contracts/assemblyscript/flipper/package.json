@@ -16,7 +16,7 @@
     "bignum": "MaxGraey/bignum.wasm"
   },
   "devDependencies": {
-    "@types/node": "^10.12.18",
+    "@types/node": "^10.17.2",
     "typescript": "^3.2.2"
   }
 }
