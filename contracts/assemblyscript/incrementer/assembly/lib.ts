@@ -15,6 +15,7 @@ export enum StorageResult {
   None
 }
 
+// @ts-ignore: no-return
 export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
   // accept only integers and booleans
   if (isInteger<T>()) {
