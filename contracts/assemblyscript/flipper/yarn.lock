@@ -17,11 +17,11 @@ assemblyscript@AssemblyScript/assemblyscript:
   resolved "https://codeload.github.com/AssemblyScript/assemblyscript/tar.gz/6ef1f75b3e2315f1eb8e0a35de19d9cf7fe590b5"
   dependencies:
     "@protobufjs/utf8" "^1.1.0"
-    binaryen "87.0.0-nightly.20190716"
+    binaryen "89.0.0-nightly.20191012"
     glob "^7.1.4"
     long "^4.0.0"
     opencollective-postinstall "^2.0.0"
-    source-map-support "^0.5.12"
+    source-map-support "^0.5.13"
 
 balanced-match@^1.0.0:
   version "1.0.0"
