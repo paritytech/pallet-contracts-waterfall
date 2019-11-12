@@ -10,7 +10,7 @@ import {
 } from "./lib";
 
 // Create a new Uint8Array of length 32
-const ERC20_KEY = (new Uint8Array(32) as Uint8Array).fill(3);
+const EERC20_TOKEN = (new Uint8Array(32) as Uint8Array).fill(3);
 
 enum Action {
   TotalSupply, // -> Balance
@@ -24,7 +24,7 @@ enum Action {
 
 function handle(input: Uint8Array): Uint8Array {
   const value = new Uint8Array(0);
-  const erc20 = getStorage(ERC20_KEY);
+  const erc20 = getStorage(EERC20_TOKEN);
   const dataErc20 = new DataView(erc20.buffer);
   const erc20Value = dataErc20.byteLength ? dataErc20.getUint8(0) : 0;
 
@@ -88,6 +88,6 @@ export function call(): u32 {
 // deploy a new instance of the contract with the default value 0x00 (false)
 export function deploy(): u32 {
   const totalSupply = toBytes(10000000055);
-  setStorage(ERC20_KEY, totalSupply);
+  setStorage(EERC20_TOKEN, totalSupply);
   return 0;
 }
