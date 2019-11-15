@@ -26,3 +26,9 @@ rm -rf build
 yarn && yarn build
 ./build.sh
 cd -
+
+cd contracts/assemblyscript/erc20
+rm -rf build
+yarn && yarn build
+./build.sh
+cd -

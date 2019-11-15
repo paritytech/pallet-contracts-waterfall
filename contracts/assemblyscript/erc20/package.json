@@ -11,10 +11,12 @@
     "build:tsd": "asc assembly/index.ts -d build/index.d.ts",
     "build": "yarn build:optimized && yarn build:tsd"
   },
+  "dependencies": {
+    "assemblyscript": "AssemblyScript/assemblyscript",
+    "bignum": "MaxGraey/bignum.wasm"
+  },
   "devDependencies": {
     "@types/node": "^10.17.2",
-    "assemblyscript": "AssemblyScript/assemblyscript",
-    "bignum": "MaxGraey/bignum.wasm",
     "typescript": "^3.2.2"
   }
 }

@@ -22,6 +22,7 @@ import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Option } from "@polkadot/types";
 import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
+import BN from "bn.js";
 
 import { BOB, CREATION_FEE, WSURL } from "./consts";
 import {
@@ -61,12 +62,11 @@ beforeEach(
 );
 
 describe("AssemblyScript Smart Contracts", () => {
-  test("Raw Flipper contract", async (done): Promise<void> => {
+  test.skip("Raw Flipper contract", async (done): Promise<void> => {
     // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
 
-    const STORAGE_KEY =
-      "0xd9818087de7244abc1b5fcf28e55e42c7ff9c678c0605181f37ac5d7414a7b95";
+    const STORAGE_KEY = "0xd9818087de7244abc1b5fcf28e55e42c7ff9c678c0605181f37ac5d7414a7b95";
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
@@ -76,7 +76,7 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // Call contract with Action: 0x00 = Action::Inc()
+    // Call contract with Action: 0x00 = Action::Flip()
     const address: Address = await instantiate(
       api,
       testAccount,
@@ -107,9 +107,8 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test("Raw Incrementer contract", async (done): Promise<void> => {
-    const STORAGE_KEY =
-      "0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c";
+  test.skip("Raw Incrementer contract", async (done): Promise<void> => {
+    const STORAGE_KEY = "0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c";
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
@@ -134,6 +133,45 @@ describe("AssemblyScript Smart Contracts", () => {
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
+
+    done();
+  });
+
+  test("Raw Erc20 contract", async (done): Promise<void> => {
+    const TOTAL_SUPPLY_STORAGE_KEY = "0xfc14ac676780c40e5cfeb5b8701b14761a89b5519eaf663b29e7f8abbdc72195";
+    const CREATOR_STORAGE_KEY = "0x89eb0d6a8a691dae2cd15ed0369931ce0a949ecafa5c3f93f8121833646e15c3";
+
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash = await putCode(
+      api,
+      testAccount,
+      "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
+    );
+    expect(codeHash).toBeDefined();
+
+    // Instantiate a new contract instance and retrieve the contracts address
+    // Call contract with Action: 0x00 = Action::Inc()
+    const address: Address = await instantiate(
+      api,
+      testAccount,
+      codeHash,
+      "0x00",
+      CREATION_FEE
+    );
+    expect(address).toBeDefined();
+
+    const totalSupply = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
+    // expect(totalSupply.toString()).toBe(CREATION_FEE);
+
+    const creatorBalance = await getContractStorage(api, address, CREATOR_STORAGE_KEY);
+    //const balanceBN = new BN(creatorBalance.toString());
+    expect(creatorBalance.toString()).toBe(CREATION_FEE);
+
+    // // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
+    // await callContract(api, testAccount, address, "0x002a000000");
+
+    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    // expect(newValue.toString()).toBe("0x2a000000");
 
     done();
   });

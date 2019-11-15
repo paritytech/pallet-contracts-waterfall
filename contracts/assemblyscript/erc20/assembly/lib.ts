@@ -2,24 +2,21 @@
 
 import { u128 } from "bignum";
 import {
+  ext_balance,
+  ext_caller,
   ext_get_storage,
   ext_scratch_read,
   ext_scratch_size,
   ext_scratch_write,
   ext_set_rent_allowance,
-  ext_set_storage
+  ext_set_storage,
+  ext_value_transferred
 } from "./env";
 
 export enum StorageResult {
   Value,
   None
 }
-
-// export enum Erc20Token {
-//   Balances,
-//   Allowances,
-//   TotalSupply
-// }
 
 export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
   // accept only integers and booleans
@@ -29,6 +26,15 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
     return arr;
   }
   assert(false);
+}
+
+// This is just a wrapper function around the provided env host function 
+export function getCaller(): void {
+  ext_caller();
+}
+
+export function getValueTransferred(): void {
+  ext_balance();
 }
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
