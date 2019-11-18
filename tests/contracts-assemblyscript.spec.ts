@@ -17,11 +17,11 @@
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
 import { Abi } from "@polkadot/api-contract";
 import testKeyring from "@polkadot/keyring/testing";
-import { u8aToHex } from "@polkadot/util";
+import { hexStripPrefix, hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Option } from "@polkadot/types";
-import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
+import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 
 import { BOB, CREATION_FEE, WSURL } from "./consts";
@@ -160,12 +160,18 @@ describe("AssemblyScript Smart Contracts", () => {
     );
     expect(address).toBeDefined();
 
-    const totalSupply = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
-    // expect(totalSupply.toString()).toBe(CREATION_FEE);
+    const totalSupplyRaw = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
+    // Convert 128 bit little endian hex value 
+    const totalSupply = hexToBn(totalSupplyRaw.toString(), true);
+    expect(totalSupply.eq(CREATION_FEE)).toBeTruthy();
 
-    const creatorBalance = await getContractStorage(api, address, CREATOR_STORAGE_KEY);
-    //const balanceBN = new BN(creatorBalance.toString());
-    expect(creatorBalance.toString()).toBe(CREATION_FEE);
+    // We know that the return value should be of type Balance.
+    // So we convert the hex value returned from Storage as little endian value 
+    // to an BN instance to be able to compare the values.
+    const creatorBalanceRaw = await getContractStorage(api, address, CREATOR_STORAGE_KEY);
+    const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+    expect(creatorBalance.eq(totalSupply)).toBeTruthy();
+
 
     // // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
     // await callContract(api, testAccount, address, "0x002a000000");

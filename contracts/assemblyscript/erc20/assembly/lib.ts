@@ -34,7 +34,7 @@ export function getCaller(): void {
 }
 
 export function getValueTransferred(): void {
-  ext_balance();
+  ext_value_transferred();
 }
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
