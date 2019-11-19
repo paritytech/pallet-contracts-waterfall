@@ -93,18 +93,19 @@ export function call(): u32 {
 
 // deploy a new instance of the contract with the default value 0x00 (false)
 export function deploy(): u32 {
-  // Get and store endowment as total supply
+  // Get and store endowment as total supply in scratch buffer
   getValueTransferred()
   const totalSupply = getScratchBuffer();
   setStorage(ERC20_SUPPLY_STORAGE, totalSupply);
   
   // Get and store the address of the caller to scratch buffer 
   getCaller();
-  const caller = getScratchBuffer();
+  const CALLER = getScratchBuffer();
   // Create a new storage entry with the address of the contract caller
   // and assign the total supply of the contract to the creators account.
   // In more advanced implementations you might want to hash this with a crypto function
-  const ERC20_CREATOR = (new Uint8Array(32));
-  setStorage(ERC20_CREATOR, totalSupply);
+
+  setStorage(CALLER, totalSupply);
   return 0;
 }
+

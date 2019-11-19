@@ -24,7 +24,7 @@ import { Option } from "@polkadot/types";
 import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 
-import { BOB, CREATION_FEE, WSURL } from "./consts";
+import { ALICE, BOB, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -34,7 +34,7 @@ import {
 
 // This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: "sr25519" });
-const alicePair = keyring.getPair(BOB);
+const alicePair = keyring.getPair(ALICE);
 let testAccount: KeyringPair;
 let api: ApiPromise;
 
@@ -107,8 +107,9 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test.skip("Raw Incrementer contract", async (done): Promise<void> => {
+  test("Raw Incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = "0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c";
+
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
@@ -130,21 +131,21 @@ describe("AssemblyScript Smart Contracts", () => {
 
     // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
     await callContract(api, testAccount, address, "0x002a000000");
-
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
 
     done();
   });
 
-  test("Raw Erc20 contract", async (done): Promise<void> => {
+  test.skip("Raw Erc20 contract", async (done): Promise<void> => {
     const TOTAL_SUPPLY_STORAGE_KEY = "0xfc14ac676780c40e5cfeb5b8701b14761a89b5519eaf663b29e7f8abbdc72195";
-    const CREATOR_STORAGE_KEY = "0x89eb0d6a8a691dae2cd15ed0369931ce0a949ecafa5c3f93f8121833646e15c3";
+    const CREATOR_STORAGE_KEY = "0x94772f97f5f6b539aac74e798bc395119f39603402d0c85bc9eda5dfc5ae2160"; // BOB
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      testAccount,
+      keyring.getPair(BOB),
       "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -153,24 +154,29 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 = Action::Inc()
     const address: Address = await instantiate(
       api,
-      testAccount,
+      keyring.getPair(BOB),
       codeHash,
       "0x00",
       CREATION_FEE
     );
     expect(address).toBeDefined();
 
+    // Get the totalSupply of the contract from storage
     const totalSupplyRaw = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
-    // Convert 128 bit little endian hex value 
+    // Convert unsigned 128 bit integer returned as a little endian hex value 
+    // From Storage: 0x000014bbf08ac6020000000000000000
+    // Converted to <BN: 2c68af0bb140000>
     const totalSupply = hexToBn(totalSupplyRaw.toString(), true);
+    // Test if the totalSupply value in storage equals the CREATION_FEE
     expect(totalSupply.eq(CREATION_FEE)).toBeTruthy();
 
-    // We know that the return value should be of type Balance.
-    // So we convert the hex value returned from Storage as little endian value 
+    // We know that the creator should own the total supply of the contract
+    // after initialization. The return value should be of type Balance.
+    // We get the value from storage and convert the returned hex value
     // to an BN instance to be able to compare the values.
     const creatorBalanceRaw = await getContractStorage(api, address, CREATOR_STORAGE_KEY);
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
-    expect(creatorBalance.eq(totalSupply)).toBeTruthy();
+    expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
 
 
     // // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
