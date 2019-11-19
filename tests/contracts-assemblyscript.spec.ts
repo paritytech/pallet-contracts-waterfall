@@ -15,12 +15,10 @@
 // along with Substrate. If not, see <http://www.gnu.org/licenses/>.
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
-import { Abi } from "@polkadot/api-contract";
 import testKeyring from "@polkadot/keyring/testing";
-import { hexStripPrefix, hexToBn, u8aToHex } from "@polkadot/util";
+import { hexStripPrefix, hexToBn, u8aToHex, u8aToString } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { Option } from "@polkadot/types";
 import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 
@@ -35,6 +33,7 @@ import {
 // This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: "sr25519" });
 const alicePair = keyring.getPair(ALICE);
+const randomSeed = randomAsU8a(32);
 let testAccount: KeyringPair;
 let api: ApiPromise;
 
@@ -45,7 +44,7 @@ beforeAll((): void => {
 beforeEach(
   async (done): Promise<() => void> => {
     api = await ApiPromise.create({ provider: new WsProvider(WSURL) });
-    testAccount = keyring.addFromSeed(randomAsU8a(32));
+    testAccount = keyring.addFromSeed(randomSeed);
 
     return api.tx.balances
       .transfer(testAccount.address, CREATION_FEE.muln(3))
@@ -62,11 +61,11 @@ beforeEach(
 );
 
 describe("AssemblyScript Smart Contracts", () => {
-  test.skip("Raw Flipper contract", async (done): Promise<void> => {
+  test("Raw Flipper contract", async (done): Promise<void> => {
     // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
 
-    const STORAGE_KEY = "0xd9818087de7244abc1b5fcf28e55e42c7ff9c678c0605181f37ac5d7414a7b95";
+    const STORAGE_KEY = (new Uint8Array(32)).fill(2);
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
@@ -108,7 +107,7 @@ describe("AssemblyScript Smart Contracts", () => {
   });
 
   test("Raw Incrementer contract", async (done): Promise<void> => {
-    const STORAGE_KEY = "0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c";
+    const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
@@ -138,14 +137,13 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test.skip("Raw Erc20 contract", async (done): Promise<void> => {
-    const TOTAL_SUPPLY_STORAGE_KEY = "0xfc14ac676780c40e5cfeb5b8701b14761a89b5519eaf663b29e7f8abbdc72195";
-    const CREATOR_STORAGE_KEY = "0x94772f97f5f6b539aac74e798bc395119f39603402d0c85bc9eda5dfc5ae2160"; // BOB
-
+  test("Raw Erc20 contract", async (done): Promise<void> => {
+    const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
+ 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      keyring.getPair(BOB),
+      testAccount,
       "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -154,7 +152,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 = Action::Inc()
     const address: Address = await instantiate(
       api,
-      keyring.getPair(BOB),
+      testAccount,
       codeHash,
       "0x00",
       CREATION_FEE
@@ -174,16 +172,9 @@ describe("AssemblyScript Smart Contracts", () => {
     // after initialization. The return value should be of type Balance.
     // We get the value from storage and convert the returned hex value
     // to an BN instance to be able to compare the values.
-    const creatorBalanceRaw = await getContractStorage(api, address, CREATOR_STORAGE_KEY);
+    const creatorBalanceRaw = await getContractStorage(api, address, testAccount.publicKey);
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
-
-
-    // // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
-    // await callContract(api, testAccount, address, "0x002a000000");
-
-    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
-    // expect(newValue.toString()).toBe("0x2a000000");
 
     done();
   });

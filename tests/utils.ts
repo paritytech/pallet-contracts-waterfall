@@ -5,8 +5,14 @@ import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import fs from "fs";
 import path from "path";
+const blake = require('blakejs')
 
 import { GAS_REQUIRED } from "./consts";
+
+// const string = keyring.getPair(BOB).address;
+// console.log(string)
+// const test = blake.blake2bHex(string, null, 32)
+// console.log(test)
 
 export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
@@ -91,14 +97,19 @@ export async function callContract(
 export async function getContractStorage(
   api: ApiPromise,
   contractAddress: Address,
-  storageKey: string
+  storageKey: Uint8Array
 ): Promise<StorageData> {
   const contractInfo = await api.query.contracts.contractInfoOf(
     contractAddress
   );
   // Return the value of the contracts storage
+  const storageKeyBlake2b = blake.blake2bHex(storageKey, null, 32);
+
+  console.log('storageKey', storageKey);
+  console.log('storageKeyBlake2b', storageKeyBlake2b);
+
   return await api.rpc.state.getChildStorage(
     (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
-    storageKey
+    '0x' + storageKeyBlake2b
   );
 }

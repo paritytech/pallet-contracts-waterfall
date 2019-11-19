@@ -61,10 +61,9 @@ beforeEach(
 );
 
 describe("Rust Smart Contracts", () => {
-  test("Flip contract", async (done): Promise<void> => {
+  test.only("Flip contract", async (done): Promise<void> => {
     const flipperAbi = require("../lib/ink/examples/lang/flipper/target/abi.json");
-    const STORAGE_KEY =
-      "0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77";
+    const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     const abi: Abi = new Abi(flipperAbi);
 
     // Deploy contract code on chain and retrieve the code hash
@@ -102,8 +101,7 @@ describe("Rust Smart Contracts", () => {
   });
 
   test("Raw incrementer contract", async (done): Promise<void> => {
-    const STORAGE_KEY =
-      "0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c";
+    const STORAGE_KEY = (new Uint8Array(32)).fill(1);
     // Deploy contract code on chain and retrieve the code hash
     const codeHash: Hash = await putCode(
       api,
@@ -141,8 +139,7 @@ describe("Rust Smart Contracts", () => {
     // 6. restores the contract
     // 7. checks that the restored contract is equivalent to the evicted.
 
-    const STORAGE_KEY =
-      "0xf40ceaf86e5776923332b8d8fd3bef849cadb19c6996bc272af1f648d9566a4c";
+    const STORAGE_KEY = (new Uint8Array(32)).fill(1);;
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash: Hash = await putCode(
