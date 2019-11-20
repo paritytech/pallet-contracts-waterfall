@@ -9,11 +9,6 @@ const blake = require('blakejs')
 
 import { GAS_REQUIRED } from "./consts";
 
-// const string = keyring.getPair(BOB).address;
-// console.log(string)
-// const test = blake.blake2bHex(string, null, 32)
-// console.log(test)
-
 export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
