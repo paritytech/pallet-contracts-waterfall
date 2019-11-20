@@ -28,7 +28,6 @@ import {
   callContract,
   instantiate,
   getContractStorage,
-  getContractStorageOld,
   putCode
 } from "./utils";
 
@@ -67,6 +66,7 @@ describe("Rust Smart Contracts", () => {
   // test("Flip contract", async (done): Promise<void> => {
   //   // const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
 
+  // // @Todo Get contract storage key as bytes instead of the blake2 encoded hex string
   //   const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
 
   //   // Deploy contract code on chain and retrieve the code hash
@@ -87,7 +87,7 @@ describe("Rust Smart Contracts", () => {
   //   );
   //   expect(address).toBeDefined();
 
-  //   const initialValue: Uint8Array = await getContractStorageOld(
+  //   const initialValue: Uint8Array = await getContractStorage(
   //     api,
   //     address,
   //     STORAGE_KEY
@@ -97,7 +97,7 @@ describe("Rust Smart Contracts", () => {
 
   //   await callContract(api, testAccount, address, ["0x8C","0x97","0xDB","0x39"]);
 
-  //   const newValue = await getContractStorageOld(api, address, STORAGE_KEY);
+  //   const newValue = await getContractStorage(api, address, STORAGE_KEY);
   //   expect(newValue.toString()).toEqual("0x01");
 
   //   done();

@@ -136,46 +136,4 @@ describe("AssemblyScript Smart Contracts", () => {
 
     done();
   });
-
-  test("Raw Erc20 contract", async (done): Promise<void> => {
-    const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
- 
-    // Deploy contract code on chain and retrieve the code hash
-    const codeHash = await putCode(
-      api,
-      testAccount,
-      "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
-    );
-    expect(codeHash).toBeDefined();
-
-    // Instantiate a new contract instance and retrieve the contracts address
-    // Call contract with Action: 0x00 = Action::Inc()
-    const address: Address = await instantiate(
-      api,
-      testAccount,
-      codeHash,
-      "0x00",
-      CREATION_FEE
-    );
-    expect(address).toBeDefined();
-
-    // Get the totalSupply of the contract from storage
-    const totalSupplyRaw = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
-    // Convert unsigned 128 bit integer returned as a little endian hex value 
-    // From Storage: 0x000014bbf08ac6020000000000000000
-    // Converted to <BN: 2c68af0bb140000>
-    const totalSupply = hexToBn(totalSupplyRaw.toString(), true);
-    // Test if the totalSupply value in storage equals the CREATION_FEE
-    expect(totalSupply.eq(CREATION_FEE)).toBeTruthy();
-
-    // We know that the creator should own the total supply of the contract
-    // after initialization. The return value should be of type Balance.
-    // We get the value from storage and convert the returned hex value
-    // to an BN instance to be able to compare the values.
-    const creatorBalanceRaw = await getContractStorage(api, address, testAccount.publicKey);
-    const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
-    expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
-
-    done();
-  });
 });
