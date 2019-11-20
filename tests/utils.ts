@@ -94,6 +94,22 @@ export async function callContract(
   await sendAndReturnFinalized(signer, tx);
 }
 
+// Remove this once the flipper contract uses ink! 2.0
+export async function getContractStorageOld(
+  api: ApiPromise,
+  contractAddress: Address,
+  storageKey: string
+): Promise<StorageData> {
+  const contractInfo = await api.query.contracts.contractInfoOf(
+    contractAddress
+  );
+  // Return the value of the contracts storage
+  return await api.rpc.state.getChildStorage(
+    (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
+    storageKey
+  );
+}
+
 export async function getContractStorage(
   api: ApiPromise,
   contractAddress: Address,
@@ -104,10 +120,6 @@ export async function getContractStorage(
   );
   // Return the value of the contracts storage
   const storageKeyBlake2b = blake.blake2bHex(storageKey, null, 32);
-
-  console.log('storageKey', storageKey);
-  console.log('storageKeyBlake2b', storageKeyBlake2b);
-
   return await api.rpc.state.getChildStorage(
     (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
     '0x' + storageKeyBlake2b
