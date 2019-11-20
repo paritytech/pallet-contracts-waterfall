@@ -61,7 +61,7 @@ beforeEach(
 );
 
 describe("Rust Smart Contracts", () => {
-  test.only("Flip contract", async (done): Promise<void> => {
+  test("Flip contract", async (done): Promise<void> => {
     const flipperAbi = require("../lib/ink/examples/lang/flipper/target/abi.json");
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     const abi: Abi = new Abi(flipperAbi);
@@ -99,6 +99,45 @@ describe("Rust Smart Contracts", () => {
 
     done();
   });
+
+  // test.only("Flip contract", async (done): Promise<void> => {
+  //   const flipperAbi = require("../lib/ink/examples/lang2/flipper/target/abi.json");
+  //   const STORAGE_KEY = (new Uint8Array(32)).fill(0);
+  //   const abi: Abi = new Abi(flipperAbi);
+
+  //   // Deploy contract code on chain and retrieve the code hash
+  //   const codeHash: Hash = await putCode(
+  //     api,
+  //     testAccount,
+  //     "../lib/ink/examples/lang/flipper/target/flipper.wasm"
+  //   );
+  //   expect(codeHash).toBeDefined();
+
+  //   // Instantiate a new contract instance and retrieve the contracts address
+  //   const address: Address = await instantiate(
+  //     api,
+  //     testAccount,
+  //     codeHash,
+  //     abi.constructors[0],
+  //     CREATION_FEE
+  //   );
+  //   expect(address).toBeDefined();
+
+  //   const initialValue: Uint8Array = await getContractStorage(
+  //     api,
+  //     address,
+  //     STORAGE_KEY
+  //   );
+  //   expect(initialValue).toBeDefined();
+  //   expect(initialValue.toString()).toEqual("0x00");
+
+  //   await callContract(api, testAccount, address, abi.messages.flip());
+
+  //   const newValue = await getContractStorage(api, address, STORAGE_KEY);
+  //   expect(newValue.toString()).toEqual("0x01");
+
+  //   done();
+  // });
 
   test("Raw incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = (new Uint8Array(32)).fill(1);
