@@ -12,7 +12,7 @@
     "build": "yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
-    "assemblyscript": "AssemblyScript/assemblyscript",
+    "assemblyscript": "^0.8.1",
     "bignum": "MaxGraey/bignum.wasm"
   },
   "devDependencies": {
