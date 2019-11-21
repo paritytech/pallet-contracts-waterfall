@@ -131,7 +131,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
     await callContract(api, testAccount, address, "0x002a000000");
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
-    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
+
     expect(newValue.toString()).toBe("0x2a000000");
 
     done();

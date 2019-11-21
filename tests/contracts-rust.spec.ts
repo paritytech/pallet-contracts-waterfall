@@ -61,47 +61,46 @@ beforeEach(
 );
 
 describe("Rust Smart Contracts", () => {
-  // Currently broken, needs fixing after onk! 2.0 update
-  //
-  // test("Flip contract", async (done): Promise<void> => {
-  //   // const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
+  // Currently broken, needs fixing after ink! 2.0 update
+  test("Flip contract", async (done): Promise<void> => {
+    // const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
 
-  // // @Todo Get contract storage key as bytes instead of the blake2 encoded hex string
-  //   const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
+  // @Todo Get contract storage key as bytes instead of the blake2 encoded hex string
+    const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
 
-  //   // Deploy contract code on chain and retrieve the code hash
-  //   const codeHash: Hash = await putCode(
-  //     api,
-  //     testAccount,
-  //     "../lib/ink/examples/lang2/flipper/target/flipper.wasm"
-  //   );
-  //   expect(codeHash).toBeDefined();
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash: Hash = await putCode(
+      api,
+      testAccount,
+      "../lib/ink/examples/lang2/flipper/target/flipper.wasm"
+    );
+    expect(codeHash).toBeDefined();
 
-  //   // Instantiate a new contract instance and retrieve the contracts address
-  //   const address: Address = await instantiate(
-  //     api,
-  //     testAccount,
-  //     codeHash,
-  //     ["0x8C", "0x97", "0xDB", "0x39"],
-  //     CREATION_FEE
-  //   );
-  //   expect(address).toBeDefined();
+    // Instantiate a new contract instance and retrieve the contracts address
+    const address: Address = await instantiate(
+      api,
+      testAccount,
+      codeHash,
+      ["0x8C", "0x97", "0xDB", "0x39"],
+      CREATION_FEE
+    );
+    expect(address).toBeDefined();
 
-  //   const initialValue: Uint8Array = await getContractStorage(
-  //     api,
-  //     address,
-  //     STORAGE_KEY
-  //   );
-  //   expect(initialValue).toBeDefined();
-  //   expect(initialValue.toString()).toEqual("0x00");
+    const initialValue: Uint8Array = await getContractStorage(
+      api,
+      address,
+      STORAGE_KEY
+    );
+    expect(initialValue).toBeDefined();
+    expect(initialValue.toString()).toEqual("0x00");
 
-  //   await callContract(api, testAccount, address, ["0x8C","0x97","0xDB","0x39"]);
+    await callContract(api, testAccount, address, ["0x8C","0x97","0xDB","0x39"]);
 
-  //   const newValue = await getContractStorage(api, address, STORAGE_KEY);
-  //   expect(newValue.toString()).toEqual("0x01");
+    const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    expect(newValue.toString()).toEqual("0x01");
 
-  //   done();
-  // });
+    done();
+  });
 
   test("Raw incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = (new Uint8Array(32)).fill(1);
@@ -142,7 +141,7 @@ describe("Rust Smart Contracts", () => {
     // 6. restores the contract
     // 7. checks that the restored contract is equivalent to the evicted.
 
-    const STORAGE_KEY = (new Uint8Array(32)).fill(1);;
+    const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash: Hash = await putCode(
