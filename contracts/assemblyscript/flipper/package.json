@@ -12,11 +12,11 @@
     "build": "yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
-    "assemblyscript": "AssemblyScript/assemblyscript",
     "bignum": "MaxGraey/bignum.wasm"
   },
   "devDependencies": {
     "@types/node": "^10.17.2",
+    "assemblyscript": "^0.8.1-nightly.20191124",
     "typescript": "^3.2.2"
   }
 }
