@@ -5,7 +5,7 @@ import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import fs from "fs";
 import path from "path";
-const blake = require('blakejs')
+const blake = require('blakejs');
 
 import { GAS_REQUIRED } from "./consts";
 
@@ -14,11 +14,12 @@ import { GAS_REQUIRED } from "./consts";
 // const test = blake.blake2bHex(string, null, 32)
 // console.log(test)
 
-export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
+export async function sendAndReturnFinalized(signer: KeyringPair, tx: any, lala?: boolean) {
   return new Promise(function(resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
       if (result.status.isFinalized) {
         // Return result of the submittable extrinsic after the transfer is finalized
+        if(lala) {console.log(result)}
         resolve(result as SubmittableResult);
       }
       if (
@@ -91,7 +92,6 @@ export async function callContract(
     gasRequired,
     inputData
   );
-  await sendAndReturnFinalized(signer, tx);
 }
 
 // Remove this once the flipper contract uses ink! 2.0

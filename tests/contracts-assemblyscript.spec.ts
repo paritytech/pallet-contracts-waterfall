@@ -16,13 +16,14 @@
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
 import testKeyring from "@polkadot/keyring/testing";
-import { hexStripPrefix, hexToBn, u8aToHex, u8aToString } from "@polkadot/util";
+import { bnToHex, hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
+const blake = require('blakejs');
 
-import { ALICE, BOB, CREATION_FEE, WSURL } from "./consts";
+import { BOB, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -34,7 +35,7 @@ import {
 const keyring = testKeyring({ type: "sr25519" });
 const bobPair = keyring.getPair(BOB);
 const randomSeed = randomAsU8a(32);
-let testAccount: KeyringPair;
+let contractCaller: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
@@ -44,10 +45,10 @@ beforeAll((): void => {
 beforeEach(
   async (done): Promise<() => void> => {
     api = await ApiPromise.create({ provider: new WsProvider(WSURL) });
-    testAccount = keyring.addFromSeed(randomSeed);
+    contractCaller = keyring.addFromSeed(randomSeed);
 
     return api.tx.balances
-      .transfer(testAccount.address, CREATION_FEE.muln(3))
+      .transfer(contractCaller.address, CREATION_FEE.muln(3))
       .signAndSend(bobPair, (result: SubmittableResult): void => {
         if (
           result.status.isFinalized &&
@@ -69,7 +70,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      testAccount,
+      contractCaller,
       "../contracts/assemblyscript/flipper/build/flipper-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -78,7 +79,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 = Action::Flip()
     const address: Address = await instantiate(
       api,
-      testAccount,
+      contractCaller,
       codeHash,
       "0x00",
       CREATION_FEE
@@ -93,12 +94,12 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x00");
 
-    await callContract(api, testAccount, address, "0x00");
+    await callContract(api, contractCaller, address, "0x00");
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
 
-    await callContract(api, testAccount, address, "0x00");
+    await callContract(api, contractCaller, address, "0x00");
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x00");
@@ -106,13 +107,13 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test("Raw Incrementer contract", async (done): Promise<void> => {
+  test.only("Raw Incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      testAccount,
+      contractCaller,
       "../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -121,7 +122,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 = Action::Inc()
     const address: Address = await instantiate(
       api,
-      testAccount,
+      contractCaller,
       codeHash,
       "0x00",
       CREATION_FEE
@@ -129,36 +130,47 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(address).toBeDefined();
 
     // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
-    await callContract(api, testAccount, address, "0x002a000000");
+    await callContract(api, contractCaller, address, "0x002a000000");
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     // const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
 
+    const currentValue =  await callContract(api, contractCaller, address, "0x01");
+    console.log(currentValue)
     done();
   });
 
   test("Raw Erc20 contract", async (done): Promise<void> => {
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
- 
+
+    // 1. Deploy & instantiate the contract 
+    // 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
+    // 3. Test if the CALLER storage holds the totalSupply of tokens
+    // 4. Call the transfer function to Transfer some tokens to a different account
+    // 5. Get the BalanceOf the receiver account
+    
+    // 1. Instantiate the contract 
+    //
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      testAccount,
+      contractCaller,
       "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // Call contract with Action: 0x00 = Action::Inc()
     const address: Address = await instantiate(
       api,
-      testAccount,
+      contractCaller,
       codeHash,
       "0x00",
       CREATION_FEE
     );
     expect(address).toBeDefined();
 
+    // 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
+    //
     // Get the totalSupply of the contract from storage
     const totalSupplyRaw = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
     // Convert unsigned 128 bit integer returned as a little endian hex value 
@@ -168,13 +180,41 @@ describe("AssemblyScript Smart Contracts", () => {
     // Test if the totalSupply value in storage equals the CREATION_FEE
     expect(totalSupply.eq(CREATION_FEE)).toBeTruthy();
 
+    // 3. Test if the CALLER storage holds the totalSupply of tokens
+    //
     // We know that the creator should own the total supply of the contract
     // after initialization. The return value should be of type Balance.
     // We get the value from storage and convert the returned hex value
     // to an BN instance to be able to compare the values.
-    const creatorBalanceRaw = await getContractStorage(api, address, testAccount.publicKey);
+    const creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
+
+
+    const lalalala = await callContract(api, contractCaller, address, `0x00`);
+    // `0x01${blake.blake2bHex(contractCaller.publicKey, null, 32)}`
+    console.log(`0x01${u8aToHex(contractCaller.publicKey, -1, false)}`)
+    console.log(lalalala)
+   // expect(callerBalance.toString()).toBe(CREATION_FEE.toString());
+
+    // 4. Call the transfer function to Transfer some tokens to a different account
+    //
+    // - 0x03 = Action.Transfer
+    // - recipientStorageKey - 32 bytes recipients account publicKey as hex
+    //   e.g 58cae2a2a7f4406c37b237065063051920603c19ef13ea54ccca881bc352ea2b
+    // - Followed by the amount as u128 little endian
+    //   eg. 5555b3dba800000000000000000000000000000000000000
+    const recipient = keyring.addFromSeed(randomAsU8a(32));
+    const recipientAccountId = u8aToHex(recipient.publicKey, -1, false);
+
+    const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
+    const transferValueHex = u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false);
+    console.log(`0x03${recipientAccountId}${transferValueHex}`);
+
+    await callContract(api, contractCaller, address, `0x03${recipientAccountId}${transferValueHex}`);
+    const newValue = await getContractStorage(api, address, recipient.publicKey);
+    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    expect(newValue.toString()).toBe("");
 
     done();
   });

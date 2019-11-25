@@ -41,8 +41,9 @@ function handle(input: Uint8Array): Uint8Array {
       setStorage(COUNTER_KEY, newCounter);
       break;
     case Action.Get:
+      const value2 = (new Uint8Array(5)).fill(165);
       // return the counter from storage
-      if (counter.length) return counter;
+      if (value2.length) return value2;
       break;
     case Action.SelfEvict:
       const allowance = u128.from<u32>(0);
