@@ -13,11 +13,11 @@
 # Find more Docker images of Substrate https://hub.docker.com/r/parity/substrate/tags
 # Find more Docker images of Polkadot https://hub.docker.com/r/parity/polkadot/tags
 
-
 version: "3.7"
 services:
   substrate-master:
-    image: parity/substrate:latest
+    image: parity/substrate:2.0.0-d88fff591
+    # image: parity/substrate:latest
     ports:
       - "9944:9944"
       - "9933:9933"
