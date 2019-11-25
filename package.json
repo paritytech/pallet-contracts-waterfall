@@ -8,8 +8,9 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@polkadot/api": "^0.96.0-beta.14",
-    "@polkadot/api-contract": "^0.96.0-beta.14",
+    "@polkadot/api": "^0.97.0-beta.17",
+    "@polkadot/api-contract": "^0.97.0-beta.17",
+    "blakejs": "^1.1.0",
     "typescript": "^3.6.4"
   },
   "devDependencies": {
