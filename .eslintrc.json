@@ -16,5 +16,6 @@
     "./tsconfig.json",
     "./contracts/assemblyscript/**/tsconfig.json"
   ],
-  "tsconfigRootDir": "./"
+  "tsconfigRootDir": "./",
+  "root": true
 }
