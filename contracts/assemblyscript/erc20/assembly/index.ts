@@ -71,8 +71,8 @@ function handle(input: Uint8Array): Uint8Array {
     // }
     case Action.TransferFrom: { // first byte: 0x05
       const from = load<u32>(input.dataStart, 1);
-      const to = load<u32>(input.dataStart, 5);
-      const value = load<u32>(input.dataStart, 9);
+      const to = load<u32>(input.dataStart, 17);
+      const value = load<u32>(input.dataStart, 33);
       // return the counter from storage
       if (totalSupply.length) return totalSupply;
       break;

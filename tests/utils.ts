@@ -92,6 +92,7 @@ export async function callContract(
     gasRequired,
     inputData
   );
+  await sendAndReturnFinalized(signer, tx);
 }
 
 // Remove this once the flipper contract uses ink! 2.0

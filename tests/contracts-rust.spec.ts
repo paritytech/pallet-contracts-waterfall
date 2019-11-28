@@ -129,6 +129,10 @@ describe("Rust Smart Contracts", () => {
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
 
+    // Call contract with Action: 0x01 to get the value from storage = Action::Get()
+    const test = await callContract(api, testAccount, address, "0x01");
+    console.log(test)
+
     done();
   });
 
@@ -206,7 +210,7 @@ describe("Rust Smart Contracts", () => {
     expect(restoredAddress).toBeDefined();
 
     // 5. performs calls that rebuild the state of the evicted contract
-    let encodedPutAction =
+    const encodedPutAction =
       "0x00" + // idx:  0x00 = Action::Inc
       "01010101010101010101010101010101010101010101010101010101010101010110" + // storage key
       "2a000000"; // // little endian 32-bit integer, decimal number `42` toHex() === `2a`

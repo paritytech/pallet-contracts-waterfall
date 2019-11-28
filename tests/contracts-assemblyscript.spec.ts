@@ -21,7 +21,6 @@ import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
-const blake = require('blakejs');
 
 import { BOB, CREATION_FEE, WSURL } from "./consts";
 import {
@@ -137,6 +136,7 @@ describe("AssemblyScript Smart Contracts", () => {
 
     const currentValue =  await callContract(api, contractCaller, address, "0x01");
     console.log(currentValue)
+
     done();
   });
 
@@ -190,30 +190,21 @@ describe("AssemblyScript Smart Contracts", () => {
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
 
-
-    const lalalala = await callContract(api, contractCaller, address, `0x00`);
-    // `0x01${blake.blake2bHex(contractCaller.publicKey, null, 32)}`
-    console.log(`0x01${u8aToHex(contractCaller.publicKey, -1, false)}`)
-    console.log(lalalala)
-   // expect(callerBalance.toString()).toBe(CREATION_FEE.toString());
-
     // 4. Call the transfer function to Transfer some tokens to a different account
     //
-    // - 0x03 = Action.Transfer
-    // - recipientStorageKey - 32 bytes recipients account publicKey as hex
-    //   e.g 58cae2a2a7f4406c37b237065063051920603c19ef13ea54ccca881bc352ea2b
-    // - Followed by the amount as u128 little endian
-    //   eg. 5555b3dba800000000000000000000000000000000000000
     const recipient = keyring.addFromSeed(randomAsU8a(32));
-    const recipientAccountId = u8aToHex(recipient.publicKey, -1, false);
-
     const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
-    const transferValueHex = u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false);
-    console.log(`0x03${recipientAccountId}${transferValueHex}`);
 
-    await callContract(api, contractCaller, address, `0x03${recipientAccountId}${transferValueHex}`);
+    const contractAction = 
+    "0x02" // First byte Action:Transfer
+    + u8aToHex(recipient.publicKey, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
+    + u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false); // u128 bit integer of type Balance to hex (little endian)
+
+    console.log(contractAction);
+
+    await callContract(api, contractCaller, address, contractAction);
     const newValue = await getContractStorage(api, address, recipient.publicKey);
-    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
+
     expect(newValue.toString()).toBe("");
 
     done();
