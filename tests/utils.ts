@@ -14,13 +14,13 @@ import { GAS_REQUIRED } from "./consts";
 // const test = blake.blake2bHex(string, null, 32)
 // console.log(test)
 
-export async function sendAndReturnFinalized(signer: KeyringPair, tx: any, lala?: boolean) {
+export async function sendAndReturnFinalized(signer: KeyringPair, tx: any, lllll?: Boolean) {
   return new Promise(function(resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
       if (result.status.isFinalized) {
-        // Return result of the submittable extrinsic after the transfer is finalized
-        if(lala) {console.log(result)}
+        // Return result of the submittable extrinsic after the transfer is finalized        
         resolve(result as SubmittableResult);
+        return result;
       }
       if (
         result.status.isDropped ||
@@ -85,30 +85,19 @@ export async function callContract(
   inputData: any,
   gasRequired: number = GAS_REQUIRED,
   endowment: number = 0
-): Promise<void> {
+): Promise<any> {
   const tx = api.tx.contracts.call(
     contractAddress,
     endowment,
     gasRequired,
     inputData
   );
-  await sendAndReturnFinalized(signer, tx);
-}
 
-// Remove this once the flipper contract uses ink! 2.0
-export async function getContractStorageOld(
-  api: ApiPromise,
-  contractAddress: Address,
-  storageKey: string
-): Promise<StorageData> {
-  const contractInfo = await api.query.contracts.contractInfoOf(
-    contractAddress
-  );
-  // Return the value of the contracts storage
-  return await api.rpc.state.getChildStorage(
-    (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
-    storageKey
-  );
+  const result: any = await sendAndReturnFinalized(signer, tx);
+  const record = result.findRecord("contracts", "Transfer");
+  if(record) {
+    return record.event.data[0];
+  }
 }
 
 export async function getContractStorage(

@@ -35,18 +35,17 @@ function handle(input: Uint8Array): Uint8Array {
   switch (input[0]) {
     case Action.TotalSupply: // first byte: 0x00
       // return the counter from storage
-      if (totalSupply.length) return totalSupply;
+      if (totalSupply.length) return toBytes(totalSupplyValue);
       break;
     case Action.BalanceOf: { // first byte: 0x01
       // read 32 bytes (u256) from storageBuffer with offset 1
       const owner = load<Uint8Array>(input.dataStart, 1);
-
       const balance = getStorage(owner.subarray(0, 32));
       const balanceDataView = new DataView(balance.buffer);
-      const balanceValue = balanceDataView.byteLength ? balanceDataView.getUint8(0) : 0;
 
-      // return toBytes(balanceValue);
-      return (new Uint8Array(32)).fill(65);
+      if(balance.length){
+        return toBytes(balanceDataView.getUint8(0));
+      }
       break;
     }
     // case Action.Allowance: { // first byte: 0x02
@@ -56,8 +55,20 @@ function handle(input: Uint8Array): Uint8Array {
     //   break;
     // }
     // case Action.Transfer: { // first byte: 0x03
+    //   // read 32 bytes (u256) from storageBuffer with offset 1
+    //   const addressTo = load<u256>(input.dataStart, 1);
+
+    //   const receiver = getStorage(toBytes(addressTo));
+    //   const receiverDataView = new DataView(receiver.buffer);
+    //   const receiverValue = receiverDataView.byteLength ? receiverDataView.getUint8(0) : 0;
+
+    //   const amount = load<u128>(input.dataStart, 33);
+      
+
+    //   return toBytes(receiverValue);
+    //   break;
     //   // const to = load<u32>(input.dataStart, 1);
-    //   const value = load<u64>(input.dataStart, 33);
+      
     //   // return the counter from storage
     //   if (totalSupply.length) return totalSupply;
     //   break;
@@ -85,12 +96,13 @@ function handle(input: Uint8Array): Uint8Array {
   return value;
 }
 
-export function call(): u32 {
+export function call(): Uint8Array {
   const input = getScratchBuffer();
   const output = handle(input);
 
   setScratchBuffer(output);
-  return 0;
+  // Why are we not returning the output here?
+  return output;
 }
 
 // deploy a new instance of the contract with the default value 0x00 (false)

@@ -1,6 +1,6 @@
 /// <reference path="../node_modules/assemblyscript/std/assembly/index.d.ts" />
 
-import { u128 } from "bignum";
+import { u256, u128 } from "bignum";
 import {
   ext_balance,
   ext_caller,

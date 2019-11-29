@@ -106,7 +106,7 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test.only("Raw Incrementer contract", async (done): Promise<void> => {
+  test("Raw Incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
@@ -140,7 +140,7 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test("Raw Erc20 contract", async (done): Promise<void> => {
+  test.only("Raw Erc20 contract", async (done): Promise<void> => {
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
 
     // 1. Deploy & instantiate the contract 
@@ -191,7 +191,7 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
 
     // 4. Call the transfer function to Transfer some tokens to a different account
-    //
+    
     const recipient = keyring.addFromSeed(randomAsU8a(32));
     const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
 
@@ -199,8 +199,6 @@ describe("AssemblyScript Smart Contracts", () => {
     "0x02" // First byte Action:Transfer
     + u8aToHex(recipient.publicKey, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
     + u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false); // u128 bit integer of type Balance to hex (little endian)
-
-    console.log(contractAction);
 
     await callContract(api, contractCaller, address, contractAction);
     const newValue = await getContractStorage(api, address, recipient.publicKey);
