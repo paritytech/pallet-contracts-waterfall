@@ -11,8 +11,13 @@ import {
   toBytes
 } from "./lib";
 
+import {
+  getBalanceOrZero
+} from "./lib-contract";
+
 // Create a new Uint8Array of length 32
 const ERC20_SUPPLY_STORAGE = (new Uint8Array(32)).fill(3);
+const MY_DUMMY = (new Uint8Array(32)).fill(55);
 
 enum Action {
   TotalSupply, // -> Balance
@@ -39,53 +44,48 @@ function handle(input: Uint8Array): Uint8Array {
       break;
     case Action.BalanceOf: { // first byte: 0x01
       // read 32 bytes (u256) from storageBuffer with offset 1
-      const owner = load<Uint8Array>(input.dataStart, 1);
-      const balance = getStorage(owner.subarray(0, 32));
-      const balanceDataView = new DataView(balance.buffer);
-
-      if(balance.length){
-        return toBytes(balanceDataView.getUint8(0));
-      }
+      const accountId = load<Uint8Array>(input.dataStart, 1);
+      const balance = getBalanceOrZero(accountId.subarray(0, 32));
+      return balance;
+    }
+    case Action.Allowance: { // first byte: 0x02
+      const inputData = load<Uint8Array>(input.dataStart, 1);
+      const owner = inputData.subarray(0, 32);
+      const spender = inputData.subarray(32, 64);
       break;
     }
-    // case Action.Allowance: { // first byte: 0x02
-    //   const owner = load<u32>(input.dataStart, 1);
-    //   const spender = load<u32>(input.dataStart, 5);
-    //   if (totalSupply.length) return totalSupply;
-    //   break;
-    // }
-    // case Action.Transfer: { // first byte: 0x03
-    //   // read 32 bytes (u256) from storageBuffer with offset 1
-    //   const addressTo = load<u256>(input.dataStart, 1);
+    case Action.Transfer: { // first byte: 0x03
+      const inputData = load<u256>(input.dataStart, 1);
+      const addressTo = inputData.toUint8Array();
+      // const value = inputData.subarray(32, 48);
 
-    //   const receiver = getStorage(toBytes(addressTo));
-    //   const receiverDataView = new DataView(receiver.buffer);
-    //   const receiverValue = receiverDataView.byteLength ? receiverDataView.getUint8(0) : 0;
+      setStorage(MY_DUMMY, toBytes(42562));
 
-    //   const amount = load<u128>(input.dataStart, 33);
-      
+      // getCaller();
+      // const addressFrom = getScratchBuffer();
+      // const balance = getBalanceOrZero(addressFrom);
 
-    //   return toBytes(receiverValue);
-    //   break;
-    //   // const to = load<u32>(input.dataStart, 1);
-      
-    //   // return the counter from storage
-    //   if (totalSupply.length) return totalSupply;
-    //   break;
-    // }
-    // case Action.Approve: { // first byte: 0x04
-    //   const spender = load<u32>(input.dataStart, 1);
-    //   const value = load<u32>(input.dataStart, 5);
-    //   // return the counter from storage
-    //   if (totalSupply.length) return totalSupply;
-    //   break;
-    // }
+      // const balanceU128 = u128.from<Uint8Array>(balance);
+      // const valueU128 = u128.from<Uint8Array>(value);
+
+      // if (balanceU128 >= valueU128){
+      //   const balanceAddressTo = getBalanceOrZero(addressTo);
+      //   setStorage(addressFrom, (valueU128).toUint8Array() )
+      //   setStorage(addressTo, (valueU128).toUint8Array() )
+      // }
+      break;
+    }
+    case Action.Approve: { // first byte: 0x04
+      const inputData = load<Uint8Array>(input.dataStart, 1);
+      const spender = inputData.subarray(0, 32);
+      const value = inputData.subarray(0, 48);
+      break;
+    }
     case Action.TransferFrom: { // first byte: 0x05
-      const from = load<u32>(input.dataStart, 1);
-      const to = load<u32>(input.dataStart, 17);
-      const value = load<u32>(input.dataStart, 33);
-      // return the counter from storage
-      if (totalSupply.length) return totalSupply;
+      const inputData = load<Uint8Array>(input.dataStart, 1);
+      const from = inputData.subarray(0, 32);
+      const to = inputData.subarray(32, 64);
+      const value = inputData.subarray(64, 80);
       break;
     }
     case Action.SelfEvict: // first byte: 0x06
@@ -96,13 +96,13 @@ function handle(input: Uint8Array): Uint8Array {
   return value;
 }
 
-export function call(): Uint8Array {
+export function call(): u32 {
   const input = getScratchBuffer();
   const output = handle(input);
 
   setScratchBuffer(output);
   // Why are we not returning the output here?
-  return output;
+  return 0;
 }
 
 // deploy a new instance of the contract with the default value 0x00 (false)

@@ -14,13 +14,12 @@ import { GAS_REQUIRED } from "./consts";
 // const test = blake.blake2bHex(string, null, 32)
 // console.log(test)
 
-export async function sendAndReturnFinalized(signer: KeyringPair, tx: any, lllll?: Boolean) {
+export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
       if (result.status.isFinalized) {
         // Return result of the submittable extrinsic after the transfer is finalized        
         resolve(result as SubmittableResult);
-        return result;
       }
       if (
         result.status.isDropped ||
@@ -96,7 +95,7 @@ export async function callContract(
   const result: any = await sendAndReturnFinalized(signer, tx);
   const record = result.findRecord("contracts", "Transfer");
   if(record) {
-    return record.event.data[0];
+    return record.event.data;
   }
 }
 

@@ -22,7 +22,7 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 
-import { BOB, CREATION_FEE, WSURL } from "./consts";
+import { ALICE, BOB, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -142,6 +142,9 @@ describe("AssemblyScript Smart Contracts", () => {
 
   test.only("Raw Erc20 contract", async (done): Promise<void> => {
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
+    const MY_DUMMY = (new Uint8Array(32)).fill(55);
+    const MY_DUMMY_KEYRING = keyring.addFromSeed(MY_DUMMY);
+    const STATIC = keyring.getPair(ALICE);
 
     // 1. Deploy & instantiate the contract 
     // 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
@@ -189,6 +192,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
+    console.log(creatorBalance)
 
     // 4. Call the transfer function to Transfer some tokens to a different account
     
@@ -196,14 +200,22 @@ describe("AssemblyScript Smart Contracts", () => {
     const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
 
     const contractAction = 
-    "0x02" // First byte Action:Transfer
-    + u8aToHex(recipient.publicKey, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
-    + u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false); // u128 bit integer of type Balance to hex (little endian)
+    "0x03" // First byte Action:Transfer
+    + u8aToHex(MY_DUMMY, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
+    // + u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false); // u128 bit integer of type Balance to hex (little endian)
+
+    console.log(MY_DUMMY)
+    console.log(contractCaller.publicKey)
 
     await callContract(api, contractCaller, address, contractAction);
-    const newValue = await getContractStorage(api, address, recipient.publicKey);
-
-    expect(newValue.toString()).toBe("");
+    const newValueCaller = await getContractStorage(api, address, contractCaller.publicKey);
+    const newValue = await getContractStorage(api, address, MY_DUMMY);
+    
+    console.log(hexToBn(newValueCaller.toString(), true))
+    console.log(hexToBn(newValue.toString(), true))
+    // expect(newValue.toString()).toBe("");
+    // expect(newValueCaller.toString()).toBe("");
+    
 
     done();
   });

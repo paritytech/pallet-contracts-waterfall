@@ -29,6 +29,10 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
 }
 
 // This is just a wrapper function around the provided env host function 
+export function getBalance(): void {
+  ext_balance();
+}
+
 export function getCaller(): void {
   ext_caller();
 }
@@ -85,4 +89,8 @@ export function setScratchBuffer(data: Uint8Array): void {
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
   ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
+}
+
+export function getBalanceOrZero(): void {
+
 }
