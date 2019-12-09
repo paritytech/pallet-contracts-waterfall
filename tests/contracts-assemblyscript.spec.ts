@@ -142,10 +142,6 @@ describe("AssemblyScript Smart Contracts", () => {
 
   test.only("Raw Erc20 contract", async (done): Promise<void> => {
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
-    const MY_DUMMY = (new Uint8Array(32)).fill(55);
-    const MY_DUMMY_KEYRING = keyring.addFromSeed(MY_DUMMY);
-    const STATIC = keyring.getPair(ALICE);
-
     // 1. Deploy & instantiate the contract 
     // 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
     // 3. Test if the CALLER storage holds the totalSupply of tokens
@@ -192,29 +188,55 @@ describe("AssemblyScript Smart Contracts", () => {
     const creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
-    console.log(creatorBalance)
+    // console.log(creatorBalance);
+    // console.log(contractCaller.publicKey)
+
+    /*****************************/
+    const MY_DUMMY = (new Uint8Array(32)).fill(55);
+    const MY_DUMMY_KEYRING = keyring.addFromSeed(MY_DUMMY);
+    const STATIC = keyring.getPair(ALICE);
+
+ 
+
+    const oldValueRaw = await getContractStorage(api, address, MY_DUMMY);
+    const oldValue = hexToBn(oldValueRaw.toString(), true);
+    //console.log(oldValueRaw)
+    //console.log(MY_DUMMY, oldValue)
+    
+    // await callContract(api, contractCaller, address, '0x03' + u8aToHex(contractCaller.publicKey, -1, false) + u8aToHex(MY_DUMMY, -1, false)) + 6511;
+    await callContract(api, contractCaller, address, '0x03' + u8aToHex(contractCaller.publicKey, -1, false) + u8aToHex(MY_DUMMY, -1, false) + '26600000000000000000000000000000');
+    const newValueRaw = await getContractStorage(api, address, contractCaller.publicKey);
+    const newValue = hexToBn(newValueRaw.toString(), true);
+    // console.log(newValueRaw)
+    console.log(contractCaller.publicKey, newValue)
+
+    const newValueRaw2 = await getContractStorage(api, address, MY_DUMMY);
+    const newValue2 = hexToBn(newValueRaw2.toString(), true);
+    console.log(MY_DUMMY, newValue2)
+
+    /*****************************/
 
     // 4. Call the transfer function to Transfer some tokens to a different account
     
-    const recipient = keyring.addFromSeed(randomAsU8a(32));
-    const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
+    // const recipient = keyring.addFromSeed(randomAsU8a(32));
+    // const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
 
-    const contractAction = 
-    "0x03" // First byte Action:Transfer
-    + u8aToHex(MY_DUMMY, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
+    // const contractAction = 
+    // "0x03" // First byte Action:Transfer
+    // + u8aToHex(MY_DUMMY, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
     // + u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false); // u128 bit integer of type Balance to hex (little endian)
 
-    console.log(MY_DUMMY)
-    console.log(contractCaller.publicKey)
+    // console.log(MY_DUMMY)
+    // console.log(contractCaller.publicKey)
 
-    await callContract(api, contractCaller, address, contractAction);
-    const newValueCaller = await getContractStorage(api, address, contractCaller.publicKey);
-    const newValue = await getContractStorage(api, address, MY_DUMMY);
+    // await callContract(api, contractCaller, address, contractAction);
+    // const newValueCaller = await getContractStorage(api, address, contractCaller.publicKey);
+    // const newValue = await getContractStorage(api, address, MY_DUMMY);
     
-    console.log(hexToBn(newValueCaller.toString(), true))
-    console.log(hexToBn(newValue.toString(), true))
-    // expect(newValue.toString()).toBe("");
-    // expect(newValueCaller.toString()).toBe("");
+    // console.log(hexToBn(newValueCaller.toString(), true))
+    // console.log(hexToBn(newValue.toString(), true))
+    // // expect(newValue.toString()).toBe("");
+    // // expect(newValueCaller.toString()).toBe("");
     
 
     done();

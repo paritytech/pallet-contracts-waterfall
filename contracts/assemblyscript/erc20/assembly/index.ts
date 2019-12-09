@@ -12,6 +12,7 @@ import {
 } from "./lib";
 
 import {
+  add,
   getBalanceOrZero
 } from "./lib-contract";
 
@@ -44,35 +45,28 @@ function handle(input: Uint8Array): Uint8Array {
       break;
     case Action.BalanceOf: { // first byte: 0x01
       // read 32 bytes (u256) from storageBuffer with offset 1
-      const accountId = load<Uint8Array>(input.dataStart, 1);
-      const balance = getBalanceOrZero(accountId.subarray(0, 32));
-      return balance;
+      // Uint8Array.wrap(buffer, offset, length)
+      const accountId = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 32);
+      return getBalanceOrZero(accountId);
     }
     case Action.Allowance: { // first byte: 0x02
-      const inputData = load<Uint8Array>(input.dataStart, 1);
-      const owner = inputData.subarray(0, 32);
-      const spender = inputData.subarray(32, 64);
+      const from = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 32);
+      const to = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 33, 32);
       break;
     }
     case Action.Transfer: { // first byte: 0x03
-      const inputData = load<u256>(input.dataStart, 1);
-      const addressTo = inputData.toUint8Array();
-      // const value = inputData.subarray(32, 48);
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
+      const from = parameters.subarray(0,32);
+      const to = parameters.subarray(32,64);
+      const amount = parameters.subarray(64,80);
 
-      setStorage(MY_DUMMY, toBytes(42562));
-
-      // getCaller();
-      // const addressFrom = getScratchBuffer();
-      // const balance = getBalanceOrZero(addressFrom);
-
-      // const balanceU128 = u128.from<Uint8Array>(balance);
-      // const valueU128 = u128.from<Uint8Array>(value);
-
-      // if (balanceU128 >= valueU128){
-      //   const balanceAddressTo = getBalanceOrZero(addressTo);
-      //   setStorage(addressFrom, (valueU128).toUint8Array() )
-      //   setStorage(addressTo, (valueU128).toUint8Array() )
-      // }
+      var d = u128.from(amount); 
+      setStorage(from, amount);  
+      setStorage(to, amount);  
+      // const to = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 33, 32);
+      // const amount = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 65, 16);
+      //var d = u128.from<Uint8Array>(amount || value); 
+      // var d = u128.from(3156); 
       break;
     }
     case Action.Approve: { // first byte: 0x04
