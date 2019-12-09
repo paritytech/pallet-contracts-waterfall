@@ -1,4 +1,4 @@
-import { u256, u128 } from "bignum";
+import { u128 } from "bignum";
 
 import {
   getCaller,
@@ -7,79 +7,88 @@ import {
   getValueTransferred,
   setRentAllowance,
   setScratchBuffer,
-  setStorage,
-  toBytes
+  setStorage
 } from "./lib";
 
 import {
-  add,
-  getBalanceOrZero
+  getBalanceOrZero,
+  toBytes
 } from "./lib-contract";
+
+/**
+ *  Read the Ethereum ERC20 specs https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
+ **/ 
 
 // Create a new Uint8Array of length 32
 const ERC20_SUPPLY_STORAGE = (new Uint8Array(32)).fill(3);
-const MY_DUMMY = (new Uint8Array(32)).fill(55);
 
 enum Action {
   TotalSupply, // -> Balance
   BalanceOf, // -> Balance
-  Allowance, // -> Balance
   Transfer, // -> bool
-  Approve, // -> bool
   TransferFrom, // -> bool
+  Approve, // -> bool
+  Allowance, // -> Balance
   SelfEvict
 }
 
 function handle(input: Uint8Array): Uint8Array {
   const value = new Uint8Array(0);
-
-  const totalSupply = getStorage(ERC20_SUPPLY_STORAGE);
-  const totalSupplyDataView = new DataView(totalSupply.buffer);
-  const totalSupplyValue = totalSupplyDataView.byteLength ? totalSupplyDataView.getUint8(0) : 0;
-
   // Get action from first byte of the input U8A
   switch (input[0]) {
     case Action.TotalSupply: // first byte: 0x00
-      // return the counter from storage
-      if (totalSupply.length) return toBytes(totalSupplyValue);
-      break;
+      const totalSupply = getStorage(ERC20_SUPPLY_STORAGE);
+      const totalSupplyDataView = new DataView(totalSupply.buffer);
+      const totalSupplyValue = totalSupplyDataView.byteLength ? totalSupplyDataView.getUint8(0) : 0;
+      // Returns the total token supply
+      return toBytes(totalSupplyValue);
     case Action.BalanceOf: { // first byte: 0x01
-      // read 32 bytes (u256) from storageBuffer with offset 1
-      // Uint8Array.wrap(buffer, offset, length)
-      const accountId = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 32);
-      return getBalanceOrZero(accountId);
+      // Returns the account balance of the account with the address 'owner'.
+      const owner = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 32);
+      return getBalanceOrZero(owner);
     }
-    case Action.Allowance: { // first byte: 0x02
-      const from = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 32);
-      const to = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 33, 32);
+    case Action.Transfer: { // first byte: 0x02
+      // Transfers 'value' amount of tokens to address 'to',
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
+      const to = parameters.subarray(32,64);
+      const value = u128.from(parameters.subarray(64,80));
+
+      // const balanceFrom = u128.from(getBalanceOrZero(from));
+      const balanceTo = u128.from(getBalanceOrZero(to));
+
+      // setStorage(from, u128.sub(balanceFrom, value).toUint8Array());  
+      setStorage(to, u128.add(balanceTo, value).toUint8Array());
+
+      // @TODO: Trigger transfer event
       break;
     }
-    case Action.Transfer: { // first byte: 0x03
+    case Action.TransferFrom: { // first byte: 0x03
+      // Transfers 'value' amount of tokens from address 'from' to address 'to'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
       const from = parameters.subarray(0,32);
       const to = parameters.subarray(32,64);
-      const amount = parameters.subarray(64,80);
 
-      var d = u128.from(amount); 
-      setStorage(from, amount);  
-      setStorage(to, amount);  
-      // const to = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 33, 32);
-      // const amount = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 65, 16);
-      //var d = u128.from<Uint8Array>(amount || value); 
-      // var d = u128.from(3156); 
+      const value = u128.from(parameters.subarray(64,80));
+      const balanceFrom = u128.from(getBalanceOrZero(from));
+      const balanceTo = u128.from(getBalanceOrZero(to));
+
+      if (u128.ge(balanceFrom,value)) {
+        setStorage(from, u128.sub(balanceFrom, value).toUint8Array());  
+        setStorage(to, u128.add(balanceTo, value).toUint8Array());
+      }
+      // @TODO: Trigger transfer event, 0 transfer must be treated as transfer
       break;
     }
     case Action.Approve: { // first byte: 0x04
-      const inputData = load<Uint8Array>(input.dataStart, 1);
-      const spender = inputData.subarray(0, 32);
-      const value = inputData.subarray(0, 48);
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
+      const spender = parameters.subarray(0,32);
+      const amount = parameters.subarray(32,84);
       break;
     }
-    case Action.TransferFrom: { // first byte: 0x05
-      const inputData = load<Uint8Array>(input.dataStart, 1);
-      const from = inputData.subarray(0, 32);
-      const to = inputData.subarray(32, 64);
-      const value = inputData.subarray(64, 80);
+    case Action.Allowance: { // first byte: 0x05
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 64);
+      const owner = parameters.subarray(0,32);
+      const spender = parameters.subarray(32,64);
       break;
     }
     case Action.SelfEvict: // first byte: 0x06

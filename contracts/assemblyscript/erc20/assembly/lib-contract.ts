@@ -1,10 +1,7 @@
 /// <reference path="../node_modules/assemblyscript/std/assembly/index.d.ts" />
 
-import { u256, u128 } from "bignum";
-
 import {
-  getStorage,
-  toBytes
+  getStorage
 } from './lib';
 
 export function getBalanceOrZero(AccountId: Uint8Array): Uint8Array {
@@ -12,10 +9,13 @@ export function getBalanceOrZero(AccountId: Uint8Array): Uint8Array {
   return(balance.length ? balance : toBytes(0));
 }
 
-export function add<T>(a: T, b: T): T {
-  if (isString<T>()) { // eliminated if T is not a string
-    return parseInt(a) + parseInt(b)
-  } else { // eliminated if T is a string
-    return a + b
+
+export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
+  // accept only integers and booleans
+  if (isInteger<T>()) {
+    const arr = new Uint8Array(sizeof<T>());
+    store<T>(arr.dataStart, le ? num : bswap(num));
+    return arr;
   }
+  assert(false);
 }

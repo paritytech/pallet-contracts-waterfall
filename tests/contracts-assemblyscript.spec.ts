@@ -16,7 +16,7 @@
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
 import testKeyring from "@polkadot/keyring/testing";
-import { bnToHex, hexToBn, u8aToHex } from "@polkadot/util";
+import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
@@ -188,32 +188,26 @@ describe("AssemblyScript Smart Contracts", () => {
     const creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
     const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
-    // console.log(creatorBalance);
-    // console.log(contractCaller.publicKey)
 
-    /*****************************/
-    const MY_DUMMY = (new Uint8Array(32)).fill(55);
-    const MY_DUMMY_KEYRING = keyring.addFromSeed(MY_DUMMY);
-    const STATIC = keyring.getPair(ALICE);
+    // 4. Transfer some ERC20 tokens to a different account
+    // 
+    // Create a new account to receive the tokens
+    const newAccount = keyring.addFromSeed(randomSeed);
+    const parameters = 
+      '0x03' // 1 byte: First byte Action.Transfer
+      + u8aToHex(contractCaller.publicKey, -1, false) // 32 bytes: Hex encoded contract caller address as u256
+      + u8aToHex(newAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
+      + '19000000000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex value
 
- 
+    await callContract(api, contractCaller, address, parameters);
 
-    const oldValueRaw = await getContractStorage(api, address, MY_DUMMY);
-    const oldValue = hexToBn(oldValueRaw.toString(), true);
-    //console.log(oldValueRaw)
-    //console.log(MY_DUMMY, oldValue)
+    const creatorBalanceRawNew = await getContractStorage(api, address, contractCaller.publicKey);
+    const creatorBalanceNew = hexToBn(creatorBalanceRawNew.toString(), true);
+    const newAccountBalanceRaw = await getContractStorage(api, address, newAccount.publicKey);
+    const newAccountBalance = hexToBn(newAccountBalanceRaw.toString(), true);
+    console.log(contractCaller.publicKey, creatorBalanceNew)
+    console.log(newAccount.publicKey, newAccountBalance)
     
-    // await callContract(api, contractCaller, address, '0x03' + u8aToHex(contractCaller.publicKey, -1, false) + u8aToHex(MY_DUMMY, -1, false)) + 6511;
-    await callContract(api, contractCaller, address, '0x03' + u8aToHex(contractCaller.publicKey, -1, false) + u8aToHex(MY_DUMMY, -1, false) + '26600000000000000000000000000000');
-    const newValueRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    const newValue = hexToBn(newValueRaw.toString(), true);
-    // console.log(newValueRaw)
-    console.log(contractCaller.publicKey, newValue)
-
-    const newValueRaw2 = await getContractStorage(api, address, MY_DUMMY);
-    const newValue2 = hexToBn(newValueRaw2.toString(), true);
-    console.log(MY_DUMMY, newValue2)
-
     /*****************************/
 
     // 4. Call the transfer function to Transfer some tokens to a different account
