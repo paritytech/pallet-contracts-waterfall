@@ -195,7 +195,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const paramsTransfer = 
     '0x02' // 1 byte: First byte Action.Transfer
     + u8aToHex(transferAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
-    + '5C110000000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (4444 in decimal)) value
+    + '00008D49FD1A07000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (2000000000000000 === 2 DOT in decimal)) value
 
     await callContract(api, contractCaller, address, paramsTransfer);
 
@@ -203,10 +203,25 @@ describe("AssemblyScript Smart Contracts", () => {
     creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     const transferAccountBalanceRaw = await getContractStorage(api, address, transferAccount.publicKey);
     const transferAccountBalance = hexToBn(transferAccountBalanceRaw.toString(), true);
-    expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(4444, 10)).toString());
-    expect(transferAccountBalance.toString()).toBe("4444");
+    expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000)).toString());
+    expect(transferAccountBalance.toString()).toBe("2000000000000000");
 
-    // 5. Use the transferFrom function to transfer some ERC20 tokens to a different account
+    // 5. Approve withdrawal amount for new 'spender' account
+    // 
+    const spenderAccount = keyring.addFromSeed(randomAsU8a(32));
+    const paramsApprove = 
+    '0x04' // 1 byte: First byte Action.Transfer
+    + u8aToHex(spenderAccount.publicKey, -1, false) // 32 bytes: Hex encoded new spender account address as u256
+    + '0080E03779C311000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (5000000000000000 = 5 DOT in decimal)) value
+
+    await callContract(api, contractCaller, address, paramsApprove);
+
+    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
+    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+
+    console.log(contractCaller.publicKey)
+
+    // 6. Use the transferFrom function to transfer some ERC20 tokens to a different account
     // 
     // Create a new account to receive the tokens
     const transferFromAccount = keyring.addFromSeed(randomAsU8a(32));
@@ -222,8 +237,21 @@ describe("AssemblyScript Smart Contracts", () => {
     creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     const transferFromAccountBalanceRaw = await getContractStorage(api, address, transferFromAccount.publicKey);
     const transferFromAccountBalance = hexToBn(transferFromAccountBalanceRaw.toString(), true);
-    expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(25+4444, 10)).toString());
-    expect(transferFromAccountBalance.toString()).toBe("25");
+    // expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000 + 25, 10)).toString());
+    // expect(transferFromAccountBalance.toString()).toBe("25");
+
+    // 5. Check the allowance
+    const paramsAllowance = 
+    '0x05' // 1 byte: First byte Action.Transfer
+    + u8aToHex(contractCaller.publicKey, -1, false) // 32 bytes: Hex encoded caller account address as u256
+    + u8aToHex(spenderAccount.publicKey, -1, false); // 32 bytes: Hex encoded spender account address as u256
+    console.log(creatorBalance.toString())
+    await callContract(api, contractCaller, address, paramsAllowance);
+
+    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
+    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+
+    console.log(creatorBalance.toString())
 
     done();
   });

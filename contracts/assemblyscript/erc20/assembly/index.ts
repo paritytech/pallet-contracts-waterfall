@@ -77,7 +77,7 @@ function handle(input: Uint8Array): Uint8Array {
       const balanceTo = u128.from(getBalanceOrZero(to));
 
       if (u128.ge(balanceFrom,value)) {
-        setStorage(from, u128.sub(balanceFrom, value).toUint8Array());  
+        setStorage(from, u128.sub(balanceFrom, value).toUint8Array());
         setStorage(to, u128.add(balanceTo, value).toUint8Array());
       }
       // @TODO: Trigger transfer event, 0 transfer must be treated as transfer
@@ -86,8 +86,20 @@ function handle(input: Uint8Array): Uint8Array {
     case Action.Approve: { // first byte: 0x04
       // Allows 'spender' to withdraw from your account multiple times, up to the 'value' amount
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
-      const spender = parameters.subarray(0,32);
-      const amount = parameters.subarray(32,84);
+      const spender: Uint8Array = parameters.subarray(0,32);
+      const amount: Uint8Array = parameters.subarray(32,48);
+
+      getCaller();
+      const CALLER = getScratchBuffer();
+
+      const storageKeyApprove = new Uint8Array(64);
+      const callerPtr = CALLER.dataStart;
+      const spenderPtr = spender.dataStart;
+      const keyPtr = storageKeyApprove.dataStart;
+      memory.copy(keyPtr, callerPtr, 32);
+      memory.copy(keyPtr + 32, spenderPtr, spenderPtr);
+      
+      setStorage(storageKeyApprove, amount);
 
       break;
     }
@@ -97,10 +109,21 @@ function handle(input: Uint8Array): Uint8Array {
       const owner = parameters.subarray(0,32);
       const spender = parameters.subarray(32,64);
 
-      getCaller();
-      const CALLER = getScratchBuffer();
-      
-      break;
+      // const storageKeyAllowance = new Uint8Array(64);
+      // const ownerPtr = owner.dataStart;
+      // const spenderPtr = spender.dataStart;
+      // const keyPtr = storageKeyAllowance.dataStart;
+
+      // memory.copy(keyPtr, ownerPtr, 32);
+      // memory.copy(keyPtr + 32, spenderPtr, spenderPtr);
+
+      // const allowance = getStorage(storageKeyAllowance);
+      // const allowanceDataView = new DataView(allowance.buffer);
+      // const allowanceValue = allowanceDataView.byteLength ? allowanceDataView.getUint8(0) : 0;
+
+      setStorage(owner, toBytes(0));
+
+      // return toBytes(allowanceValue);
     }
     case Action.SelfEvict: // first byte: 0x06
       const allowance = u128.from<u32>(0);
@@ -115,11 +138,7 @@ export function call(): u32 {
   const output = handle(input);
 
   setScratchBuffer(output);
-
   // QUESTION: Where does ink! set the `env.caller()` value?
-
-  setStorage(ERC20_CALLER_STORAGE, CALLER);
-
   return 0;
 }
 
