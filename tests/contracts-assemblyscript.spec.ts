@@ -185,53 +185,45 @@ describe("AssemblyScript Smart Contracts", () => {
     // after initialization. The return value should be of type Balance.
     // We get the value from storage and convert the returned hex value
     // to an BN instance to be able to compare the values.
-    const creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    const creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+    let creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
+    let creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
 
-    // 4. Transfer some ERC20 tokens to a different account
+    // 4. Use the transfer function to transfer some tokens from the callers account to a new address
+    // 
+    const transferAccount = keyring.addFromSeed(randomAsU8a(32));
+    const paramsTransfer = 
+    '0x02' // 1 byte: First byte Action.Transfer
+    + u8aToHex(transferAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
+    + '5C110000000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (4444 in decimal)) value
+
+    await callContract(api, contractCaller, address, paramsTransfer);
+
+    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
+    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+    const transferAccountBalanceRaw = await getContractStorage(api, address, transferAccount.publicKey);
+    const transferAccountBalance = hexToBn(transferAccountBalanceRaw.toString(), true);
+    expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(4444, 10)).toString());
+    expect(transferAccountBalance.toString()).toBe("4444");
+
+    // 5. Use the transferFrom function to transfer some ERC20 tokens to a different account
     // 
     // Create a new account to receive the tokens
-    const newAccount = keyring.addFromSeed(randomSeed);
-    const parameters = 
-      '0x03' // 1 byte: First byte Action.Transfer
+    const transferFromAccount = keyring.addFromSeed(randomAsU8a(32));
+    const paramsTransferFrom = 
+      '0x03' // 1 byte: First byte Action.TransferFrom
       + u8aToHex(contractCaller.publicKey, -1, false) // 32 bytes: Hex encoded contract caller address as u256
-      + u8aToHex(newAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
-      + '19000000000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex value
+      + u8aToHex(transferFromAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
+      + '19000000000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (25 in decimal)) value
 
-    await callContract(api, contractCaller, address, parameters);
+    await callContract(api, contractCaller, address, paramsTransferFrom);
 
-    const creatorBalanceRawNew = await getContractStorage(api, address, contractCaller.publicKey);
-    const creatorBalanceNew = hexToBn(creatorBalanceRawNew.toString(), true);
-    const newAccountBalanceRaw = await getContractStorage(api, address, newAccount.publicKey);
-    const newAccountBalance = hexToBn(newAccountBalanceRaw.toString(), true);
-    console.log(contractCaller.publicKey, creatorBalanceNew)
-    console.log(newAccount.publicKey, newAccountBalance)
-    
-    /*****************************/
-
-    // 4. Call the transfer function to Transfer some tokens to a different account
-    
-    // const recipient = keyring.addFromSeed(randomAsU8a(32));
-    // const transferValue: BN = new BN(CREATION_FEE.divn(150), 'le');
-
-    // const contractAction = 
-    // "0x03" // First byte Action:Transfer
-    // + u8aToHex(MY_DUMMY, -1, false) // Recipient u256 account publicKey to hex without the '0x' prefix
-    // + u8aToHex(transferValue.toArrayLike(Buffer, 'le', 16), -1, false); // u128 bit integer of type Balance to hex (little endian)
-
-    // console.log(MY_DUMMY)
-    // console.log(contractCaller.publicKey)
-
-    // await callContract(api, contractCaller, address, contractAction);
-    // const newValueCaller = await getContractStorage(api, address, contractCaller.publicKey);
-    // const newValue = await getContractStorage(api, address, MY_DUMMY);
-    
-    // console.log(hexToBn(newValueCaller.toString(), true))
-    // console.log(hexToBn(newValue.toString(), true))
-    // // expect(newValue.toString()).toBe("");
-    // // expect(newValueCaller.toString()).toBe("");
-    
+    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
+    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+    const transferFromAccountBalanceRaw = await getContractStorage(api, address, transferFromAccount.publicKey);
+    const transferFromAccountBalance = hexToBn(transferFromAccountBalanceRaw.toString(), true);
+    expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(25+4444, 10)).toString());
+    expect(transferFromAccountBalance.toString()).toBe("25");
 
     done();
   });

@@ -19,7 +19,6 @@ import {
  *  Read the Ethereum ERC20 specs https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
  **/ 
 
-// Create a new Uint8Array of length 32
 const ERC20_SUPPLY_STORAGE = (new Uint8Array(32)).fill(3);
 
 enum Action {
@@ -50,14 +49,19 @@ function handle(input: Uint8Array): Uint8Array {
     case Action.Transfer: { // first byte: 0x02
       // Transfers 'value' amount of tokens to address 'to',
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
-      const to = parameters.subarray(32,64);
-      const value = u128.from(parameters.subarray(64,80));
+      const to = parameters.subarray(0,32);
+      const value = u128.from(parameters.subarray(32,48));
 
-      // const balanceFrom = u128.from(getBalanceOrZero(from));
+      getCaller();
+      const CALLER = getScratchBuffer();
+
+      const balanceFrom = u128.from(getBalanceOrZero(CALLER));
       const balanceTo = u128.from(getBalanceOrZero(to));
 
-      // setStorage(from, u128.sub(balanceFrom, value).toUint8Array());  
-      setStorage(to, u128.add(balanceTo, value).toUint8Array());
+      if (u128.ge(balanceFrom,value)) {
+        setStorage(CALLER, u128.sub(balanceFrom, value).toUint8Array());
+        setStorage(to, u128.add(balanceTo, value).toUint8Array());
+      }
 
       // @TODO: Trigger transfer event
       break;
@@ -80,15 +84,22 @@ function handle(input: Uint8Array): Uint8Array {
       break;
     }
     case Action.Approve: { // first byte: 0x04
+      // Allows 'spender' to withdraw from your account multiple times, up to the 'value' amount
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const spender = parameters.subarray(0,32);
       const amount = parameters.subarray(32,84);
+
       break;
     }
     case Action.Allowance: { // first byte: 0x05
+      // Returns the amount which 'spender' is still allowed to withdraw from 'owner'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 64);
       const owner = parameters.subarray(0,32);
       const spender = parameters.subarray(32,64);
+
+      getCaller();
+      const CALLER = getScratchBuffer();
+      
       break;
     }
     case Action.SelfEvict: // first byte: 0x06
@@ -104,7 +115,11 @@ export function call(): u32 {
   const output = handle(input);
 
   setScratchBuffer(output);
-  // Why are we not returning the output here?
+
+  // QUESTION: Where does ink! set the `env.caller()` value?
+
+  setStorage(ERC20_CALLER_STORAGE, CALLER);
+
   return 0;
 }
 
@@ -115,6 +130,7 @@ export function deploy(): u32 {
   const totalSupply = getScratchBuffer();
   setStorage(ERC20_SUPPLY_STORAGE, totalSupply);
   
+  // QUESTION: Is there a better way to do that?
   // Get and store the address of the caller to scratch buffer 
   getCaller();
   const CALLER = getScratchBuffer();
