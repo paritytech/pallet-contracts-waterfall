@@ -89,6 +89,7 @@ describe("Rust Smart Contracts", () => {
     const initialValue: Uint8Array = await getContractStorage(
       api,
       address,
+      // @ts-ignore
       STORAGE_KEY
     );
     expect(initialValue).toBeDefined();
@@ -96,6 +97,7 @@ describe("Rust Smart Contracts", () => {
 
     await callContract(api, testAccount, address, ["0x8C","0x97","0xDB","0x39"]);
 
+    // @ts-ignore
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
 
