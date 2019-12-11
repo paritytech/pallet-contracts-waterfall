@@ -12,11 +12,12 @@
     "build": "yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
+    "@chainsafe/as-sha256": "^0.1.3",
     "assemblyscript": "^0.8.1",
     "bignum": "MaxGraey/bignum.wasm"
   },
   "devDependencies": {
-    "@types/node": "^10.17.2",
+    "@types/node": "^12.12.17",
     "typescript": "^3.2.2"
   }
 }

@@ -19,10 +19,10 @@ import testKeyring from "@polkadot/keyring/testing";
 import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { Address, ContractInfo, Balance, Hash } from "@polkadot/types/interfaces";
+import { Address } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 
-import { ALICE, BOB, CREATION_FEE, WSURL } from "./consts";
+import { BOB, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -141,15 +141,22 @@ describe("AssemblyScript Smart Contracts", () => {
   });
 
   test.only("Raw Erc20 contract", async (done): Promise<void> => {
-    const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
-    // 1. Deploy & instantiate the contract 
-    // 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
-    // 3. Test if the CALLER storage holds the totalSupply of tokens
-    // 4. Call the transfer function to Transfer some tokens to a different account
-    // 5. Get the BalanceOf the receiver account
-    
-    // 1. Instantiate the contract 
-    //
+    /**
+    * 1. Deploy & instantiate the contract
+    * 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
+    * 3. Test if the CALLER storage holds the totalSupply of tokens
+    * 4. Use the transfer function to transfer some tokens from the callers account to a new address
+    * 5. Approve withdrawal amount for new 'spender' account
+    * 6. Use the transferFrom function to transfer some ERC20 tokens to a different account
+    * 7. Check the allowance of the spender account
+    **/
+
+   const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
+
+    /**
+    * 1. Deploy & instantiate the contract
+    **/
+
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
@@ -168,8 +175,10 @@ describe("AssemblyScript Smart Contracts", () => {
     );
     expect(address).toBeDefined();
 
-    // 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
-    //
+    /**
+    * 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
+    **/
+
     // Get the totalSupply of the contract from storage
     const totalSupplyRaw = await getContractStorage(api, address, TOTAL_SUPPLY_STORAGE_KEY);
     // Convert unsigned 128 bit integer returned as a little endian hex value 
@@ -179,18 +188,23 @@ describe("AssemblyScript Smart Contracts", () => {
     // Test if the totalSupply value in storage equals the CREATION_FEE
     expect(totalSupply.eq(CREATION_FEE)).toBeTruthy();
 
-    // 3. Test if the CALLER storage holds the totalSupply of tokens
-    //
-    // We know that the creator should own the total supply of the contract
-    // after initialization. The return value should be of type Balance.
-    // We get the value from storage and convert the returned hex value
-    // to an BN instance to be able to compare the values.
+    /**
+    *  3. Test if the CALLER storage holds the totalSupply of tokens
+    *
+    * We know that the creator should own the total supply of the contract
+    * after initialization. The return value should be of type Balance.
+    * We get the value from storage and convert the returned hex value
+    * to an BN instance to be able to compare the values.
+    **/
+
     let creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
     let creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
     expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
 
-    // 4. Use the transfer function to transfer some tokens from the callers account to a new address
-    // 
+    /**
+    * 4. Use the transfer function to transfer some tokens from the callers account to a new address
+    **/
+
     const transferAccount = keyring.addFromSeed(randomAsU8a(32));
     const paramsTransfer = 
     '0x02' // 1 byte: First byte Action.Transfer
@@ -206,8 +220,9 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000)).toString());
     expect(transferAccountBalance.toString()).toBe("2000000000000000");
 
-    // 5. Approve withdrawal amount for new 'spender' account
-    // 
+    /**
+    * 5. Approve withdrawal amount for new 'spender' account
+    **/ 
     const spenderAccount = keyring.addFromSeed(randomAsU8a(32));
     const paramsApprove = 
     '0x04' // 1 byte: First byte Action.Transfer
@@ -216,13 +231,21 @@ describe("AssemblyScript Smart Contracts", () => {
 
     await callContract(api, contractCaller, address, paramsApprove);
 
-    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+    // Create a new storage key from the contractCaller.publicKey and the spenderAccount.publicKey
+    // It will be hashed to 32 byte hash with blake2b in the `getContractStorage` function before querying.
+    const storageKeyApprove = new Uint8Array(64);
+    storageKeyApprove.set(contractCaller.publicKey);
+    storageKeyApprove.set(spenderAccount.publicKey, 32);
 
-    console.log(contractCaller.publicKey)
+    const approvalRaw = await getContractStorage(api, address, storageKeyApprove);
+    const approval = hexToBn(approvalRaw.toString(), true);
 
-    // 6. Use the transferFrom function to transfer some ERC20 tokens to a different account
-    // 
+    console.log(storageKeyApprove, approval.toString())
+
+    /**
+    *  6. Use the transferFrom function to transfer some ERC20 tokens to a different account
+    **/
+
     // Create a new account to receive the tokens
     const transferFromAccount = keyring.addFromSeed(randomAsU8a(32));
     const paramsTransferFrom = 
@@ -240,7 +263,10 @@ describe("AssemblyScript Smart Contracts", () => {
     // expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000 + 25, 10)).toString());
     // expect(transferFromAccountBalance.toString()).toBe("25");
 
-    // 5. Check the allowance
+    /**
+    * 7. Check the allowance
+    **/
+
     const paramsAllowance = 
     '0x05' // 1 byte: First byte Action.Transfer
     + u8aToHex(contractCaller.publicKey, -1, false) // 32 bytes: Hex encoded caller account address as u256

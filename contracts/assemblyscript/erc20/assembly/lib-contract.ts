@@ -5,8 +5,8 @@ import {
 } from './lib';
 
 export function getBalanceOrZero(AccountId: Uint8Array): Uint8Array {
-  const balance = getStorage(AccountId).subarray(0,16);
-  return(balance.length ? balance : toBytes(0));
+  const balance = getStorage(AccountId);
+  return(balance.length === 16 ? balance : toBytes(0));
 }
 
 

@@ -19,24 +19,29 @@ export enum StorageResult {
 }
 
 // This is just a wrapper function around the provided env host function 
-export function getBalance(): void {
+export function getBalance(): Uint8Array {
   ext_balance();
+  return getScratchBuffer();
 }
 
-export function getCaller(): void {
+export function getCaller(): Uint8Array {
   ext_caller();
+  return getScratchBuffer();
 }
 
-export function getValueTransferred(): void {
+export function getValueTransferred(): Uint8Array {
   ext_value_transferred();
+  return getScratchBuffer();
 }
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
-  const pointer = value ? value.dataStart : 0;
-  const length = value ? value.length : 0;
-  const valueNonNull = i32(value !== null);
-
-  ext_set_storage(key.dataStart, valueNonNull, pointer, length);
+  if(key.length === 32) {
+    const pointer = value ? value.dataStart : 0;
+    const length = value ? value.length : 0;
+    const valueNonNull = i32(value !== null);
+  
+    ext_set_storage(key.dataStart, valueNonNull, pointer, length);
+  }
 }
 
 // check for length 32 bytes
@@ -79,8 +84,4 @@ export function setScratchBuffer(data: Uint8Array): void {
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
   ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
-}
-
-export function getBalanceOrZero(): void {
-
 }

@@ -1,4 +1,5 @@
 import { u128 } from "bignum";
+// import sha256 from "@chainsafe/as-sha256";
 
 import {
   getCaller,
@@ -51,10 +52,7 @@ function handle(input: Uint8Array): Uint8Array {
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const to = parameters.subarray(0,32);
       const value = u128.from(parameters.subarray(32,48));
-
-      getCaller();
-      const CALLER = getScratchBuffer();
-
+      const CALLER = getCaller();
       const balanceFrom = u128.from(getBalanceOrZero(CALLER));
       const balanceTo = u128.from(getBalanceOrZero(to));
 
@@ -62,8 +60,6 @@ function handle(input: Uint8Array): Uint8Array {
         setStorage(CALLER, u128.sub(balanceFrom, value).toUint8Array());
         setStorage(to, u128.add(balanceTo, value).toUint8Array());
       }
-
-      // @TODO: Trigger transfer event
       break;
     }
     case Action.TransferFrom: { // first byte: 0x03
@@ -71,16 +67,17 @@ function handle(input: Uint8Array): Uint8Array {
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
       const from = parameters.subarray(0,32);
       const to = parameters.subarray(32,64);
-
       const value = u128.from(parameters.subarray(64,80));
       const balanceFrom = u128.from(getBalanceOrZero(from));
       const balanceTo = u128.from(getBalanceOrZero(to));
+      const allowance = value;
 
-      if (u128.ge(balanceFrom,value)) {
+      // @TODO add allowance check here
+      if (u128.ge(balanceFrom,value) && u128.ge(allowance, value)) {
         setStorage(from, u128.sub(balanceFrom, value).toUint8Array());
         setStorage(to, u128.add(balanceTo, value).toUint8Array());
+        // @TODO deduct from allowance
       }
-      // @TODO: Trigger transfer event, 0 transfer must be treated as transfer
       break;
     }
     case Action.Approve: { // first byte: 0x04
@@ -88,10 +85,11 @@ function handle(input: Uint8Array): Uint8Array {
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const spender: Uint8Array = parameters.subarray(0,32);
       const amount: Uint8Array = parameters.subarray(32,48);
+      const CALLER = getCaller();
 
-      getCaller();
-      const CALLER = getScratchBuffer();
-
+      // Merging TypedArrays is not implemented in AssemblyScript yet.
+      // That's why we need to read directly from memory
+      // See https://stackoverflow.com/questions/59270312/concatenate-or-merge-typedarrays-in-assemblyscript
       const storageKeyApprove = new Uint8Array(64);
       const callerPtr = CALLER.dataStart;
       const spenderPtr = spender.dataStart;
@@ -100,7 +98,6 @@ function handle(input: Uint8Array): Uint8Array {
       memory.copy(keyPtr + 32, spenderPtr, spenderPtr);
       
       setStorage(storageKeyApprove, amount);
-
       break;
     }
     case Action.Allowance: { // first byte: 0x05
@@ -138,25 +135,20 @@ export function call(): u32 {
   const output = handle(input);
 
   setScratchBuffer(output);
-  // QUESTION: Where does ink! set the `env.caller()` value?
+
   return 0;
 }
 
 // deploy a new instance of the contract with the default value 0x00 (false)
 export function deploy(): u32 {
   // Get and store endowment as total supply in scratch buffer
-  getValueTransferred()
-  const totalSupply = getScratchBuffer();
+  const totalSupply = getValueTransferred();
   setStorage(ERC20_SUPPLY_STORAGE, totalSupply);
-  
-  // QUESTION: Is there a better way to do that?
-  // Get and store the address of the caller to scratch buffer 
-  getCaller();
-  const CALLER = getScratchBuffer();
+
   // Create a new storage entry with the address of the contract caller
   // and assign the total supply of the contract to the creators account.
   // In more advanced implementations you might want to hash this with a crypto function
-
+  const CALLER = getCaller();
   setStorage(CALLER, totalSupply);
   return 0;
 }
