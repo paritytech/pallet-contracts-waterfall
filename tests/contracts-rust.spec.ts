@@ -62,11 +62,11 @@ beforeEach(
 
 describe("Rust Smart Contracts", () => {
   // Currently broken, needs fixing after ink! 2.0 update
-  test.skip("Flip contract", async (done): Promise<void> => {
-    // const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
+  test.only("Flip contract", async (done): Promise<void> => {
+    const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
 
-  // @Todo Get contract storage key as bytes instead of the blake2 encoded hex string
-    const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
+    // The storage key `0x0000000000000000000000000000000000000000000000000000000000000000` is copied over from the generated ink! contract metadata
+    const STORAGE_KEY = (new Uint8Array(32)).fill(0);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash: Hash = await putCode(
@@ -77,11 +77,12 @@ describe("Rust Smart Contracts", () => {
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
+    // The action `0x0222FF18` is copied over from the generated ink! contract metadata
     const address: Address = await instantiate(
       api,
       testAccount,
       codeHash,
-      ["0x8C", "0x97", "0xDB", "0x39"],
+      "0x0222FF18",
       CREATION_FEE
     );
     expect(address).toBeDefined();
@@ -89,15 +90,14 @@ describe("Rust Smart Contracts", () => {
     const initialValue: Uint8Array = await getContractStorage(
       api,
       address,
-      // @ts-ignore
       STORAGE_KEY
     );
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x00");
 
-    await callContract(api, testAccount, address, ["0x8C","0x97","0xDB","0x39"]);
+    // The action `0x8C97DB39` is copied over from the generated ink! contract metadata
+    await callContract(api, testAccount, address, '0x8C97DB39');
 
-    // @ts-ignore
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
 
