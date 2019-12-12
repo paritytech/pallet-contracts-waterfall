@@ -62,7 +62,7 @@ beforeEach(
 
 describe("Rust Smart Contracts", () => {
   // Currently broken, needs fixing after ink! 2.0 update
-  test.only("Flip contract", async (done): Promise<void> => {
+  test("Flip contract", async (done): Promise<void> => {
     const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
 
     // The storage key `0x0000000000000000000000000000000000000000000000000000000000000000` is copied over from the generated ink! contract metadata
