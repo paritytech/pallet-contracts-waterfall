@@ -77,7 +77,7 @@ describe("Rust Smart Contracts", () => {
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // The action `0x0222FF18` is copied over from the generated ink! contract metadata
+    // The selector `0x0222FF18` is copied over from the generated ink! contract metadata
     const address: Address = await instantiate(
       api,
       testAccount,
@@ -95,7 +95,7 @@ describe("Rust Smart Contracts", () => {
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x00");
 
-    // The action `0x8C97DB39` is copied over from the generated ink! contract metadata
+    // The selector `0x8C97DB39` is copied over from the generated ink! contract metadata
     await callContract(api, testAccount, address, '0x8C97DB39');
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
