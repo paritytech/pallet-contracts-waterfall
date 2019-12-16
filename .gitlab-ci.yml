@@ -45,42 +45,46 @@ variables:
 
 #### stage:                        build
 
+.update-cargo-contract:            &update-cargo-contract
+  # `cargo install` returns an error if there is nothing to update, so have to supress it here temporarily
+  - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
+  - cargo contract -V
+
 build-ink-flipper:
   stage:                           build
   <<:                              *docker-env
-  script: |
-    cd lib/ink/examples/lang2/flipper
-    cargo contract build
-    cargo contract generate-metadata
+  script:
+    - *update-cargo-contract
+    - cd lib/ink/examples/lang2/flipper
+    - cargo contract build
+    - cargo contract generate-metadata
 
 build-raw-incrementer:
   stage:                           build
   <<:                              *docker-env
-  script: |
-    cd contracts/rust/raw-incrementer
-    ./build.sh
+  script:
+    - cd contracts/rust/raw-incrementer
+    - ./build.sh
 
 build-restore-contract:
   stage:                           build
   <<:                              *docker-env
-  script: |
-    cd contracts/rust/restore-contract
-    ./build.sh
+  script:
+    - cd contracts/rust/restore-contract
+    - ./build.sh
 
 build-as-flipper:
   stage:                           build
   <<:                              *docker-env
-  script: |
-    cd contracts/assemblyscript/flipper
-    rm -rf build
-    yarn && yarn build
-    ./build.sh
+  script:
+    - cd contracts/assemblyscript/flipper
+    - yarn && yarn build
+    - ./build.sh
   
 build-as-incrementer:
   stage:                           build
   <<:                              *docker-env
-  script: |
-    cd contracts/assemblyscript/incrementer
-    rm -rf build
-    yarn && yarn build
-    ./build.sh
+  script:
+    - cd contracts/assemblyscript/incrementer
+    - yarn && yarn build
+    - ./build.sh
