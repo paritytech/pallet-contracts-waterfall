@@ -1,5 +1,5 @@
 import { u128 } from "bignum";
-// import sha256 from "@chainsafe/as-sha256";
+import { hash } from "../node_modules/@chainsafe/as-sha256/assembly";
 
 import {
   getCaller,
@@ -96,8 +96,10 @@ function handle(input: Uint8Array): Uint8Array {
       const keyPtr = storageKeyApprove.dataStart;
       memory.copy(keyPtr, callerPtr, 32);
       memory.copy(keyPtr + 32, spenderPtr, spenderPtr);
+
+      const sha256 = hash(storageKeyApprove); 
       
-      setStorage(storageKeyApprove, amount);
+      setStorage(sha256, amount);
       break;
     }
     case Action.Allowance: { // first byte: 0x05

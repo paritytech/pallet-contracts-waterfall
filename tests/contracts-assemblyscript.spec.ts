@@ -237,6 +237,8 @@ describe("AssemblyScript Smart Contracts", () => {
     storageKeyApprove.set(contractCaller.publicKey);
     storageKeyApprove.set(spenderAccount.publicKey, 32);
 
+    sha256(storageKeyApprove);
+
     const approvalRaw = await getContractStorage(api, address, storageKeyApprove);
     const approval = hexToBn(approvalRaw.toString(), true);
 
