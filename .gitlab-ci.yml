@@ -1,0 +1,86 @@
+# .gitlab-ci.yml
+#
+# scontracts-waterfall
+#
+# pipelines can be triggered manually in the web
+# setting DEPLOY_TAG will only deploy the tagged image
+
+
+stages:
+    - build
+    - test
+
+variables:
+  GIT_STRATEGY:                    fetch
+  GIT_SUBMODULE_STRATEGY:          recursive
+  GIT_DEPTH:                       3
+  CARGO_INCREMENTAL:               0
+  CARGO_HOME:                      "/ci-cache/${CI_PROJECT_NAME}/cargo/${CI_JOB_NAME}"
+  SCCACHE_DIR:                     "/ci-cache/${CI_PROJECT_NAME}/sccache"
+  REGISTRY:                        registry.parity.io/parity/infrastructure/scripts
+
+
+.docker-env:                       &docker-env
+  image:                           ${REGISTRY}/contracts-ci-linux:latest
+  before_script:
+    - rustup show
+    - cargo --version
+    - sccache -s
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+.*$/        # i.e. v1.0, v2.1rc1
+    - schedules
+    - web
+    - /^[0-9]+$/                   # PRs
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - unknown_failure
+      - api_failure
+  dependencies:                    []
+  interruptible:                   true
+  tags:
+    - linux-docker
+
+#### stage:                        build
+
+build-ink-flipper:
+  stage:                           build
+  <<:                              *docker-env
+  script: |
+    cd lib/ink/examples/lang2/flipper
+    cargo contract build
+    cargo contract generate-metadata
+
+build-raw-incrementer:
+  stage:                           build
+  <<:                              *docker-env
+  script: |
+    cd contracts/rust/raw-incrementer
+    ./build.sh
+
+build-restore-contract:
+  stage:                           build
+  <<:                              *docker-env
+  script: |
+    cd contracts/rust/restore-contract
+    ./build.sh
+
+build-as-flipper:
+  stage:                           build
+  <<:                              *docker-env
+  script: |
+    cd contracts/assemblyscript/flipper
+    rm -rf build
+    yarn && yarn build
+    ./build.sh
+  
+build-as-incrementer:
+  stage:                           build
+  <<:                              *docker-env
+  script: |
+    cd contracts/assemblyscript/incrementer
+    rm -rf build
+    yarn && yarn build
+    ./build.sh
