@@ -117,11 +117,10 @@ test-on-substrate:
     - echo ${SUBSTRATE_COMMIT}
     - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
     - unzip artifacts.zip
-    # - mv artifacts/substrate/substrate .
     - SUBSTRATE_PATH=artifacts/substrate/substrate
     - ./test.sh
-  only:
-    - triggers
+  # only:
+  #   - triggers
   # rules:
   #   - if:                          ${CI_PIPELINE_TRIGGERED}
   #     when:                        always
