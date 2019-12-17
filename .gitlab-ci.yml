@@ -142,7 +142,16 @@ triggered-test-on-substrate:
     - ls
     - unzip artifacts.zip
     - export SUBSTRATE_PATH="artifacts/substrate/substrate"
-    - ./test.sh
+    - $SUBSTRATE_PATH --version
+    # - ./test.sh
+    # Purge dev chain and then spin up the substrate node in background
+    - $SUBSTRATE_PATH purge-chain --dev -y
+    - $SUBSTRATE_PATH --dev &
+    - SUBSTRATE_PID=$!
+    # Execute tests
+    - yarn && yarn test
+    # Kill the spawned substrate node
+    - kill -9 $SUBSTRATE_PID
   only:
     - pipelines
   # rules:
@@ -162,8 +171,16 @@ nightly-test-on-substrate:
     - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
     - ls
     - unzip artifacts.zip
-    - artifacts/substrate/substrate --version
     - export SUBSTRATE_PATH="artifacts/substrate/substrate"
-    - ./test.sh
+    - $SUBSTRATE_PATH --version
+    # - ./test.sh
+    # Purge dev chain and then spin up the substrate node in background
+    - $SUBSTRATE_PATH purge-chain --dev -y
+    - $SUBSTRATE_PATH --dev &
+    - SUBSTRATE_PID=$!
+    # Execute tests
+    - yarn && yarn test
+    # Kill the spawned substrate node
+    - kill -9 $SUBSTRATE_PID
   except:
     - pipelines
