@@ -119,7 +119,9 @@ build-as-incrementer:
 #   - echo "update objects in latest path"
 #   - aws s3 sync s3://${BUCKET}/${PREFIX}/$(cat ./artifacts/substrate/VERSION)/ s3://${BUCKET}/${PREFIX}/latest/
 
-test-on-substrate:
+# releases.parity.io/substrate/x86_64-debian:stretch/
+
+triggered-test-on-substrate:
   stage:                           test
   <<:                              *docker-env
   variables:
@@ -133,8 +135,8 @@ test-on-substrate:
     - echo ${SUBSTRATE_JOB_ID}
     - echo ${SUBSTRATE_COMMIT}
     - echo ${CI_PIPELINE_TRIGGERED}
-    # - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
-    - curl ${SUBSTRATE_JOB_URL}/artifacts/download --output artifacts.zip
+    - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
+    # - curl ${SUBSTRATE_JOB_URL}/artifacts/download --output artifacts.zip
     - ls
     - unzip artifacts.zip
     - SUBSTRATE_PATH=artifacts/substrate/substrate
@@ -150,20 +152,16 @@ test-on-substrate:
   #     when: manual
   #   - when: on_success
 
-
-
-
-###
-
-# test-srml-contracts-waterfall:
-#   stage:                           publish
-  # this is the set of integration tests for srml-contracts that requires the substrate binary
-  # <<:                              *docker-env
-  # only:
-  #   - nightly
-  # script:
-  #   - git submodule update --init
-  #   - ./build.sh
-  #   - ../artifacts/substrate/substrate purge-chain --dev -y
-  #   - ../artifacts/substrate/substrate --dev
-  #   - yarn && yarn test
+  nightly-test-on-substrate:
+    stage:                           build
+    <<:                              *docker-env
+    variables:
+      GIT_STRATEGY:                  none
+    script:
+      - apt update && apt install -y unzip curl  
+      - curl https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate --output artifacts.zip
+      - ls
+      - unzip artifacts.zip
+      - artifacts/substrate/substrate --version
+      - SUBSTRATE_PATH=artifacts/substrate/substrate
+      - ./test.sh
