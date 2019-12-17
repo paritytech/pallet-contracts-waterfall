@@ -143,8 +143,6 @@ triggered-test-on-substrate:
     - ./test.sh
   only:
     - pipelines
-  needs:
-    - build-as-flipper
   # rules:
   #   - if:                          ${CI_PIPELINE_TRIGGERED}
   #     when:                        always
