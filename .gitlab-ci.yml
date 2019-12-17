@@ -122,8 +122,9 @@ test-on-substrate:
     - unzip artifacts.zip
     - SUBSTRATE_PATH=artifacts/substrate/substrate
     - ./test.sh
-  # only:
-  #   - triggers
+  only:
+    # - triggers
+    - pipelines
   # rules:
   #   - if:                          ${CI_PIPELINE_TRIGGERED}
   #     when:                        always
