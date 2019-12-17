@@ -16,7 +16,6 @@ variables:
   GIT_DEPTH:                       3
   CARGO_INCREMENTAL:               0
   CARGO_HOME:                      "/ci-cache/${CI_PROJECT_NAME}/cargo/${CI_JOB_NAME}"
-  SCCACHE_DIR:                     "/ci-cache/${CI_PROJECT_NAME}/sccache"
   REGISTRY:                        registry.parity.io/parity/infrastructure/scripts
 
 
@@ -88,3 +87,56 @@ build-as-incrementer:
     - cd contracts/assemblyscript/incrementer
     - yarn && yarn build
     - ./build.sh
+
+
+### stage:                         test
+
+# ADD https://releases.parity.io/substrate/x86_64-debian:stretch/${VERSION}/substrate/substrate /usr/local/bin
+
+# variables:
+#   GIT_STRATEGY:                  none
+#   BUCKET:                        "releases.parity.io"
+#   PREFIX:                        "substrate/${ARCH}-${DOCKER_OS}"
+# script:
+#   - aws s3 sync ./artifacts/ s3://${BUCKET}/${PREFIX}/$(cat ./artifacts/substrate/VERSION)/
+#   - echo "update objects in latest path"
+#   - aws s3 sync s3://${BUCKET}/${PREFIX}/$(cat ./artifacts/substrate/VERSION)/ s3://${BUCKET}/${PREFIX}/latest/
+
+test-substrate:
+  stage:                           test
+  <<:                              *docker-env
+  variables:
+    GIT_STRATEGY:                  none
+  script:
+  - apt update && apt install -y unzip curl
+  # - curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/master/download?job=test&job_token=$CI_JOB_TOKEN"
+  # https://gitlab.parity.io/parity/substrate/-/jobs/333935/artifacts/browse/artifacts/substrate/substrate
+  - echo ${CI_JOB_URL}
+  - echo ${SUBSTRATE_JOB_URL}
+  - echo ${SUBSTRATE_JOB_ID}
+  - echo ${SUBSTRATE_COMMIT}
+  - curl https://gitlab.parity.io/parity/substrate/-/jobs/${CI_JOB_ID}/artifacts/download --output artifacts.zip
+  - unzip artifacts.zip
+  # - mv artifacts/substrate/substrate .
+  - SUBSTRATE_PATH=artifacts/substrate/substrate
+  - ./test.sh
+  # only:
+  # - tags
+
+
+
+
+###
+
+# test-srml-contracts-waterfall:
+#   stage:                           publish
+  # this is the set of integration tests for srml-contracts that requires the substrate binary
+  # <<:                              *docker-env
+  # only:
+  #   - nightly
+  script:
+    - git submodule update --init
+    - ./build.sh
+    - ../artifacts/substrate/substrate purge-chain --dev -y
+    - ../artifacts/substrate/substrate --dev
+    - yarn && yarn test
