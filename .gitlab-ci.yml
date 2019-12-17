@@ -152,16 +152,16 @@ triggered-test-on-substrate:
   #     when: manual
   #   - when: on_success
 
-  nightly-test-on-substrate:
-    stage:                           build
-    <<:                              *docker-env
-    variables:
-      GIT_STRATEGY:                  none
-    script:
-      - apt update && apt install -y unzip curl  
-      - curl https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate --output artifacts.zip
-      - ls
-      - unzip artifacts.zip
-      - artifacts/substrate/substrate --version
-      - SUBSTRATE_PATH=artifacts/substrate/substrate
-      - ./test.sh
+nightly-test-on-substrate:
+  stage:                           build
+  <<:                              *docker-env
+  variables:
+    GIT_STRATEGY:                  none
+  script:
+    - apt update && apt install -y unzip curl  
+    - curl https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate --output artifacts.zip
+    - ls
+    - unzip artifacts.zip
+    - artifacts/substrate/substrate --version
+    - SUBSTRATE_PATH=artifacts/substrate/substrate
+    - ./test.sh
