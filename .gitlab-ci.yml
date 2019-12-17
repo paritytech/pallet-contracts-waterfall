@@ -163,7 +163,7 @@ nightly-test-on-substrate:
     - ls
     - unzip artifacts.zip
     - artifacts/substrate/substrate --version
-    - SUBSTRATE_PATH=artifacts/substrate/substrate
+    - export SUBSTRATE_PATH="artifacts/substrate/substrate"
     - ./test.sh
   except:
     - pipelines
