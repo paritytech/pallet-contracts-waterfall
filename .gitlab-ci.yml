@@ -129,13 +129,15 @@ triggered-test-on-substrate:
   script:
     - apt update && apt install -y unzip curl
     # - curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/master/download?job=test&job_token=$CI_JOB_TOKEN"
-    # https://gitlab.parity.io/parity/substrate/-/jobs/333935/artifacts/browse/artifacts/substrate/substrate
+    # https://gitlab.parity.io/parity/substrate/-/jobs/333935/artifacts/browse/artifacts/substrate/substrate # LOCATION
     - echo ${CI_JOB_URL}
     - echo ${SUBSTRATE_JOB_URL}
     - echo ${SUBSTRATE_JOB_ID}
     - echo ${SUBSTRATE_COMMIT}
     - echo ${CI_PIPELINE_TRIGGERED}
-    - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
+    # debug
+    - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
+    # - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
     # - curl ${SUBSTRATE_JOB_URL}/artifacts/download --output artifacts.zip
     - ls
     - unzip artifacts.zip
@@ -157,9 +159,11 @@ nightly-test-on-substrate:
     GIT_STRATEGY:                  none
   script:
     - apt update && apt install -y unzip curl  
-    - curl https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate --output artifacts.zip
+    - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
     - ls
     - unzip artifacts.zip
     - artifacts/substrate/substrate --version
     - SUBSTRATE_PATH=artifacts/substrate/substrate
     - ./test.sh
+  except:
+    - pipelines
