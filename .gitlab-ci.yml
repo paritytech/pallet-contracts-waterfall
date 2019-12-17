@@ -122,7 +122,7 @@ build-as-incrementer:
 # releases.parity.io/substrate/x86_64-debian:stretch/
 
 triggered-test-on-substrate:
-  stage:                           test
+  stage:                           build
   <<:                              *docker-env
   variables:
     GIT_STRATEGY:                  none
