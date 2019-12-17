@@ -102,7 +102,7 @@ build-as-incrementer:
 #   - echo "update objects in latest path"
 #   - aws s3 sync s3://${BUCKET}/${PREFIX}/$(cat ./artifacts/substrate/VERSION)/ s3://${BUCKET}/${PREFIX}/latest/
 
-test-substrate:
+test-on-substrate:
   stage:                           test
   <<:                              *docker-env
   variables:
@@ -115,13 +115,19 @@ test-substrate:
   - echo ${SUBSTRATE_JOB_URL}
   - echo ${SUBSTRATE_JOB_ID}
   - echo ${SUBSTRATE_COMMIT}
-  - curl https://gitlab.parity.io/parity/substrate/-/jobs/${CI_JOB_ID}/artifacts/download --output artifacts.zip
+  - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
   - unzip artifacts.zip
   # - mv artifacts/substrate/substrate .
   - SUBSTRATE_PATH=artifacts/substrate/substrate
   - ./test.sh
-  # only:
-  # - tags
+  only:
+  - triggers
+  # rules:
+  #   - if:                          ${CI_PIPELINE_TRIGGERED}
+  #     when:                        always
+  #   - if: '$VAR =~ /pattern/'
+  #     when: manual
+  #   - when: on_success
 
 
 
@@ -134,9 +140,9 @@ test-substrate:
   # <<:                              *docker-env
   # only:
   #   - nightly
-  script:
-    - git submodule update --init
-    - ./build.sh
-    - ../artifacts/substrate/substrate purge-chain --dev -y
-    - ../artifacts/substrate/substrate --dev
-    - yarn && yarn test
+  # script:
+  #   - git submodule update --init
+  #   - ./build.sh
+  #   - ../artifacts/substrate/substrate purge-chain --dev -y
+  #   - ../artifacts/substrate/substrate --dev
+  #   - yarn && yarn test
