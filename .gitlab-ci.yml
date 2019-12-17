@@ -141,7 +141,7 @@ triggered-test-on-substrate:
     # - curl ${SUBSTRATE_JOB_URL}/artifacts/download --output artifacts.zip
     - ls
     - unzip artifacts.zip
-    - SUBSTRATE_PATH=artifacts/substrate/substrate
+    - export SUBSTRATE_PATH="artifacts/substrate/substrate"
     - ./test.sh
   only:
     - pipelines
