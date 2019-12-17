@@ -115,7 +115,10 @@ test-on-substrate:
     - echo ${SUBSTRATE_JOB_URL}
     - echo ${SUBSTRATE_JOB_ID}
     - echo ${SUBSTRATE_COMMIT}
-    - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
+    - echo ${CI_PIPELINE_TRIGGERED}
+    # - curl https://gitlab.parity.io/parity/substrate/-/jobs/${SUBSTRATE_JOB_ID}/artifacts/download --output artifacts.zip
+    - curl ${SUBSTRATE_JOB_URL}/artifacts/download --output artifacts.zip
+    - ls
     - unzip artifacts.zip
     - SUBSTRATE_PATH=artifacts/substrate/substrate
     - ./test.sh
