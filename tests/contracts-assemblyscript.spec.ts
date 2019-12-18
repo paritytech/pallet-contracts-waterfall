@@ -21,6 +21,7 @@ import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
 import BN from "bn.js";
+import sha256 from "@chainsafe/as-sha256";
 
 import { BOB, CREATION_FEE, WSURL } from "./consts";
 import {
