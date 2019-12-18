@@ -51,7 +51,7 @@ variables:
   - cargo contract -V
 
 build-contracts:
-  stage:                           test
+  stage:                           build
   <<:                              *docker-env
   script:
     - *update-cargo-contract
