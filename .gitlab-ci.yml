@@ -68,7 +68,8 @@ build-raw-incrementer:
     - echo $CARGO_TARGET_DIR
     - PROJNAME=raw_incrementer
     - cargo +nightly build --release
-    - ls && ls target
+    - ls && ls target || echo $?
+    - echo $CARGO_TARGET_DIR || echo $?
     - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
     - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
     - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
@@ -83,7 +84,7 @@ build-restore-contract:
     - echo $CARGO_TARGET_DIR
     - PROJNAME=restore_contract
     - cargo +nightly build --release --target wasm32-unknown-unknown
-    - ls && ls target
+    - ls && ls target || echo $?
     - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
     - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
     - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
@@ -125,8 +126,8 @@ build-as-incrementer:
 triggered-test-on-substrate:
   stage:                           build
   <<:                              *docker-env
-  variables:
-    GIT_STRATEGY:                  none
+  # variables:
+  #   GIT_STRATEGY:                  none
   script:
     # - curl --location --output artifacts.zip "https://gitlab.example.com/api/v4/projects/1/jobs/artifacts/master/download?job=test&job_token=$CI_JOB_TOKEN"
     # https://gitlab.parity.io/parity/substrate/-/jobs/333935/artifacts/browse/artifacts/substrate/substrate # LOCATION
@@ -146,15 +147,15 @@ triggered-test-on-substrate:
     - unzip artifacts.zip
     - export SUBSTRATE_PATH="artifacts/substrate/substrate"
     - $SUBSTRATE_PATH --version
-    # - ./test.sh
-    # Purge dev chain and then spin up the substrate node in background
-    - $SUBSTRATE_PATH purge-chain --dev -y
-    - $SUBSTRATE_PATH --dev &
-    - SUBSTRATE_PID=$!
-    # Execute tests
-    - yarn && yarn test
-    # Kill the spawned substrate node
-    - kill -9 $SUBSTRATE_PID
+    - ./test.sh
+    # # Purge dev chain and then spin up the substrate node in background
+    # - $SUBSTRATE_PATH purge-chain --dev -y
+    # - $SUBSTRATE_PATH --dev &
+    # - SUBSTRATE_PID=$!
+    # # Execute tests
+    # - yarn && yarn test
+    # # Kill the spawned substrate node
+    # - kill -9 $SUBSTRATE_PID
   only:
     - pipelines
   # rules:
@@ -167,22 +168,22 @@ triggered-test-on-substrate:
 nightly-test-on-substrate:
   stage:                           build
   <<:                              *docker-env
-  variables:
-    GIT_STRATEGY:                  none
+  # variables:
+  #   GIT_STRATEGY:                  none
   script:
     - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
     - ls
     - unzip artifacts.zip
     - export SUBSTRATE_PATH="artifacts/substrate/substrate"
     - $SUBSTRATE_PATH --version
-    # - ./test.sh
-    # Purge dev chain and then spin up the substrate node in background
-    - $SUBSTRATE_PATH purge-chain --dev -y
-    - $SUBSTRATE_PATH --dev &
-    - SUBSTRATE_PID=$!
-    # Execute tests
-    - yarn && yarn test
-    # Kill the spawned substrate node
-    - kill -9 $SUBSTRATE_PID
+    - ./test.sh
+    # # Purge dev chain and then spin up the substrate node in background
+    # - $SUBSTRATE_PATH purge-chain --dev -y
+    # - $SUBSTRATE_PATH --dev &
+    # - SUBSTRATE_PID=$!
+    # # Execute tests
+    # - yarn && yarn test
+    # # Kill the spawned substrate node
+    # - kill -9 $SUBSTRATE_PID
   except:
     - pipelines
