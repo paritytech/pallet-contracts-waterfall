@@ -70,10 +70,10 @@ build-raw-incrementer:
     - cargo +nightly build --release
     - ls && ls target || echo $?
     - echo $CARGO_TARGET_DIR || echo $?
-    - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
-    - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
-    - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
-    - wasm-prune --exports call,deploy target/$PROJNAME.wasm target/$PROJNAME-pruned.wasm
+    - wasm2wat -o ${CARGO_TARGET_DIR}/$PROJNAME.wat ${CARGO_TARGET_DIR}/wasm32-unknown-unknown/release/$PROJNAME.wasm
+    - cat ${CARGO_TARGET_DIR}/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
 
 build-restore-contract:
   stage:                           build
@@ -85,10 +85,10 @@ build-restore-contract:
     - PROJNAME=restore_contract
     - cargo +nightly build --release --target wasm32-unknown-unknown
     - ls && ls target || echo $?
-    - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
-    - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
-    - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
-    - wasm-prune --exports call,deploy target/$PROJNAME.wasm target/$PROJNAME-pruned.wasm
+    - wasm2wat -o ${CARGO_TARGET_DIR}/$PROJNAME.wat ${CARGO_TARGET_DIR}/wasm32-unknown-unknown/release/$PROJNAME.wasm
+    - cat ${CARGO_TARGET_DIR}/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
     
 
 build-as-flipper:
