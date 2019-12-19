@@ -70,7 +70,20 @@ function handle(input: Uint8Array): Uint8Array {
       const value = u128.from(parameters.subarray(64,80));
       const balanceFrom = u128.from(getBalanceOrZero(from));
       const balanceTo = u128.from(getBalanceOrZero(to));
-      const allowance = value;
+
+      // Merging TypedArrays is not implemented in AssemblyScript yet.
+      // That's why we need to read directly from memory
+      // See https://stackoverflow.com/questions/59270312/concatenate-or-merge-typedarrays-in-assemblyscript
+      // Also this PR https://github.com/AssemblyScript/assemblyscript/pull/1002
+      const storageKeyApprove = new Uint8Array(64);
+      const fromPtr = from.dataStart;
+      const toPtr = to.dataStart;
+      const keyPtr = storageKeyApprove.dataStart;
+      memory.copy(keyPtr, fromPtr, 32);
+      memory.copy(keyPtr + 32, toPtr, 32);
+
+      const sha256 = hash(storageKeyApprove);
+      const allowance = u128.from(getBalanceOrZero(sha256));
 
       // @TODO add allowance check here
       if (u128.ge(balanceFrom,value) && u128.ge(allowance, value)) {
@@ -84,22 +97,23 @@ function handle(input: Uint8Array): Uint8Array {
       // Allows 'spender' to withdraw from your account multiple times, up to the 'value' amount
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const spender: Uint8Array = parameters.subarray(0,32);
-      const amount: Uint8Array = parameters.subarray(32,48);
+      const amount = parameters.subarray(32,48);
       const CALLER = getCaller();
 
       // Merging TypedArrays is not implemented in AssemblyScript yet.
       // That's why we need to read directly from memory
       // See https://stackoverflow.com/questions/59270312/concatenate-or-merge-typedarrays-in-assemblyscript
+      // Also this PR https://github.com/AssemblyScript/assemblyscript/pull/1002
       const storageKeyApprove = new Uint8Array(64);
       const callerPtr = CALLER.dataStart;
       const spenderPtr = spender.dataStart;
       const keyPtr = storageKeyApprove.dataStart;
       memory.copy(keyPtr, callerPtr, 32);
-      memory.copy(keyPtr + 32, spenderPtr, spenderPtr);
+      memory.copy(keyPtr + 32, spenderPtr, 32);
 
-      const sha256 = hash(storageKeyApprove); 
-      
+      const sha256 = hash(storageKeyApprove);
       setStorage(sha256, amount);
+
       break;
     }
     case Action.Allowance: { // first byte: 0x05

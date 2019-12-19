@@ -60,7 +60,6 @@ beforeEach(
 );
 
 describe("Rust Smart Contracts", () => {
-  // Currently broken, needs fixing after onk! 2.0 update
   test.skip("Flip contract", async (done): Promise<void> => {
     // const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
 

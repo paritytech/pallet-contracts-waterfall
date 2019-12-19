@@ -35,7 +35,7 @@ import {
 const keyring = testKeyring({ type: "sr25519" });
 const bobPair = keyring.getPair(BOB);
 const randomSeed = randomAsU8a(32);
-let contractCaller: KeyringPair;
+let contractCreator: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
@@ -45,10 +45,10 @@ beforeAll((): void => {
 beforeEach(
   async (done): Promise<() => void> => {
     api = await ApiPromise.create({ provider: new WsProvider(WSURL) });
-    contractCaller = keyring.addFromSeed(randomSeed);
+    contractCreator = keyring.addFromSeed(randomSeed);
 
     return api.tx.balances
-      .transfer(contractCaller.address, CREATION_FEE.muln(3))
+      .transfer(contractCreator.address, CREATION_FEE.muln(3))
       .signAndSend(bobPair, (result: SubmittableResult): void => {
         if (
           result.status.isFinalized &&
@@ -70,7 +70,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      contractCaller,
+      contractCreator,
       "../contracts/assemblyscript/flipper/build/flipper-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -79,7 +79,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 = Action::Flip()
     const address: Address = await instantiate(
       api,
-      contractCaller,
+      contractCreator,
       codeHash,
       "0x00",
       CREATION_FEE
@@ -94,12 +94,12 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x00");
 
-    await callContract(api, contractCaller, address, "0x00");
+    await callContract(api, contractCreator, address, "0x00");
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
 
-    await callContract(api, contractCaller, address, "0x00");
+    await callContract(api, contractCreator, address, "0x00");
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x00");
@@ -113,7 +113,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      contractCaller,
+      contractCreator,
       "../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -122,7 +122,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Call contract with Action: 0x00 = Action::Inc()
     const address: Address = await instantiate(
       api,
-      contractCaller,
+      contractCreator,
       codeHash,
       "0x00",
       CREATION_FEE
@@ -130,12 +130,13 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(address).toBeDefined();
 
     // Call contract with Action: 0x00 0x2a 0x00 0x00 0x00 = Action::Inc(42)
-    await callContract(api, contractCaller, address, "0x002a000000");
+    await callContract(api, contractCreator, address, "0x002a000000");
+
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     // const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
 
-    const currentValue =  await callContract(api, contractCaller, address, "0x01");
+    const currentValue =  await callContract(api, contractCreator, address, "0x01");
     console.log(currentValue)
 
     done();
@@ -152,7 +153,16 @@ describe("AssemblyScript Smart Contracts", () => {
     * 7. Check the allowance of the spender account
     **/
 
-   const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
+    const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
+
+    // FRANKIE is our contract creator account
+    const FRANKIE = contractCreator;
+    // FRANKIE will transfer 2000000000000000 tokens to CAROL
+    const CAROL = keyring.addFromSeed(randomAsU8a(32));
+    // FRANKIE will approve, that DAN is allowed to transfer 5000000000000000 of her tokens on her behalf
+    const DAN = keyring.addFromSeed(randomAsU8a(32));
+    // DAN will then transfer 10000000 of the 5000000000000000 approved tokens from FRANKIE to OSCAR
+    const OSCAR = keyring.addFromSeed(randomAsU8a(32));
 
     /**
     * 1. Deploy & instantiate the contract
@@ -161,7 +171,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
-      contractCaller,
+      FRANKIE,
       "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
     );
     expect(codeHash).toBeDefined();
@@ -169,7 +179,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // Instantiate a new contract instance and retrieve the contracts address
     const address: Address = await instantiate(
       api,
-      contractCaller,
+      FRANKIE,
       codeHash,
       "0x00",
       CREATION_FEE
@@ -198,73 +208,71 @@ describe("AssemblyScript Smart Contracts", () => {
     * to an BN instance to be able to compare the values.
     **/
 
-    let creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    let creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
-    expect(creatorBalance.toString()).toBe(CREATION_FEE.toString());
+    let frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
+    let frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
+    expect(frankieBalance.toString()).toBe(CREATION_FEE.toString());
 
     /**
-    * 4. Use the transfer function to transfer some tokens from the callers account to a new address
+    * 4. Use the transfer function to transfer some tokens from the FRANKIES account to CAROLS account
     **/
 
-    const transferAccount = keyring.addFromSeed(randomAsU8a(32));
     const paramsTransfer = 
     '0x02' // 1 byte: First byte Action.Transfer
-    + u8aToHex(transferAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
-    + '00008D49FD1A07000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (2000000000000000 === 2 DOT in decimal)) value
+    + u8aToHex(CAROL.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
+    + '00008D49FD1A07000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (2000000000000000 in decimal)) value
 
-    await callContract(api, contractCaller, address, paramsTransfer);
+    await callContract(api, FRANKIE, address, paramsTransfer);
 
-    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
-    const transferAccountBalanceRaw = await getContractStorage(api, address, transferAccount.publicKey);
-    const transferAccountBalance = hexToBn(transferAccountBalanceRaw.toString(), true);
-    expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000)).toString());
-    expect(transferAccountBalance.toString()).toBe("2000000000000000");
+    frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
+    frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
+    const carolBalanceRaw = await getContractStorage(api, address, CAROL.publicKey);
+    const carolBalance = hexToBn(carolBalanceRaw.toString(), true);
+    expect(frankieBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000)).toString());
+    expect(carolBalance.toString()).toBe("2000000000000000");
 
     /**
-    * 5. Approve withdrawal amount for new 'spender' account
+    * 5. FRANKIE approves withdrawal amount for new account DAN
     **/ 
-    const spenderAccount = keyring.addFromSeed(randomAsU8a(32));
     const paramsApprove = 
     '0x04' // 1 byte: First byte Action.Transfer
-    + u8aToHex(spenderAccount.publicKey, -1, false) // 32 bytes: Hex encoded new spender account address as u256
-    + '0080E03779C311000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (5000000000000000 = 5 DOT in decimal)) value
+    + u8aToHex(DAN.publicKey, -1, false) // 32 bytes: Hex encoded new spender account address as u256
+    + '0080E03779C311000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (5000000000000000 in decimal)) value
 
-    await callContract(api, contractCaller, address, paramsApprove);
+    await callContract(api, FRANKIE, address, paramsApprove);
 
-    // Create a new storage key from the contractCaller.publicKey and the spenderAccount.publicKey
+    // Create a new storage key from the FRANKIE.publicKey and the DAN.publicKey
     // It will be hashed to 32 byte hash with blake2b in the `getContractStorage` function before querying.
     const storageKeyApprove = new Uint8Array(64);
-    storageKeyApprove.set(contractCaller.publicKey);
-    storageKeyApprove.set(spenderAccount.publicKey, 32);
+    storageKeyApprove.set(FRANKIE.publicKey);
+    storageKeyApprove.set(DAN.publicKey, 32);
+    const storageKeyApprove32 = sha256(storageKeyApprove);
 
-    sha256(storageKeyApprove);
+    const amount = await getContractStorage(api, address, storageKeyApprove32);
 
-    const approvalRaw = await getContractStorage(api, address, storageKeyApprove);
-    const approval = hexToBn(approvalRaw.toString(), true);
-
-    console.log(storageKeyApprove, approval.toString())
+    expect(amount.toString()).toBe('0x0080e03779c311000000000000000000');
 
     /**
-    *  6. Use the transferFrom function to transfer some ERC20 tokens to a different account
+    *  6. Use the transferFrom function to let DAN transfer 10000000 ERC20 tokens from FRANKIE to OSCAR
     **/
 
-    // Create a new account to receive the tokens
-    const transferFromAccount = keyring.addFromSeed(randomAsU8a(32));
+    let oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
+    let oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
+    expect(oscarBalance.toString()).toBe("0");
+
     const paramsTransferFrom = 
       '0x03' // 1 byte: First byte Action.TransferFrom
-      + u8aToHex(contractCaller.publicKey, -1, false) // 32 bytes: Hex encoded contract caller address as u256
-      + u8aToHex(transferFromAccount.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
-      + '19000000000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (25 in decimal)) value
+      + u8aToHex(FRANKIE.publicKey, -1, false) // 32 bytes: Hex encoded contract caller address as u256
+      + u8aToHex(OSCAR.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
+      + '80969800000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (10000000 in decimal)) value
 
-    await callContract(api, contractCaller, address, paramsTransferFrom);
+    await callContract(api, DAN, address, paramsTransferFrom);
 
-    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
-    const transferFromAccountBalanceRaw = await getContractStorage(api, address, transferFromAccount.publicKey);
-    const transferFromAccountBalance = hexToBn(transferFromAccountBalanceRaw.toString(), true);
-    // expect(creatorBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000 + 25, 10)).toString());
-    // expect(transferFromAccountBalance.toString()).toBe("25");
+    frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
+    frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
+    oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
+    oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
+
+    expect(oscarBalance.toString()).toBe("10000000");
 
     /**
     * 7. Check the allowance
@@ -272,15 +280,13 @@ describe("AssemblyScript Smart Contracts", () => {
 
     const paramsAllowance = 
     '0x05' // 1 byte: First byte Action.Transfer
-    + u8aToHex(contractCaller.publicKey, -1, false) // 32 bytes: Hex encoded caller account address as u256
-    + u8aToHex(spenderAccount.publicKey, -1, false); // 32 bytes: Hex encoded spender account address as u256
-    console.log(creatorBalance.toString())
-    await callContract(api, contractCaller, address, paramsAllowance);
+    + u8aToHex(FRANKIE.publicKey, -1, false) // 32 bytes: Hex encoded caller account address as u256
+    + u8aToHex(DAN.publicKey, -1, false); // 32 bytes: Hex encoded spender account address as u256
 
-    creatorBalanceRaw = await getContractStorage(api, address, contractCaller.publicKey);
-    creatorBalance = hexToBn(creatorBalanceRaw.toString(), true);
+    await callContract(api, FRANKIE, address, paramsAllowance);
 
-    console.log(creatorBalance.toString())
+    frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
+    frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
 
     done();
   });
