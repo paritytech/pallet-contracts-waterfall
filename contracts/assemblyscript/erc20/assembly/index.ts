@@ -82,11 +82,11 @@ function handle(input: Uint8Array): Uint8Array {
       memory.copy(keyPtr, fromPtr, 32);
       memory.copy(keyPtr + 32, toPtr, 32);
 
-      const sha256 = hash(storageKeyApprove);
-      const allowance = u128.from(getBalanceOrZero(sha256));
+      // const sha256 = hash(storageKeyApprove);
+      // const allowance = u128.from(getBalanceOrZero(sha256));
 
       // @TODO add allowance check here
-      if (u128.ge(balanceFrom,value) && u128.ge(allowance, value)) {
+      if (u128.ge(balanceFrom,value)) {
         setStorage(from, u128.sub(balanceFrom, value).toUint8Array());
         setStorage(to, u128.add(balanceTo, value).toUint8Array());
         // @TODO deduct from allowance

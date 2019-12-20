@@ -23,7 +23,7 @@ import { Address } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import sha256 from "@chainsafe/as-sha256";
 
-import { BOB, CREATION_FEE, WSURL } from "./consts";
+import { ALICE as ALICE_ADDRESS, BOB as BOB_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -33,7 +33,8 @@ import {
 
 // This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: "sr25519" });
-const bobPair = keyring.getPair(BOB);
+const ALICE = keyring.getPair(ALICE_ADDRESS);
+const BOB = keyring.getPair(BOB_ADDRESS);
 const randomSeed = randomAsU8a(32);
 let contractCreator: KeyringPair;
 let api: ApiPromise;
@@ -49,7 +50,7 @@ beforeEach(
 
     return api.tx.balances
       .transfer(contractCreator.address, CREATION_FEE.muln(3))
-      .signAndSend(bobPair, (result: SubmittableResult): void => {
+      .signAndSend(BOB, (result: SubmittableResult): void => {
         if (
           result.status.isFinalized &&
           result.findRecord("system", "ExtrinsicSuccess")
@@ -163,6 +164,14 @@ describe("AssemblyScript Smart Contracts", () => {
     const DAN = keyring.addFromSeed(randomAsU8a(32));
     // DAN will then transfer 10000000 of the 5000000000000000 approved tokens from FRANKIE to OSCAR
     const OSCAR = keyring.addFromSeed(randomAsU8a(32));
+
+    await api.tx.balances
+      .transfer(DAN.address, CREATION_FEE.muln(3))
+      .signAndSend(ALICE, (result: SubmittableResult): void => {
+        if (result.status.isFinalized && result.findRecord("system", "ExtrinsicSuccess")) {
+          console.log("DANs account is now funded.");
+        }
+      });
 
     /**
     * 1. Deploy & instantiate the contract
