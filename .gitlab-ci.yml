@@ -90,14 +90,17 @@ build-restore-contract:
     - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
     - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
     
-
 build-as-flipper:
   stage:                           build
   <<:                              *docker-env
   script:
     - cd contracts/assemblyscript/flipper
     - yarn && yarn build
-    - ./build.sh
+    # - ./build.sh
+    - PROJNAME=flipper
+    - cat build/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory \$0 1))/(import \"env\" \"memory\" (memory \$0 2 16))/" > build/$PROJNAME-fixed.wat
+    - wat2wasm -o build/$PROJNAME-fixed.wasm build/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy build/$PROJNAME-fixed.wasm build/$PROJNAME-pruned.wasm
   
 build-as-incrementer:
   stage:                           build
@@ -105,7 +108,11 @@ build-as-incrementer:
   script:
     - cd contracts/assemblyscript/incrementer
     - yarn && yarn build
-    - ./build.sh
+    # - ./build.sh
+    - PROJNAME=incrementer
+    - cat build/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory \$0 1))/(import \"env\" \"memory\" (memory \$0 2 16))/" > build/$PROJNAME-fixed.wat
+    - wat2wasm -o build/$PROJNAME-fixed.wasm build/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy build/$PROJNAME-fixed.wasm build/$PROJNAME-pruned.wasm
 
 # HIGHLY ST00PID CONCEPT
 # round-robin:
@@ -199,7 +206,7 @@ nightly-test-on-substrate:
     - ls
     # - unzip artifacts.zip
     # - export SUBSTRATE_PATH="artifacts/substrate/substrate"
-    - export SUBSTRATE_PATH="./substrate
+    - export SUBSTRATE_PATH="./substrate"
     - $SUBSTRATE_PATH --version
     - ./test.sh
     # # Purge dev chain and then spin up the substrate node in background
