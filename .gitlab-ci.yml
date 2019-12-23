@@ -1,0 +1,97 @@
+# .gitlab-ci.yml
+#
+# scontracts-waterfall
+#
+# pipelines can be triggered manually in the web
+# setting DEPLOY_TAG will only deploy the tagged image
+
+
+stages:
+    - build
+
+variables:
+  GIT_STRATEGY:                    fetch
+  GIT_SUBMODULE_STRATEGY:          recursive
+  GIT_DEPTH:                       3
+  CARGO_INCREMENTAL:               0
+  CARGO_HOME:                      "/ci-cache/${CI_PROJECT_NAME}/cargo/${CI_JOB_NAME}"
+  CARGO_TARGET_DIR:                "/ci-cache/${CI_PROJECT_NAME}/targets/${CI_COMMIT_REF_NAME}"
+  REGISTRY:                        registry.parity.io/parity/infrastructure/scripts
+
+
+.docker-env:                       &docker-env
+  image:                           ${REGISTRY}/contracts-ci-linux:latest
+  before_script:
+    - rustup show
+    - cargo --version
+    - sccache -s
+  only:
+    - master
+    - /^v[0-9]+\.[0-9]+.*$/        # i.e. v1.0, v2.1rc1
+    - schedules
+    - web
+    - /^[0-9]+$/                   # PRs
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - unknown_failure
+      - api_failure
+  dependencies:                    []
+  interruptible:                   true
+  tags:
+    - linux-docker
+
+#### stage:                        build
+
+build-and-test:
+  stage:                           build
+  <<:                              *docker-env
+  before_script:
+    # `cargo install` returns an error if there is nothing to update, so have to supress it here temporarily
+    - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
+    - cargo contract -V
+  script:
+    - echo "_____Building contracts_____"
+    # - ./build.sh
+    - cd lib/ink/examples/lang2/flipper
+    - cargo contract build
+    - cargo contract generate-metadata
+    - cd -
+    - cd contracts/rust/raw-incrementer
+    - ./build.sh
+    - cd -
+    - cd contracts/rust/restore-contract
+    - ./build.sh
+    - cd -
+    - cd contracts/assemblyscript/flipper
+    - rm -rf build
+    - yarn && yarn build
+    - ./build.sh
+    - cd -
+    - cd contracts/assemblyscript/incrementer
+    - rm -rf build
+    - yarn && yarn build
+    - ./build.sh
+    - cd -
+    - echo "_____Downloading the latest nightly Substrate_____"
+    # CI passes with this and below versions until the issue is solved: https://github.com/paritytech/srml-contracts-waterfall/issues/27
+    # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location 
+    # master from gitlab
+    # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location 
+    # published master
+    - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate" --output substrate --location 
+    - chmod +x ./substrate
+    - export SUBSTRATE_PATH="./substrate"
+    - $SUBSTRATE_PATH --version
+    - echo "_____Running dev node and tests_____"
+    # - ./test.sh
+    - echo "_____Purging dev chain_____"
+    - $SUBSTRATE_PATH purge-chain --dev -y
+    - echo "_____Spinning up the substrate node in background_____"
+    - $SUBSTRATE_PATH --dev &
+    - SUBSTRATE_PID=$!
+    - echo "_____Executing tests_____"
+    - yarn && yarn test
+    - echo "_____Kill the spawned substrate node_____"
+    - kill -9 $SUBSTRATE_PID
