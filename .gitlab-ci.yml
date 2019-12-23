@@ -47,12 +47,13 @@ build-and-test:
   stage:                           build
   <<:                              *docker-env
   before_script:
+    # upstream CI can override global vars here
+    - unset CARGO_TARGET_DIR
     # `cargo install` returns an error if there is nothing to update, so have to supress it here temporarily
     - cargo contract -V
     - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
     - cargo contract -V
   script:
-    - unset CARGO_TARGET_DIR
     - echo "_____Building contracts_____"
     # - ./build.sh
     - cd lib/ink/examples/lang2/flipper
@@ -60,36 +61,26 @@ build-and-test:
     - cargo contract generate-metadata
     - cd -
     - cd contracts/rust/raw-incrementer
-    # - ./build.sh
-    - PROJNAME=raw_incrementer
-    - cargo +nightly build --release
-    - echo ${CARGO_TARGET_DIR}
-    - pwd && ls -la
-    - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
-    - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
-    - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
-    - wasm-prune --exports call,deploy target/$PROJNAME.wasm target/$PROJNAME-pruned.wasm
+    - ./build.sh
     - cd -
     - cd contracts/rust/restore-contract
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/flipper
-    - rm -rf build
     - yarn && yarn build
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/incrementer
-    - rm -rf build
     - yarn && yarn build
     - ./build.sh
     - cd -
     - echo "_____Downloading the latest nightly Substrate_____"
     # CI passes with this and below versions until the issue is solved: https://github.com/paritytech/srml-contracts-waterfall/issues/27
-    # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location 
+    - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location 
     # master from gitlab
     # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location 
     # published master
-    - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate" --output substrate --location 
+    # - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate" --output substrate --location 
     - chmod +x ./substrate
     - export SUBSTRATE_PATH="./substrate"
     - $SUBSTRATE_PATH --version
