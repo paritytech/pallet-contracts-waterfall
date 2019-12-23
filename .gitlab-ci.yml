@@ -59,7 +59,15 @@ build-and-test:
     - cargo contract generate-metadata
     - cd -
     - cd contracts/rust/raw-incrementer
-    - ./build.sh
+    # - ./build.sh
+    - PROJNAME=raw_incrementer
+    - cargo +nightly build --release
+    - pwd && ls -la target || $?
+    - echo ${CARGO_TARGET_DIR}
+    - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
+    - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
+    - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy target/$PROJNAME.wasm target/$PROJNAME-pruned.wasm
     - cd -
     - cd contracts/rust/restore-contract
     - ./build.sh
