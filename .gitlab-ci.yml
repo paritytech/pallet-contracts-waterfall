@@ -113,9 +113,12 @@ round-robin:
   <<:                              *docker-env
   script:
     - ./build.sh
-    - - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
-    - unzip artifacts.zip
-    - export SUBSTRATE_PATH="artifacts/substrate/substrate"
+    # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
+    - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate
+    - chmod +x ./substrate
+    # - unzip artifacts.zip
+    # - export SUBSTRATE_PATH="artifacts/substrate/substrate"
+    - export SUBSTRATE_PATH="./substrate"
     - $SUBSTRATE_PATH --version
     - ./test.sh
 
@@ -123,6 +126,7 @@ round-robin:
 ### stage:                         test
 
 # ADD https://releases.parity.io/substrate/x86_64-debian:stretch/${VERSION}/substrate/substrate /usr/local/bin
+# 2.0.0-21e4f08
 
 # variables:
 #   GIT_STRATEGY:                  none
