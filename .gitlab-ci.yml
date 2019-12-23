@@ -52,6 +52,7 @@ build-and-test:
     - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
     - cargo contract -V
   script:
+    - unset CARGO_TARGET_DIR
     - echo "_____Building contracts_____"
     # - ./build.sh
     - cd lib/ink/examples/lang2/flipper
@@ -62,8 +63,8 @@ build-and-test:
     # - ./build.sh
     - PROJNAME=raw_incrementer
     - cargo +nightly build --release
-    - pwd && ls -la target || $?
     - echo ${CARGO_TARGET_DIR}
+    - pwd && ls -la
     - wasm2wat -o target/$PROJNAME.wat target/wasm32-unknown-unknown/release/$PROJNAME.wasm
     - cat target/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > target/$PROJNAME-fixed.wat
     - wat2wasm -o target/$PROJNAME.wasm target/$PROJNAME-fixed.wat
