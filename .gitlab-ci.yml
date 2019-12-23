@@ -16,7 +16,7 @@ variables:
   GIT_DEPTH:                       3
   CARGO_INCREMENTAL:               0
   CARGO_HOME:                      "/ci-cache/${CI_PROJECT_NAME}/cargo/${CI_JOB_NAME}"
-  # CARGO_TARGET_DIR:                "/ci-cache/${CI_PROJECT_NAME}/targets/${CI_COMMIT_REF_NAME}"
+  CARGO_TARGET_DIR:                "/ci-cache/${CI_PROJECT_NAME}/targets/${CI_COMMIT_REF_NAME}"
   REGISTRY:                        registry.parity.io/parity/infrastructure/scripts
 
 
@@ -64,31 +64,31 @@ build-raw-incrementer:
   <<:                              *docker-env
   script:
     - cd contracts/rust/raw-incrementer
-    - ./build.sh
-    # - echo $CARGO_TARGET_DIR
-    # - PROJNAME=raw_incrementer
-    # - cargo +nightly build --release
-    # - ls && ls target || echo $?
-    # - echo $CARGO_TARGET_DIR || echo $?
-    # - wasm2wat -o ${CARGO_TARGET_DIR}/$PROJNAME.wat ${CARGO_TARGET_DIR}/wasm32-unknown-unknown/release/$PROJNAME.wasm
-    # - cat ${CARGO_TARGET_DIR}/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
-    # - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
-    # - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
+    # - ./build.sh
+    - echo $CARGO_TARGET_DIR
+    - PROJNAME=raw_incrementer
+    - cargo +nightly build --release
+    - ls && ls target || echo $?
+    - echo $CARGO_TARGET_DIR || echo $?
+    - wasm2wat -o ${CARGO_TARGET_DIR}/$PROJNAME.wat ${CARGO_TARGET_DIR}/wasm32-unknown-unknown/release/$PROJNAME.wasm
+    - cat ${CARGO_TARGET_DIR}/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
 
 build-restore-contract:
   stage:                           build
   <<:                              *docker-env
   script:
     - cd contracts/rust/restore-contract
-    - ./build.sh
-    # - echo $CARGO_TARGET_DIR
-    # - PROJNAME=restore_contract
-    # - cargo +nightly build --release --target wasm32-unknown-unknown
-    # - ls && ls target || echo $?
-    # - wasm2wat -o ${CARGO_TARGET_DIR}/$PROJNAME.wat ${CARGO_TARGET_DIR}/wasm32-unknown-unknown/release/$PROJNAME.wasm
-    # - cat ${CARGO_TARGET_DIR}/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
-    # - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
-    # - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
+    # - ./build.sh
+    - echo $CARGO_TARGET_DIR
+    - PROJNAME=restore_contract
+    - cargo +nightly build --release --target wasm32-unknown-unknown
+    - ls && ls target || echo $?
+    - wasm2wat -o ${CARGO_TARGET_DIR}/$PROJNAME.wat ${CARGO_TARGET_DIR}/wasm32-unknown-unknown/release/$PROJNAME.wasm
+    - cat ${CARGO_TARGET_DIR}/$PROJNAME.wat | sed "s/(import \"env\" \"memory\" (memory (;0;) 2))/(import \"env\" \"memory\" (memory (;0;) 2 16))/" > ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wat2wasm -o ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-fixed.wat
+    - wasm-prune --exports call,deploy ${CARGO_TARGET_DIR}/$PROJNAME.wasm ${CARGO_TARGET_DIR}/$PROJNAME-pruned.wasm
     
 
 build-as-flipper:
@@ -108,19 +108,20 @@ build-as-incrementer:
     - ./build.sh
 
 # HIGHLY ST00PID CONCEPT
-round-robin:
-  stage:                           build
-  <<:                              *docker-env
-  script:
-    - ./build.sh
-    # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
-    - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate
-    - chmod +x ./substrate
-    # - unzip artifacts.zip
-    # - export SUBSTRATE_PATH="artifacts/substrate/substrate"
-    - export SUBSTRATE_PATH="./substrate"
-    - $SUBSTRATE_PATH --version
-    - ./test.sh
+# round-robin:
+#   stage:                           build
+#   <<:                              *docker-env
+#   script:
+#     - ./build.sh
+#     # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location # <-- master from gitlab
+#     # - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate" --output substrate --location # <-- published master
+#     - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location # <-- works https://github.com/paritytech/srml-contracts-waterfall/issues/27
+#     - chmod +x ./substrate
+#     # - unzip artifacts.zip
+#     # - export SUBSTRATE_PATH="artifacts/substrate/substrate"
+#     - export SUBSTRATE_PATH="./substrate"
+#     - $SUBSTRATE_PATH --version
+#     - ./test.sh
 
 
 ### stage:                         test
@@ -191,20 +192,23 @@ nightly-test-on-substrate:
     CARGO_TARGET_DIR:              "/ci-cache/${CI_PROJECT_NAME}/targets/${CI_COMMIT_REF_NAME}"
   script:
     - echo ${CARGO_TARGET_DIR}
-    - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
+    # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
+    - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location
+    - chmod +x ./substrate
     - pwd
     - ls
-    - unzip artifacts.zip
-    - export SUBSTRATE_PATH="artifacts/substrate/substrate"
+    # - unzip artifacts.zip
+    # - export SUBSTRATE_PATH="artifacts/substrate/substrate"
+    - export SUBSTRATE_PATH="./substrate
     - $SUBSTRATE_PATH --version
-    # - ./test.sh
-    # Purge dev chain and then spin up the substrate node in background
-    - $SUBSTRATE_PATH purge-chain --dev -y
-    - $SUBSTRATE_PATH --dev &
-    - SUBSTRATE_PID=$!
-    # Execute tests
-    - yarn && yarn test
-    # Kill the spawned substrate node
-    - kill -9 $SUBSTRATE_PID
+    - ./test.sh
+    # # Purge dev chain and then spin up the substrate node in background
+    # - $SUBSTRATE_PATH purge-chain --dev -y
+    # - $SUBSTRATE_PATH --dev &
+    # - SUBSTRATE_PID=$!
+    # # Execute tests
+    # - yarn && yarn test
+    # # Kill the spawned substrate node
+    # - kill -9 $SUBSTRATE_PID
   except:
     - pipelines
