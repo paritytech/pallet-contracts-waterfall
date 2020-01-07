@@ -66,29 +66,36 @@ function handle(input: Uint8Array): Uint8Array {
       break;
     }
     case Action.TransferFrom: { // first byte: 0x03
-      // Transfers 'value' amount of tokens from address 'from' to address 'to'
+      // Transfers 'value' amount of tokens from address 'owner' to address 'to'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
       const owner: Uint8Array = parameters.subarray(0,32);
-      const to: Uint8Array = parameters.subarray(32,64);
-      const value = u128.from(parameters.subarray(64,80));
-      const balanceOwner = getStorage(owner);
-      // const balanceTo = u128.from(getBalanceOrZero(to));
-
-      // // Get the allowance 
+      const to: Uint8Array = parameters.subarray(32, 64);
+      const value: u128 = u128.from(parameters.subarray(64,80));
       const CALLER: Uint8Array = getCaller(); // The CALLER is the spender
-      const allowanceKey: Uint8Array = mergeToSha256(owner, CALLER);
-      // const allowance = getStorage(allowanceKey);
-      setStorage(testStorage, toBytes(allowanceKey));
-      // const allowance = getBalanceOrZero(allowanceKey);
-      
-      
+      const balanceOwner: u128 = u128.from(getBalanceOrZero(owner));
+      const balanceTo: u128 = u128.from(getBalanceOrZero(to));
 
-      // // @TODO add allowance check here
-      // if (u128.ge(balanceFrom,value)) {
-      //   setStorage(from, u128.sub(balanceFrom, value).toUint8Array());
-      //   setStorage(to, u128.add(balanceTo, value).toUint8Array());
-      //   // @TODO deduct from allowance
-      // }
+      // Get the allowance 
+
+      //  const storageKey = new Uint8Array(64);
+      //  const account1Ptr = owner.dataStart;
+      //  const account2Ptr = CALLER.dataStart;
+      //  const keyPtr = storageKey.dataStart;
+      //  memory.copy(keyPtr, account1Ptr, 32);
+      //  memory.copy(keyPtr + 32, account2Ptr, 32);
+      //  const allowanceKey: Uint8Array = hash(storageKey);
+
+      //  const allowanceKey: Uint8Array = mergeToSha256(testStorage, testStorage);
+      const allowanceKey: Uint8Array = mergeToSha256(CALLER, owner);
+      const allowance = getBalanceOrZero(owner);
+      setStorage(testStorage, allowanceKey);
+
+      // @TODO add allowance check here
+      if (u128.ge(balanceOwner,value)) {
+        setStorage(owner, u128.sub(balanceOwner, value).toUint8Array());
+        setStorage(to, u128.add(balanceTo, value).toUint8Array());
+        //  @TODO deduct from allowance
+      }
       break;
     }
     case Action.Approve: { // first byte: 0x04
@@ -99,8 +106,8 @@ function handle(input: Uint8Array): Uint8Array {
       const CALLER = getCaller();
 
       // Create storage key for approved amount
-      const sha256: Uint8Array = mergeToSha256(CALLER, spender);
-      setStorage(sha256, amount);
+      const allowanceKey: Uint8Array = mergeToSha256(CALLER, spender);
+      setStorage(allowanceKey, amount);
       break;
     }
     case Action.Allowance: { // first byte: 0x05
@@ -115,7 +122,7 @@ function handle(input: Uint8Array): Uint8Array {
       // const allowanceDataView = new DataView(allowance.buffer);
       // const allowanceValue = allowanceDataView.byteLength ? allowanceDataView.getUint8(0) : 0;
 
-      setStorage(owner, toBytes(0));
+      // setStorage(owner, toBytes(0));
 
       // return toBytes(allowanceValue);
     }

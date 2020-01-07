@@ -10,9 +10,9 @@
     assemblyscript "https://github.com/AssemblyScript/assemblyscript.git"
 
 "@types/node@^12.12.17":
-  version "12.12.20"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.20.tgz#7b693038ce661fe57a7ffa4679440b5e7c5e8b99"
-  integrity sha512-VAe+DiwpnC/g448uN+/3gRl4th0BTdrR9gSLIOHA+SUQskaYZQDOHG7xmjiE7JUhjbXnbXytf6Ih+/pA6CtMFQ==
+  version "12.12.24"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.24.tgz#d4606afd8cf6c609036b854360367d1b2c78931f"
+  integrity sha512-1Ciqv9pqwVtW6FsIUKSZNB82E5Cu1I2bBTj1xuIHXLe/1zYLl3956Nbhg2MzSYHVfl9/rmanjbQIb7LibfCnug==
 
 arrify@^1.0.0:
   version "1.0.1"
@@ -29,9 +29,9 @@ assemblyscript@^0.8.1:
 
 "assemblyscript@https://github.com/AssemblyScript/assemblyscript.git":
   version "0.8.1"
-  resolved "https://github.com/AssemblyScript/assemblyscript.git#e2804df3ce84e501bcad7689debea4fca0790af8"
+  resolved "https://github.com/AssemblyScript/assemblyscript.git#dec4790ed070107d0da2087546e7901bbf839e63"
   dependencies:
-    binaryen "89.0.0-nightly.20191215"
+    binaryen "90.0.0-nightly.20200101"
     long "^4.0.0"
     source-map-support "^0.5.16"
     ts-node "^6.2.0"
@@ -45,10 +45,10 @@ binaryen@89.0.0-nightly.20191113:
   resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-89.0.0-nightly.20191113.tgz#a0d3914f35c929787341e02910b7ffaeb7d897a9"
   integrity sha512-scODswmj6Xf/Adjy1PRsjf8fHxpIIUYpH7HjKUaZ/RdZYjqB1Zq3X4izpLfcK+hKGNah92DpAJ3i/adEayMe9g==
 
-binaryen@89.0.0-nightly.20191215:
-  version "89.0.0-nightly.20191215"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-89.0.0-nightly.20191215.tgz#29899f65f2ea97573958911f126b2384069bb239"
-  integrity sha512-Do7CxyQGZEY5YvQnUtJJSLcM2L9IruGIogHJGga/hgEFSmSWkoiqNtOiK3Pzw1QIhVBaHw0Qpxs4DnxCdhqTLw==
+binaryen@90.0.0-nightly.20200101:
+  version "90.0.0-nightly.20200101"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-90.0.0-nightly.20200101.tgz#75fb065e4a2dd88852c2872085e05eee0883106c"
+  integrity sha512-64lgruunUnkJD4YVD0DLCSRskqfo3xhoErM1H22GfkkWNT16/7tPTLG+MYqKLMALTiIyLL6L9UqmDaxOxDv0rw==
 
 buffer-from@^1.0.0, buffer-from@^1.1.0:
   version "1.1.1"
@@ -115,9 +115,9 @@ ts-node@^6.2.0:
     yn "^2.0.0"
 
 typescript@^3.2.2:
-  version "3.7.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.3.tgz#b36840668a16458a7025b9eabfad11b66ab85c69"
-  integrity sha512-Mcr/Qk7hXqFBXMN7p7Lusj1ktCBydylfQM/FZCk5glCNQJrCUKPkMHdo9R0MTFWsC/4kPFvDS0fDPvukfCkFsw==
+  version "3.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
+  integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
 
 yn@^2.0.0:
   version "2.0.0"

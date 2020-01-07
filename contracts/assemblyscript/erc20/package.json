@@ -9,7 +9,7 @@
   "scripts": {
     "build:optimized": "asc assembly/index.ts -b build/erc20.wasm -t build/erc20.wat --importMemory --noAssert --use abort= --validate --optimize",
     "build:tsd": "asc assembly/index.ts -d build/index.d.ts",
-    "build": "yarn build:optimized && yarn build:tsd"
+    "build": "rm -rf build && mkdir build && yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
     "@chainsafe/as-sha256": "0.1.1",

@@ -168,7 +168,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const OSCAR = keyring.addFromSeed(randomAsU8a(32));
 
     await api.tx.balances
-      .transfer(DAN.address, CREATION_FEE.muln(500))
+      .transfer(DAN.address, CREATION_FEE.muln(5))
       .signAndSend(ALICE, (result: SubmittableResult): void => {
         if (result.status.isFinalized && result.findRecord("system", "ExtrinsicSuccess")) {
           console.log("DANs account is now funded.");
@@ -238,8 +238,10 @@ describe("AssemblyScript Smart Contracts", () => {
     frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
     const carolBalanceRaw = await getContractStorage(api, address, CAROL.publicKey);
     const carolBalance = hexToBn(carolBalanceRaw.toString(), true);
-    expect(frankieBalance.toString()).toBe(totalSupply.sub(new BN(2000000000000000)).toString());
+    let frankieBalanceNew = totalSupply.sub(new BN(2000000000000000));
+    expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
     expect(carolBalance.toString()).toBe("2000000000000000");
+    frankieBalance = frankieBalanceNew;
 
     /**
     * 5. FRANKIE approves withdrawal amount for new account DAN
@@ -279,18 +281,20 @@ describe("AssemblyScript Smart Contracts", () => {
       + u8aToHex(OSCAR.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
       + '80969800000000000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (10000000 in decimal)) value
 
-    await callContract(api, DAN, address, paramsTransferFrom);
+    await callContract(api, BOB, address, paramsTransferFrom);
 
     const testValueRaw = await getContractStorage(api, address, testStorage);
     console.log(testValueRaw)
 
+    frankieBalanceNew = frankieBalance.sub(new BN(10000000));
+
     frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
-    const frankieBalanceNew = hexToBn(frankieBalanceRaw.toString(), true);
+    frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
     oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
     oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
 
     expect(oscarBalance.toString()).toBe("10000000");
-    expect(frankieBalanceNew.toString()).toBe("50000000");
+    expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
 
     /**
     * 7. Check the allowance
