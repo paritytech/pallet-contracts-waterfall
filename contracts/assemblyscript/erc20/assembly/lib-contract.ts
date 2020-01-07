@@ -1,5 +1,7 @@
 /// <reference path="../node_modules/assemblyscript/std/assembly/index.d.ts" />
 
+import { hash } from "../node_modules/@chainsafe/as-sha256/assembly";
+
 import {
   getStorage
 } from './lib';
@@ -20,18 +22,17 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
   assert(false);
 }
 
-export function mergeToSha256(U8A1: Uint8Array, U8A2: Uint8Array): Uint8Array {
+export function mergeToSha256(account1: Uint8Array, account2: Uint8Array): Uint8Array {
   // Merging TypedArrays is not implemented in AssemblyScript yet.
   // That's why we need to read directly from memory
   // See https://stackoverflow.com/questions/59270312/concatenate-or-merge-typedarrays-in-assemblyscript
   // Also this PR https://github.com/AssemblyScript/assemblyscript/pull/1002
   
-  const storageKeyApprove = new Uint8Array(64);
-  const fromPtr = from.dataStart;
-  const toPtr = to.dataStart;
-  const keyPtr = storageKeyApprove.dataStart;
-  memory.copy(keyPtr, fromPtr, 32);
-  memory.copy(keyPtr + 32, toPtr, 32);
-
-  return storageKeyApprove
+  const storageKey = new Uint8Array(64);
+  const account1Ptr = account1.dataStart;
+  const account2Ptr = account2.dataStart;
+  const keyPtr = storageKey.dataStart;
+  memory.copy(keyPtr, account1Ptr, 32);
+  memory.copy(keyPtr + 32, account2Ptr, 32);
+  return(hash(storageKey));
 }

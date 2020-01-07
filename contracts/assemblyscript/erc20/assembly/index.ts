@@ -13,12 +13,15 @@ import {
 
 import {
   getBalanceOrZero,
+  mergeToSha256,
   toBytes
 } from "./lib-contract";
 
 /**
  *  Read the Ethereum ERC20 specs https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
  **/ 
+
+const testStorage = (new Uint8Array(32)).fill(71);
 
 const ERC20_SUPPLY_STORAGE = (new Uint8Array(32)).fill(3);
 
@@ -48,7 +51,7 @@ function handle(input: Uint8Array): Uint8Array {
       return getBalanceOrZero(owner);
     }
     case Action.Transfer: { // first byte: 0x02
-      // Transfers 'value' amount of tokens to address 'to',
+      // Transfers 'value' amount of tokens to address 'to'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const to = parameters.subarray(0,32);
       const value = u128.from(parameters.subarray(32,48));
@@ -65,72 +68,50 @@ function handle(input: Uint8Array): Uint8Array {
     case Action.TransferFrom: { // first byte: 0x03
       // Transfers 'value' amount of tokens from address 'from' to address 'to'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
-      const from = parameters.subarray(0,32);
-      const to = parameters.subarray(32,64);
+      const owner: Uint8Array = parameters.subarray(0,32);
+      const to: Uint8Array = parameters.subarray(32,64);
       const value = u128.from(parameters.subarray(64,80));
-      const balanceFrom = u128.from(getBalanceOrZero(from));
-      const balanceTo = u128.from(getBalanceOrZero(to));
+      const balanceOwner = getStorage(owner);
+      // const balanceTo = u128.from(getBalanceOrZero(to));
 
-      // Merging TypedArrays is not implemented in AssemblyScript yet.
-      // That's why we need to read directly from memory
-      // See https://stackoverflow.com/questions/59270312/concatenate-or-merge-typedarrays-in-assemblyscript
-      // Also this PR https://github.com/AssemblyScript/assemblyscript/pull/1002
-      const storageKeyApprove = new Uint8Array(64);
-      const fromPtr = from.dataStart;
-      const toPtr = to.dataStart;
-      const keyPtr = storageKeyApprove.dataStart;
-      memory.copy(keyPtr, fromPtr, 32);
-      memory.copy(keyPtr + 32, toPtr, 32);
+      // // Get the allowance 
+      const CALLER: Uint8Array = getCaller(); // The CALLER is the spender
+      const allowanceKey: Uint8Array = mergeToSha256(owner, CALLER);
+      // const allowance = getStorage(allowanceKey);
+      setStorage(testStorage, toBytes(allowanceKey));
+      // const allowance = getBalanceOrZero(allowanceKey);
+      
+      
 
-      // const sha256 = hash(storageKeyApprove);
-      // const allowance = u128.from(getBalanceOrZero(sha256));
-
-      // @TODO add allowance check here
-      if (u128.ge(balanceFrom,value)) {
-        setStorage(from, u128.sub(balanceFrom, value).toUint8Array());
-        setStorage(to, u128.add(balanceTo, value).toUint8Array());
-        // @TODO deduct from allowance
-      }
+      // // @TODO add allowance check here
+      // if (u128.ge(balanceFrom,value)) {
+      //   setStorage(from, u128.sub(balanceFrom, value).toUint8Array());
+      //   setStorage(to, u128.add(balanceTo, value).toUint8Array());
+      //   // @TODO deduct from allowance
+      // }
       break;
     }
     case Action.Approve: { // first byte: 0x04
       // Allows 'spender' to withdraw from your account multiple times, up to the 'value' amount
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const spender: Uint8Array = parameters.subarray(0,32);
-      const amount = parameters.subarray(32,48);
+      const amount: Uint8Array = parameters.subarray(32,48);
       const CALLER = getCaller();
 
-      // Merging TypedArrays is not implemented in AssemblyScript yet.
-      // That's why we need to read directly from memory
-      // See https://stackoverflow.com/questions/59270312/concatenate-or-merge-typedarrays-in-assemblyscript
-      // Also this PR https://github.com/AssemblyScript/assemblyscript/pull/1002
-      const storageKeyApprove = new Uint8Array(64);
-      const callerPtr = CALLER.dataStart;
-      const spenderPtr = spender.dataStart;
-      const keyPtr = storageKeyApprove.dataStart;
-      memory.copy(keyPtr, callerPtr, 32);
-      memory.copy(keyPtr + 32, spenderPtr, 32);
-
-      const sha256 = hash(storageKeyApprove);
+      // Create storage key for approved amount
+      const sha256: Uint8Array = mergeToSha256(CALLER, spender);
       setStorage(sha256, amount);
-
       break;
     }
     case Action.Allowance: { // first byte: 0x05
       // Returns the amount which 'spender' is still allowed to withdraw from 'owner'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 64);
-      const owner = parameters.subarray(0,32);
-      const spender = parameters.subarray(32,64);
+      const owner: Uint8Array = parameters.subarray(0,32);
+      const spender: Uint8Array = parameters.subarray(32,64);
 
-      // const storageKeyAllowance = new Uint8Array(64);
-      // const ownerPtr = owner.dataStart;
-      // const spenderPtr = spender.dataStart;
-      // const keyPtr = storageKeyAllowance.dataStart;
+      const allowanceKey: Uint8Array = mergeToSha256(owner, spender);
 
-      // memory.copy(keyPtr, ownerPtr, 32);
-      // memory.copy(keyPtr + 32, spenderPtr, spenderPtr);
-
-      // const allowance = getStorage(storageKeyAllowance);
+      // const allowance = getStorage(allowanceKey);
       // const allowanceDataView = new DataView(allowance.buffer);
       // const allowanceValue = allowanceDataView.byteLength ? allowanceDataView.getUint8(0) : 0;
 

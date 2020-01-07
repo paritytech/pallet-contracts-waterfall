@@ -31,6 +31,8 @@ import {
   putCode
 } from "./utils";
 
+const testStorage = (new Uint8Array(32)).fill(71);
+
 // This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: "sr25519" });
 const ALICE = keyring.getPair(ALICE_ADDRESS);
@@ -49,7 +51,7 @@ beforeEach(
     contractCreator = keyring.addFromSeed(randomSeed);
 
     return api.tx.balances
-      .transfer(contractCreator.address, CREATION_FEE.muln(3))
+      .transfer(contractCreator.address, CREATION_FEE.muln(5))
       .signAndSend(BOB, (result: SubmittableResult): void => {
         if (
           result.status.isFinalized &&
@@ -147,11 +149,11 @@ describe("AssemblyScript Smart Contracts", () => {
     /**
     * 1. Deploy & instantiate the contract
     * 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
-    * 3. Test if the CALLER storage holds the totalSupply of tokens
-    * 4. Use the transfer function to transfer some tokens from the callers account to a new address
-    * 5. Approve withdrawal amount for new 'spender' account
-    * 6. Use the transferFrom function to transfer some ERC20 tokens to a different account
-    * 7. Check the allowance of the spender account
+    * 3. Test if FRANKIES storage holds the totalSupply of tokens
+    * 4. Use the transfer function to transfer some tokens from the FRANKIES account to a new address CAROL
+    * 5. Approve withdrawal amount from FRANKIES account for new 'spender' account DAN
+    * 6. Use the transferFrom function to transfer some ERC20 tokens from FRANKIES to a new account OSCAR
+    * 7. Check the allowance of the spender account FRANKIE
     **/
 
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
@@ -166,7 +168,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const OSCAR = keyring.addFromSeed(randomAsU8a(32));
 
     await api.tx.balances
-      .transfer(DAN.address, CREATION_FEE.muln(3))
+      .transfer(DAN.address, CREATION_FEE.muln(500))
       .signAndSend(ALICE, (result: SubmittableResult): void => {
         if (result.status.isFinalized && result.findRecord("system", "ExtrinsicSuccess")) {
           console.log("DANs account is now funded.");
@@ -209,7 +211,7 @@ describe("AssemblyScript Smart Contracts", () => {
     expect(totalSupply.eq(CREATION_FEE)).toBeTruthy();
 
     /**
-    *  3. Test if the CALLER storage holds the totalSupply of tokens
+    *  3. Test if FRANKIES storage holds the totalSupply of tokens
     *
     * We know that the creator should own the total supply of the contract
     * after initialization. The return value should be of type Balance.
@@ -241,11 +243,14 @@ describe("AssemblyScript Smart Contracts", () => {
 
     /**
     * 5. FRANKIE approves withdrawal amount for new account DAN
-    **/ 
+    **/
+
+    // 16 bytes: Amount of tokens to transfer as u128 little endian hex (5000000000000000 in decimal)) value
+    const approvedAmount = '0080e03779c311000000000000000000';
     const paramsApprove = 
     '0x04' // 1 byte: First byte Action.Transfer
     + u8aToHex(DAN.publicKey, -1, false) // 32 bytes: Hex encoded new spender account address as u256
-    + '0080E03779C311000000000000000000'; // 16 bytes: Amount of tokens to transfer as u128 little endian hex (5000000000000000 in decimal)) value
+    + approvedAmount;
 
     await callContract(api, FRANKIE, address, paramsApprove);
 
@@ -255,10 +260,10 @@ describe("AssemblyScript Smart Contracts", () => {
     storageKeyApprove.set(FRANKIE.publicKey);
     storageKeyApprove.set(DAN.publicKey, 32);
     const storageKeyApprove32 = sha256(storageKeyApprove);
-
     const amount = await getContractStorage(api, address, storageKeyApprove32);
 
-    expect(amount.toString()).toBe('0x0080e03779c311000000000000000000');
+    expect(amount.toString()).toBe('0x' + approvedAmount);
+
 
     /**
     *  6. Use the transferFrom function to let DAN transfer 10000000 ERC20 tokens from FRANKIE to OSCAR
@@ -276,12 +281,16 @@ describe("AssemblyScript Smart Contracts", () => {
 
     await callContract(api, DAN, address, paramsTransferFrom);
 
+    const testValueRaw = await getContractStorage(api, address, testStorage);
+    console.log(testValueRaw)
+
     frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
-    frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
+    const frankieBalanceNew = hexToBn(frankieBalanceRaw.toString(), true);
     oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
     oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
 
     expect(oscarBalance.toString()).toBe("10000000");
+    expect(frankieBalanceNew.toString()).toBe("50000000");
 
     /**
     * 7. Check the allowance

@@ -60,12 +60,12 @@ beforeEach(
 );
 
 describe("Rust Smart Contracts", () => {
-  test.skip("Flip contract", async (done): Promise<void> => {
-    // const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
+  // Currently broken, needs fixing after ink! 2.0 update
+  test("Flip contract", async (done): Promise<void> => {
+    const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
 
-    const STORAGE_KEY = (new Uint8Array(32)).fill(1);
-    // @Todo: Get correct STORAGE_KEY from ink! The one on top is just a workaround to make this file compile 
-    // const STORAGE_KEY = '0xeb72c87e65bed3596d6fef83aeb784615cdac1be1328adf1c7336acd6ba9ff77';
+    // The storage key `0x0000000000000000000000000000000000000000000000000000000000000000` is copied over from the generated ink! contract metadata
+    const STORAGE_KEY = (new Uint8Array(32)).fill(0);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash: Hash = await putCode(
@@ -76,11 +76,12 @@ describe("Rust Smart Contracts", () => {
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
+    // The selector `0x0222FF18` is copied over from the generated ink! contract metadata
     const address: Address = await instantiate(
       api,
       testAccount,
       codeHash,
-      ["0x8C", "0x97", "0xDB", "0x39"],
+      "0x0222FF18",
       CREATION_FEE
     );
     expect(address).toBeDefined();
@@ -88,15 +89,14 @@ describe("Rust Smart Contracts", () => {
     const initialValue: Uint8Array = await getContractStorage(
       api,
       address,
-      // @ts-ignore
       STORAGE_KEY
     );
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x00");
 
-    await callContract(api, testAccount, address, ["0x8C","0x97","0xDB","0x39"]);
+    // The selector `0x8C97DB39` is copied over from the generated ink! contract metadata
+    await callContract(api, testAccount, address, '0x8C97DB39');
 
-    // @ts-ignore
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
 
@@ -129,10 +129,6 @@ describe("Rust Smart Contracts", () => {
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
 
-    // Call contract with Action: 0x01 to get the value from storage = Action::Get()
-    const test = await callContract(api, testAccount, address, "0x01");
-    console.log(test)
-
     done();
   });
 
@@ -146,7 +142,7 @@ describe("Rust Smart Contracts", () => {
     // 6. restores the contract
     // 7. checks that the restored contract is equivalent to the evicted.
 
-    const STORAGE_KEY = (new Uint8Array(32)).fill(1);;
+    const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash: Hash = await putCode(
@@ -210,7 +206,7 @@ describe("Rust Smart Contracts", () => {
     expect(restoredAddress).toBeDefined();
 
     // 5. performs calls that rebuild the state of the evicted contract
-    const encodedPutAction =
+    let encodedPutAction =
       "0x00" + // idx:  0x00 = Action::Inc
       "01010101010101010101010101010101010101010101010101010101010101010110" + // storage key
       "2a000000"; // // little endian 32-bit integer, decimal number `42` toHex() === `2a`
