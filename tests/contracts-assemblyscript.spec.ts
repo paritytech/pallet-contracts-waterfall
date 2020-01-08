@@ -31,8 +31,6 @@ import {
   putCode
 } from "./utils";
 
-const testStorage = (new Uint8Array(32)).fill(95);
-
 // This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: "sr25519" });
 const ALICE = keyring.getPair(ALICE_ADDRESS);
@@ -145,7 +143,7 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test.only("Raw Erc20 contract", async (done): Promise<void> => {
+  test("Raw Erc20 contract", async (done): Promise<void> => {
     /**
     * 1. Deploy & instantiate the contract
     * 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
@@ -153,7 +151,6 @@ describe("AssemblyScript Smart Contracts", () => {
     * 4. Use the transfer function to transfer some tokens from the FRANKIES account to a new address CAROL
     * 5. Approve withdrawal amount from FRANKIES account for new 'spender' account DAN
     * 6. Use the transferFrom function to transfer some ERC20 tokens from FRANKIES to a new account OSCAR
-    * 7. Check the allowance of the spender account FRANKIE
     **/
 
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
@@ -262,12 +259,9 @@ describe("AssemblyScript Smart Contracts", () => {
     storageKeyApprove.set(FRANKIE.publicKey);
     storageKeyApprove.set(DAN.publicKey, 32);
     const storageKeyApprove32 = sha256(storageKeyApprove);
-    const amount = await getContractStorage(api, address, storageKeyApprove32);
+    let allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
 
-    const testValueRaw4 = await getContractStorage(api, address, testStorage);
-    console.log('0x04',testValueRaw4.toU8a())
-
-    expect(amount.toString()).toBe('0x' + approvedAmount);
+    expect(allowanceRaw.toString()).toBe('0x' + approvedAmount);
 
 
     /**
@@ -286,9 +280,6 @@ describe("AssemblyScript Smart Contracts", () => {
 
     await callContract(api, DAN, address, paramsTransferFrom);
 
-    const testValueRaw3 = await getContractStorage(api, address, testStorage);
-    console.log('0x03',testValueRaw3.toU8a())
-
     frankieBalanceNew = frankieBalance.sub(new BN(10000000));
 
     frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
@@ -296,25 +287,14 @@ describe("AssemblyScript Smart Contracts", () => {
     oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
     oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
 
+    // Test that value has been deducted from the approved amount
+    const allowanceUpdated = hexToBn(allowanceRaw.toString(), true).sub(new BN(10000000));
+    allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
+    let allowance = hexToBn(allowanceRaw.toString(), true);
+    expect(allowance.toString()).toBe(allowanceUpdated.toString());
+
     expect(oscarBalance.toString()).toBe("10000000");
     expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
-
-    /**
-    * 7. Check the allowance
-    **/
-
-    const paramsAllowance = 
-    '0x05' // 1 byte: First byte Action.Transfer
-    + u8aToHex(FRANKIE.publicKey, -1, false) // 32 bytes: Hex encoded caller account address as u256
-    + u8aToHex(DAN.publicKey, -1, false); // 32 bytes: Hex encoded spender account address as u256
-
-    await callContract(api, FRANKIE, address, paramsAllowance);
-
-    frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
-    frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
-
-    const testValueRaw5 = await getContractStorage(api, address, testStorage);
-    console.log('0x05',testValueRaw5.toU8a())
 
     done();
   });

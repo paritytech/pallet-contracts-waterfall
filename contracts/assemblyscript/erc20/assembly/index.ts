@@ -22,8 +22,6 @@ import {
  *  Read the Ethereum ERC20 specs https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20.md
  **/ 
 
-const testStorage = (new Uint8Array(32)).fill(95);
-
 const ERC20_SUPPLY_STORAGE = (new Uint8Array(32)).fill(3);
 
 enum Action {
@@ -67,7 +65,6 @@ function handle(input: Uint8Array): Uint8Array {
       break;
     }
     case Action.TransferFrom: { // first byte: 0x03
-      setStorage(testStorage, toBytes(55));
       // Transfers 'value' amount of tokens from address 'owner' to address 'to'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
       const owner: Uint8Array = parameters.subarray(0,32);
@@ -78,19 +75,17 @@ function handle(input: Uint8Array): Uint8Array {
       const balanceTo: u128 = u128.from(getBalanceOrZero(to));
 
       // Get the allowance 
-      // const allowanceKey: Uint8Array = mergeToSha256(owner, CALLER);
-      // setStorage(testStorage, allowanceKey);
+      const allowanceKey: Uint8Array = mergeToSha256(owner, CALLER);
+      const allowance: u128 = u128.from(getBalanceOrZero(allowanceKey));
 
-      // @TODO add allowance check here
-      if (u128.ge(balanceOwner,value)) {
+      if (u128.ge(balanceOwner,value) && u128.ge(allowance,value)) {
         setStorage(owner, u128.sub(balanceOwner, value).toUint8Array());
         setStorage(to, u128.add(balanceTo, value).toUint8Array());
-        //  @TODO deduct from allowance
+        setStorage(allowanceKey, u128.sub(allowance, value).toUint8Array());
       }
       break;
     }
     case Action.Approve: { // first byte: 0x04
-      setStorage(testStorage, toBytes(0));
       // Allows 'spender' to withdraw from your account multiple times, up to the 'value' amount
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const spender: Uint8Array = parameters.subarray(0,32);
@@ -99,22 +94,17 @@ function handle(input: Uint8Array): Uint8Array {
 
       // Create storage key for approved amount
       const allowanceKey: Uint8Array = mergeToSha256(CALLER, spender);
-      setStorage(testStorage, allowanceKey);
       setStorage(allowanceKey, amount);
       break;
     }
     case Action.Allowance: { // first byte: 0x05
-      setStorage(testStorage, toBytes(0));
       // Returns the amount which 'spender' is still allowed to withdraw from 'owner'
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 64);
       const owner: Uint8Array = parameters.subarray(0,32);
       const spender: Uint8Array = parameters.subarray(32,64);
 
       const allowanceKey: Uint8Array = mergeToSha256(owner, spender);
-
-      setStorage(testStorage, allowanceKey);
-      // setStorage(owner, toBytes(0));
-      // return toBytes(0);
+      return getBalanceOrZero(allowanceKey);
     }
     case Action.SelfEvict: // first byte: 0x06
       const allowance = u128.from<u32>(0);
