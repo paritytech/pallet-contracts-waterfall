@@ -5,6 +5,7 @@ import {
   ext_balance,
   ext_caller,
   ext_get_storage,
+  ext_println,
   ext_scratch_read,
   ext_scratch_size,
   ext_scratch_write,
@@ -33,6 +34,13 @@ export function getValueTransferred(): Uint8Array {
   ext_value_transferred();
   return getScratchBuffer();
 }
+
+export function printLine(value: string): void {
+  const string = String.UTF8.encode(value);
+  const stringArray = Uint8Array.wrap(string);
+  ext_println(stringArray.dataStart, string.byteLength);
+}
+
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
   if(key.length === 32) {

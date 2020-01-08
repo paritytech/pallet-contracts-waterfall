@@ -6,6 +6,7 @@ import {
   getScratchBuffer,
   getStorage,
   getValueTransferred,
+  printLine,
   setRentAllowance,
   setScratchBuffer,
   setStorage
