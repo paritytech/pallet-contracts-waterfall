@@ -296,8 +296,8 @@ describe("AssemblyScript Smart Contracts", () => {
     oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
     oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
 
-    //expect(oscarBalance.toString()).toBe("10000000");
-    //expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
+    expect(oscarBalance.toString()).toBe("10000000");
+    expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
 
     /**
     * 7. Check the allowance
