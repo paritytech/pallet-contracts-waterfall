@@ -30,8 +30,7 @@ enum Action {
   Transfer, // -> bool
   TransferFrom, // -> bool
   Approve, // -> bool
-  Allowance, // -> Balance
-  SelfEvict
+  Allowance // -> Balance
 }
 
 function handle(input: Uint8Array): Uint8Array {
@@ -106,10 +105,6 @@ function handle(input: Uint8Array): Uint8Array {
       const allowanceKey: Uint8Array = mergeToSha256(owner, spender);
       return getBalanceOrZero(allowanceKey);
     }
-    case Action.SelfEvict: // first byte: 0x06
-      const allowance = u128.from<u32>(0);
-      setRentAllowance(allowance);
-      break;
   }
   return value;
 }
