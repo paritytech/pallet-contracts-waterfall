@@ -2,7 +2,7 @@
 //
 // We're using these module function declarations in our lib.ts file
 // If these functions are not used by our AssemblyScript module, they will not be included
-// in the compiled wat ans wasm files.
+// in the compiled wat and wasm files.
 
 
 export declare function ext_balance(): void;
