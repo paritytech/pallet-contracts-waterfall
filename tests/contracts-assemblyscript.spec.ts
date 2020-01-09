@@ -136,10 +136,6 @@ describe("AssemblyScript Smart Contracts", () => {
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     // const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toBe("0x2a000000");
-
-    const currentValue =  await callContract(api, contractCreator, address, "0x01");
-    console.log(currentValue)
-
     done();
   });
 
@@ -151,6 +147,7 @@ describe("AssemblyScript Smart Contracts", () => {
     * 4. Use the transfer function to transfer some tokens from the FRANKIES account to a new address CAROL
     * 5. Approve withdrawal amount from FRANKIES account for new 'spender' account DAN
     * 6. Use the transferFrom function to transfer some ERC20 tokens from FRANKIES to a new account OSCAR
+    * 7. Use the transferFrom to let DAN try to transfer the full original allowance from FRANKIE to OSCAR. This attempt should fail.
     **/
 
     const TOTAL_SUPPLY_STORAGE_KEY = (new Uint8Array(32)).fill(3);
@@ -295,6 +292,33 @@ describe("AssemblyScript Smart Contracts", () => {
 
     expect(oscarBalance.toString()).toBe("10000000");
     expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
+
+    /**
+    *  7. Use the transferFrom function to let DAN try to transfer the full original allowance from FRANKIE to OSCAR. This attempt should fail now, because that value would be higher than the remaining allowance from FRANKIE to DAN.
+    **/
+
+   const paramsTransferFromFail = 
+     '0x03' // 1 byte: First byte Action.TransferFrom
+     + u8aToHex(FRANKIE.publicKey, -1, false) // 32 bytes: Hex encoded contract caller address as u256
+     + u8aToHex(OSCAR.publicKey, -1, false) // 32 bytes: Hex encoded new account address as u256
+     + approvedAmount; // 16 bytes: Amount of tokens to transfer as u128 little endian hex value
+
+   await callContract(api, DAN, address, paramsTransferFromFail);
+
+   frankieBalanceRaw = await getContractStorage(api, address, FRANKIE.publicKey);
+   frankieBalance = hexToBn(frankieBalanceRaw.toString(), true);
+   oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
+   oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
+
+  // The balances of FRANKIE and OSCAR are remaining the same 
+   expect(oscarBalance.toString()).toBe("10000000");
+   expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
+
+   // Test that the allowance hasn't changed
+   const allowanceOld = allowance;
+   allowanceRaw= await getContractStorage(api, address, storageKeyApprove32);
+   allowance = hexToBn(allowanceRaw.toString(), true);
+   expect(allowanceOld.toString()).toBe(allowance.toString());
 
     done();
   });
