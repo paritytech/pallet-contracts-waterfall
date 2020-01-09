@@ -310,13 +310,13 @@ describe("AssemblyScript Smart Contracts", () => {
    oscarBalanceRaw = await getContractStorage(api, address, OSCAR.publicKey);
    oscarBalance = hexToBn(oscarBalanceRaw.toString(), true);
 
-  // The balances of FRANKIE and OSCAR are remaining the same 
+   // The balances of FRANKIE and OSCAR are remaining the same 
    expect(oscarBalance.toString()).toBe("10000000");
    expect(frankieBalance.toString()).toBe(frankieBalanceNew.toString());
 
    // Test that the allowance hasn't changed
    const allowanceOld = allowance;
-   allowanceRaw= await getContractStorage(api, address, storageKeyApprove32);
+   allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
    allowance = hexToBn(allowanceRaw.toString(), true);
    expect(allowanceOld.toString()).toBe(allowance.toString());
 
