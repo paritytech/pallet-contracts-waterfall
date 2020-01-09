@@ -316,7 +316,7 @@ describe("AssemblyScript Smart Contracts", () => {
 
    // Test that the allowance hasn't changed
    const allowanceOld = allowance;
-   allowanceRaw= await getContractStorage(api, address, storageKeyApprove32);
+   allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
    allowance = hexToBn(allowanceRaw.toString(), true);
    expect(allowanceOld.toString()).toBe(allowance.toString());
 
