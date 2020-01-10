@@ -85,7 +85,7 @@ function handle(input: Uint8Array): Uint8Array {
       break;
     }
     case Action.Approve: { // first byte: 0x04
-      // Allows 'spender' to withdraw from your account multiple times, up to the 'value' amount
+      // Allows 'spender' to withdraw from a callers account multiple times, up to the 'value' amount
       const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
       const spender: Uint8Array = parameters.subarray(0,32);
       const amount: Uint8Array = parameters.subarray(32,48);
