@@ -98,9 +98,14 @@ export async function getContractStorage(
     contractAddress
   );
   // Return the value of the contracts storage
+  const childStorageKey = (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId;
+  const childInfo = childStorageKey.subarray(childStorageKey.byteLength -32, childStorageKey.byteLength);
+
   const storageKeyBlake2b = blake.blake2bHex(storageKey, null, 32);
   return await api.rpc.state.getChildStorage(
-    (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
-    '0x' + storageKeyBlake2b
+      childStorageKey, // trieId
+      childInfo, // trieId without `:child_storage:` prefix
+      '0x01', // substrate default value `1`
+      '0x' + storageKeyBlake2b // hashed storageKey
   );
 }
