@@ -12,7 +12,7 @@ import {
 // This simple dummy contract has a `bool` value that can
 // alter between `true` and `false` using the `flip` message.
 
-const FLIPPER_KEY = new Uint8Array(32).fill(2); // [2,2,2, ... 2]
+const FLIPPER_KEY = (new Uint8Array(32)).fill(2); // [2,2,2, ... 2]
 
 enum Action {
   Flip,

@@ -15,3 +15,4 @@ wee_alloc = "0.4"
 [profile.release]
 panic = "abort"
 lto = true
+opt= "z"

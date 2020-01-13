@@ -5,7 +5,7 @@ import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import fs from "fs";
 import path from "path";
-const blake = require('blakejs')
+const blake = require('blakejs');
 
 import { GAS_REQUIRED } from "./consts";
 
@@ -86,6 +86,7 @@ export async function callContract(
     gasRequired,
     inputData
   );
+
   await sendAndReturnFinalized(signer, tx);
 }
 
