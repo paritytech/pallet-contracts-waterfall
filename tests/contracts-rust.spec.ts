@@ -15,7 +15,6 @@
 // along with Substrate. If not, see <http://www.gnu.org/licenses/>.
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
-import { Abi } from '@polkadot/api-contract';
 import testKeyring from "@polkadot/keyring/testing";
 import { u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
