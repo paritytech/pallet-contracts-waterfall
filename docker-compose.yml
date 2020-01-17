@@ -17,8 +17,8 @@ version: "3.7"
 services:
   substrate-master:
     # image: parity/substrate:2.0.0-c2fccb3 # 2019-12-27
-    # image: parity/substrate:latest
-    image: parity/substrate:2.0.0-b5414b6 # 2019-12-10
+    image: parity/substrate:latest
+    # image: parity/substrate:2.0.0-b5414b6 # 2019-12-10
     ports:
       - "9944:9944"
       - "9933:9933"
