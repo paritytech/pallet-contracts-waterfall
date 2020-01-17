@@ -29,6 +29,6 @@
     "preset": "ts-jest/presets/js-with-ts"
   },
   "scripts": {
-    "test": "NODE_ENV=abc jest"
+    "test": "NODE_ENV=a yarn run jest"
   }
 }
