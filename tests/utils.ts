@@ -2,6 +2,7 @@ import { ApiPromise, SubmittableResult } from "@polkadot/api";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Option, StorageData } from "@polkadot/types";
 import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
+import { u8aToHex } from "@polkadot/util";
 import BN from "bn.js";
 import fs from "fs";
 import path from "path";
@@ -98,10 +99,16 @@ export async function getContractStorage(
   const contractInfo = await api.query.contracts.contractInfoOf(
     contractAddress
   );
+
   // Return the value of the contracts storage
+  const childStorageKey = (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId;
+  const childInfo = childStorageKey.subarray(childStorageKey.byteLength -32, childStorageKey.byteLength);
   const storageKeyBlake2b = blake.blake2bHex(storageKey, null, 32);
+
   return await api.rpc.state.getChildStorage(
-    (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId,
-    '0x' + storageKeyBlake2b
+    u8aToHex(childStorageKey), // trieId
+    u8aToHex(childInfo), // trieId without `:child_storage:` prefix
+    1, // substrate default value `1`
+    '0x' + storageKeyBlake2b // hashed storageKey
   );
 }
