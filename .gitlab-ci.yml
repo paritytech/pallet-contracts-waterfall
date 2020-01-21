@@ -54,10 +54,10 @@ build-and-test:
     - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
     - cargo contract -V
   needs:
-    - project: parity/substrate
-    job: build-linux-substrate
-    ref: master
-    artifacts: true
+    project:                       parity/substrate
+    job:                           build-linux-substrate
+    ref:                           master
+    artifacts:                     true
   script:
     - ls -la
     - unzip artifacts.zip || echo "no archive"
