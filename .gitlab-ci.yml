@@ -73,7 +73,9 @@ build-and-test:
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/erc20
-    - yarn && yarn build
+    - yarn
+    - yarn add assemblyscript
+    - yarn build
     - ./build.sh
     - cd -
     - echo "_____Downloading the latest nightly Substrate_____"
