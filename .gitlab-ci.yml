@@ -67,11 +67,15 @@ build-and-test:
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/flipper
-    - yarn && yarn build
+    - yarn
+    - yarn add assemblyscript
+    - yarn build
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/incrementer
-    - yarn && yarn build
+    - yarn
+    - yarn add assemblyscript
+    - yarn build
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/erc20
@@ -81,20 +85,12 @@ build-and-test:
     - ./build.sh
     - cd -
     - echo "_____Downloading the latest nightly Substrate_____"
-<<<<<<< HEAD
-    # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location
-=======
     # CI passes with this and below versions until the issue is solved: https://github.com/paritytech/srml-contracts-waterfall/issues/27
     # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location 
->>>>>>> e4d8829b4e3bc44382b15104fb70a4067336c3de
     # master from gitlab
     # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location 
     # published master
-<<<<<<< HEAD
     - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
-=======
-    - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate" --output substrate --location 
->>>>>>> e4d8829b4e3bc44382b15104fb70a4067336c3de
     - chmod +x ./substrate
     - export SUBSTRATE_PATH="./substrate"
     - $SUBSTRATE_PATH --version
