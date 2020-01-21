@@ -1,5 +1,3 @@
-#!/bin/bash
-
 set -e
 
 cd lib/ink/examples/lang2/flipper
@@ -17,18 +15,21 @@ cd -
 
 cd contracts/assemblyscript/flipper
 rm -rf build
+yarn add assemblyscript # After a version update AS seems to not get installed correctly from yarn.lock/ package.json
 yarn && yarn build
 ./build.sh
 cd -
 
 cd contracts/assemblyscript/incrementer
 rm -rf build
+yarn add assemblyscript # After a version update AS seems to not get installed correctly from yarn.lock/ package.json
 yarn && yarn build
 ./build.sh
 cd -
 
 cd contracts/assemblyscript/erc20
 rm -rf build
+yarn add assemblyscript # After a version update AS seems to not get installed correctly from yarn.lock/ package.json
 yarn && yarn build
 ./build.sh
 cd -
