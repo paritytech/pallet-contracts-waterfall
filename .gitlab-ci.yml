@@ -47,7 +47,7 @@ build-and-test:
   stage:                           build
   <<:                              *docker-env
   needs:
-    project:                       parity/substrate
+    - project:                     parity/substrate
     job:                           build-linux-substrate
     ref:                           master
     artifacts:                     true
