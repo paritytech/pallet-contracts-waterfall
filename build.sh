@@ -17,13 +17,17 @@ cd -
 
 cd contracts/assemblyscript/flipper
 rm -rf build
-yarn && yarn build
+yarn
+yarn add assemblyscript
+yarn build
 ./build.sh
 cd -
 
 cd contracts/assemblyscript/incrementer
 rm -rf build
-yarn && yarn build
+yarn
+yarn add assemblyscript
+yarn build
 ./build.sh
 cd -
 
