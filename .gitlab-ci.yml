@@ -46,6 +46,11 @@ variables:
 build-and-test:
   stage:                           build
   <<:                              *docker-env
+  needs:
+    project:                       parity/substrate
+    job:                           build-linux-substrate
+    ref:                           master
+    artifacts:                     true
   before_script:
     # upstream CI can override global vars here
     - unset CARGO_TARGET_DIR
@@ -53,13 +58,10 @@ build-and-test:
     - cargo contract -V
     - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
     - cargo contract -V
-  needs:
-    project:                       parity/substrate
-    job:                           build-linux-substrate
-    ref:                           master
-    artifacts:                     true
   script:
     - ls -la
+    - find / -type f -name "substrate" || echo $?
+    - find / -type f -iname "*.zip" || echo $?
     - unzip artifacts.zip || echo "no archive"
     - ls -la ./artifacts/substrate/substrate || echo "oops"
     - chmod +x ./artifacts/substrate/substrate || echo "nop not here"
@@ -95,7 +97,6 @@ build-and-test:
     - yarn build
     - ./build.sh
     - cd -
-    - $SUBSTRATE_PATH --version
     - echo "_____Running dev node and tests_____"
     # - ./test.sh
     - echo "_____Purging dev chain_____"
