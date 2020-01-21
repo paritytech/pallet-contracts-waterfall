@@ -53,7 +53,18 @@ build-and-test:
     - cargo contract -V
     - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
     - cargo contract -V
+  needs:
+    - project: parity/substrate
+    job: build-linux-substrate
+    ref: master
+    artifacts: true
   script:
+    - ls -la
+    - unzip artifacts.zip || echo "no archive"
+    - ls -la ./artifacts/substrate/substrate || echo "oops"
+    - chmod +x ./artifacts/substrate/substrate || echo "nop not here"
+    - export SUBSTRATE_PATH="./artifacts/substrate/substrate"
+    - $SUBSTRATE_PATH --version || echo "in vain"
     - echo "_____Building contracts_____"
     # - ./build.sh
     - cd lib/ink/examples/lang2/flipper
@@ -84,15 +95,6 @@ build-and-test:
     - yarn build
     - ./build.sh
     - cd -
-    - echo "_____Downloading the latest nightly Substrate_____"
-    # CI passes with this and below versions until the issue is solved: https://github.com/paritytech/srml-contracts-waterfall/issues/27
-    # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location 
-    # master from gitlab
-    # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location 
-    # published master
-    - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
-    - chmod +x ./substrate
-    - export SUBSTRATE_PATH="./substrate"
     - $SUBSTRATE_PATH --version
     - echo "_____Running dev node and tests_____"
     # - ./test.sh
