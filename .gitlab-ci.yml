@@ -67,11 +67,21 @@ build-and-test:
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/flipper
-    - yarn && yarn build
+    - yarn
+    - yarn add assemblyscript
+    - yarn build
     - ./build.sh
     - cd -
     - cd contracts/assemblyscript/incrementer
-    - yarn && yarn build
+    - yarn
+    - yarn add assemblyscript
+    - yarn build
+    - ./build.sh
+    - cd -
+    - cd contracts/assemblyscript/erc20
+    - yarn
+    - yarn add assemblyscript
+    - yarn build
     - ./build.sh
     - cd -
     - echo "_____Downloading the latest nightly Substrate_____"
@@ -80,7 +90,7 @@ build-and-test:
     # master from gitlab
     # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location 
     # published master
-    - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate" --output substrate --location 
+    - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
     - chmod +x ./substrate
     - export SUBSTRATE_PATH="./substrate"
     - $SUBSTRATE_PATH --version
