@@ -1,7 +1,7 @@
 
-# srml-contracts test site
+# pallet-contracts test site
 
-This repo hosts tests for `srml-contracts`.
+This repo hosts tests for `pallet-contracts`.
 
 # Preparations
 
