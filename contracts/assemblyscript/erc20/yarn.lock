@@ -19,6 +19,11 @@ arrify@^1.0.0:
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
   integrity sha1-iYUI2iIm84DfkEcoRWhJwVAaSw0=
 
+as-bignum@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/as-bignum/-/as-bignum-0.1.5.tgz#e97a46a175644c277ecfe17d3850a63b6e55ac44"
+  integrity sha512-lv0ZOxtBReuCq6wpXUtjm6Mrj7CQn+qdSgF/O7yh553aH4FRrRaUXp/ywfSNMoiPK7AJ47f9gcKs0Toi5H84iA==
+
 assemblyscript@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.8.1.tgz#c5c627492406e6d87f426897b3d92bd2a533f7fe"
@@ -35,10 +40,6 @@ assemblyscript@^0.8.1:
     long "^4.0.0"
     source-map-support "^0.5.16"
     ts-node "^6.2.0"
-
-bignum@MaxGraey/bignum.wasm:
-  version "0.1.1"
-  resolved "https://codeload.github.com/MaxGraey/bignum.wasm/tar.gz/6b12097f362a20f1f920ae516f5473f5ab71a64e"
 
 binaryen@89.0.0-nightly.20191113:
   version "89.0.0-nightly.20191113"
