@@ -18,7 +18,7 @@ cd -
 cd contracts/assemblyscript/flipper
 rm -rf build
 yarn
-yarn add assemblyscript
+yarn add assemblyscript # This shouldn't be needed, but after a version update AS seems to not get installed correctly from yarn.lock/ package.json
 yarn build
 ./build.sh
 cd -
@@ -26,7 +26,7 @@ cd -
 cd contracts/assemblyscript/incrementer
 rm -rf build
 yarn
-yarn add assemblyscript
+yarn add assemblyscript # This shouldn't be needed, but after a version update AS seems to not get installed correctly from yarn.lock/ package.json
 yarn build
 ./build.sh
 cd -
@@ -34,7 +34,7 @@ cd -
 cd contracts/assemblyscript/erc20
 rm -rf build
 yarn
-yarn add assemblyscript
+yarn add assemblyscript # This shouldn't be needed, but after a version update AS seems to not get installed correctly from yarn.lock/ package.json
 yarn build
 ./build.sh
 cd -
