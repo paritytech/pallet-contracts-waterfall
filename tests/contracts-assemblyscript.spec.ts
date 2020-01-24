@@ -64,7 +64,7 @@ beforeEach(
 
 describe("AssemblyScript Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
-    // See https://github.com/paritytech/srml-contracts-waterfall/issues/6 for info about
+    // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(2);
