@@ -40,7 +40,7 @@ let contractCreator: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
-  jest.setTimeout(30000);
+  jest.setTimeout(25000);
 });
 
 beforeEach(
