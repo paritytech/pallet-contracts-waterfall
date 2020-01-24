@@ -30,7 +30,7 @@ import {
   putCode
 } from "./utils";
 
-// This is a test account that is going to be created and funded before each test.
+// This is a test account that is going to be created and funded each test.
 const keyring = testKeyring({ type: "sr25519" });
 const alicePair = keyring.getPair(ALICE);
 let testAccount: KeyringPair;
