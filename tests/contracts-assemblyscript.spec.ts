@@ -31,7 +31,7 @@ import {
   putCode
 } from "./utils";
 
-// This is a test account that is going to be created and funded each test.
+// This is a test account that is going to be created and funded before each test.
 const keyring = testKeyring({ type: "sr25519" });
 const ALICE = keyring.getPair(ALICE_ADDRESS);
 const BOB = keyring.getPair(BOB_ADDRESS);
