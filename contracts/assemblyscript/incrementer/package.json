@@ -12,8 +12,8 @@
     "build": "yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
-    "assemblyscript": "^0.8.1",
-    "bignum": "MaxGraey/bignum.wasm"
+    "as-bignum": "^0.1.5",
+    "assemblyscript": "^0.8.1"
   },
   "devDependencies": {
     "@types/node": "^10.17.2",

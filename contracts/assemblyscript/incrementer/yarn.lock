@@ -7,6 +7,11 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.5.tgz#c1920150f7b90708a7d0f3add12a06bc9123c055"
   integrity sha512-RElZIr/7JreF1eY6oD5RF3kpmdcreuQPjg5ri4oQ5g9sq7YWU8HkfB3eH8GwAwxf5OaCh0VPi7r4N/yoTGelrA==
 
+as-bignum@^0.1.5:
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/as-bignum/-/as-bignum-0.1.5.tgz#e97a46a175644c277ecfe17d3850a63b6e55ac44"
+  integrity sha512-lv0ZOxtBReuCq6wpXUtjm6Mrj7CQn+qdSgF/O7yh553aH4FRrRaUXp/ywfSNMoiPK7AJ47f9gcKs0Toi5H84iA==
+
 assemblyscript@^0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.8.1.tgz#c5c627492406e6d87f426897b3d92bd2a533f7fe"
@@ -14,10 +19,6 @@ assemblyscript@^0.8.1:
   dependencies:
     binaryen "89.0.0-nightly.20191113"
     long "^4.0.0"
-
-bignum@MaxGraey/bignum.wasm:
-  version "0.1.1"
-  resolved "https://codeload.github.com/MaxGraey/bignum.wasm/tar.gz/6b12097f362a20f1f920ae516f5473f5ab71a64e"
 
 binaryen@89.0.0-nightly.20191113:
   version "89.0.0-nightly.20191113"
