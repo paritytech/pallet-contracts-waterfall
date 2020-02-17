@@ -1,4 +1,4 @@
-import { u128 } from "bignum";
+import { u128 } from "as-bignum";
 
 import {
   getScratchBuffer,

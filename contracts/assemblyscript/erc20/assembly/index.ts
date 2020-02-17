@@ -1,4 +1,4 @@
-import { u128 } from "bignum";
+import { u128 } from "as-bignum";
 import { hash } from "../node_modules/@chainsafe/as-sha256/assembly";
 
 import {

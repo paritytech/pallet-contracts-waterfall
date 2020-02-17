@@ -1,4 +1,4 @@
-// Declaration of imported host functions from substrate srml-contracts
+// Declaration of imported host functions from substrate pallet-contracts
 //
 // We're using these module function declarations in our lib.ts file
 // If these functions are not used by our AssemblyScript module, they will not be included
