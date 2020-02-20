@@ -2,15 +2,15 @@
   "name": "srml-contract-waterfall",
   "version": "1.0.0",
   "main": "index.js",
-  "author": "Sergey Shulepov <sergei@parity.io>",
   "contributors": [
+    "Sergey Shulepov <sergei@parity.io>",
     "Stefanie Doll <stefie@parity.io>"
   ],
   "license": "MIT",
   "dependencies": {
     "@chainsafe/as-sha256": "^0.1.3",
-    "@polkadot/api": "^1.0.0-beta.7",
-    "@polkadot/api-contract": "^1.0.0-beta.7",
+    "@polkadot/api": "beta",
+    "@polkadot/api-contract": "beta",
     "blakejs": "^1.1.0",
     "typescript": "^3.6.4"
   },
