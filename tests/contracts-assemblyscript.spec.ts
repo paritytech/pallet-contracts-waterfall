@@ -22,7 +22,7 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import sha256 from "@chainsafe/as-sha256";
-
+ 
 import { ALICE as ALICE_ADDRESS, BOB as BOB_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
@@ -40,7 +40,7 @@ let contractCreator: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
-  jest.setTimeout(30000);
+  jest.setTimeout(70000);
 });
 
 beforeEach(
@@ -255,7 +255,10 @@ describe("AssemblyScript Smart Contracts", () => {
     const storageKeyApprove = new Uint8Array(64);
     storageKeyApprove.set(FRANKIE.publicKey);
     storageKeyApprove.set(DAN.publicKey, 32);
-    const storageKeyApprove32 = sha256(storageKeyApprove);
+
+    let hash: Uint8Array;
+ 
+    const storageKeyApprove32: Uint8Array = sha256(storageKeyApprove);
     let allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
 
     expect(allowanceRaw.toString()).toBe('0x' + approvedAmount);

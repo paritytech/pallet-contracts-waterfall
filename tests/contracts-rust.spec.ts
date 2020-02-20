@@ -37,7 +37,7 @@ let testAccount: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
-  jest.setTimeout(30000);
+  jest.setTimeout(100000);
 });
 
 beforeEach(
