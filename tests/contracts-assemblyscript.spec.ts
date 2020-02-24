@@ -40,7 +40,7 @@ let contractCreator: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
-  jest.setTimeout(70000);
+  jest.setTimeout(30000);
 });
 
 beforeEach(
@@ -52,7 +52,7 @@ beforeEach(
       .transfer(contractCreator.address, CREATION_FEE.muln(5))
       .signAndSend(BOB, (result: SubmittableResult): void => {
         if (
-          result.status.isFinalized &&
+          result.status.isInBlock &&
           result.findRecord("system", "ExtrinsicSuccess")
         ) {
           console.log("New test account has been created.");
@@ -164,7 +164,7 @@ describe("AssemblyScript Smart Contracts", () => {
     await api.tx.balances
       .transfer(DAN.address, CREATION_FEE.muln(5))
       .signAndSend(ALICE, (result: SubmittableResult): void => {
-        if (result.status.isFinalized && result.findRecord("system", "ExtrinsicSuccess")) {
+        if (result.status.isInBlock && result.findRecord("system", "ExtrinsicSuccess")) {
           console.log("DANs account is now funded.");
         }
       });

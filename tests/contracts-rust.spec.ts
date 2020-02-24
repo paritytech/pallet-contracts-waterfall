@@ -37,7 +37,7 @@ let testAccount: KeyringPair;
 let api: ApiPromise;
 
 beforeAll((): void => {
-  jest.setTimeout(100000);
+  jest.setTimeout(30000);
 });
 
 beforeEach(
@@ -49,7 +49,7 @@ beforeEach(
       .transfer(testAccount.address, CREATION_FEE.muln(3))
       .signAndSend(alicePair, (result: SubmittableResult): void => {
         if (
-          result.status.isFinalized &&
+          result.status.isInBlock &&
           result.findRecord("system", "ExtrinsicSuccess")
         ) {
           console.log("New test account has been created.");
