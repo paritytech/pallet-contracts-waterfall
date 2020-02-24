@@ -55,35 +55,7 @@ build-and-test:
     - cargo contract -V
   script:
     - echo "_____Building contracts_____"
-    # - ./build.sh
-    - cd lib/ink/examples/lang2/flipper
-    - cargo contract build
-    - cargo contract generate-metadata
-    - cd -
-    - cd contracts/rust/raw-incrementer
     - ./build.sh
-    - cd -
-    - cd contracts/rust/restore-contract
-    - ./build.sh
-    - cd -
-    - cd contracts/assemblyscript/flipper
-    - yarn
-    - yarn add assemblyscript
-    - yarn build
-    - ./build.sh
-    - cd -
-    - cd contracts/assemblyscript/incrementer
-    - yarn
-    - yarn add assemblyscript
-    - yarn build
-    - ./build.sh
-    - cd -
-    - cd contracts/assemblyscript/erc20
-    - yarn
-    - yarn add assemblyscript
-    - yarn build
-    - ./build.sh
-    - cd -
     - echo "_____Downloading the latest nightly Substrate_____"
     # CI passes with this and below versions until the issue is solved: https://github.com/paritytech/pallet-contracts-waterfall/issues/27
     # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location
