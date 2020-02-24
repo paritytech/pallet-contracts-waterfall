@@ -27,7 +27,7 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
 }
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
-  const pointer = value ? value.dataStart : 0;
+  const pointer = value ? value!.dataStart : 0;
   const length = value ? value.length : 0;
   const valueNonNull = i32(value !== null);
 

@@ -1,7 +1,7 @@
 import { ApiPromise, SubmittableResult } from "@polkadot/api";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { Option, StorageData } from "@polkadot/types";
-import { Address, ContractInfo, Hash } from "@polkadot/types/interfaces";
+import { Option } from "@polkadot/types";
+import { Address, ContractInfo, Hash, StorageData } from "@polkadot/types/interfaces";
 import { u8aToHex } from "@polkadot/util";
 import BN from "bn.js";
 import fs from "fs";
@@ -13,7 +13,7 @@ import { GAS_REQUIRED } from "./consts";
 export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
-      if (result.status.isFinalized) {
+      if (result.status.isInBlock) {
         // Return result of the submittable extrinsic after the transfer is finalized
         resolve(result as SubmittableResult);
       }
@@ -69,7 +69,7 @@ export async function instantiate(
   if (!record) {
     console.error("ERROR: No new instantiated contract");
   }
-  // Return the address of instantiated contract.
+  // Return the Address of instantiated contract.
   return record.event.data[1];
 }
 

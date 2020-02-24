@@ -22,7 +22,7 @@ import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import sha256 from "@chainsafe/as-sha256";
-
+ 
 import { ALICE as ALICE_ADDRESS, BOB as BOB_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
@@ -52,7 +52,7 @@ beforeEach(
       .transfer(contractCreator.address, CREATION_FEE.muln(5))
       .signAndSend(BOB, (result: SubmittableResult): void => {
         if (
-          result.status.isFinalized &&
+          result.status.isInBlock &&
           result.findRecord("system", "ExtrinsicSuccess")
         ) {
           console.log("New test account has been created.");
@@ -164,7 +164,7 @@ describe("AssemblyScript Smart Contracts", () => {
     await api.tx.balances
       .transfer(DAN.address, CREATION_FEE.muln(5))
       .signAndSend(ALICE, (result: SubmittableResult): void => {
-        if (result.status.isFinalized && result.findRecord("system", "ExtrinsicSuccess")) {
+        if (result.status.isInBlock && result.findRecord("system", "ExtrinsicSuccess")) {
           console.log("DANs account is now funded.");
         }
       });
@@ -255,7 +255,10 @@ describe("AssemblyScript Smart Contracts", () => {
     const storageKeyApprove = new Uint8Array(64);
     storageKeyApprove.set(FRANKIE.publicKey);
     storageKeyApprove.set(DAN.publicKey, 32);
-    const storageKeyApprove32 = sha256(storageKeyApprove);
+
+    let hash: Uint8Array;
+ 
+    const storageKeyApprove32: Uint8Array = sha256(storageKeyApprove);
     let allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
 
     expect(allowanceRaw.toString()).toBe('0x' + approvedAmount);
