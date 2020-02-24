@@ -1,7 +1,7 @@
 import { ApiPromise, SubmittableResult } from "@polkadot/api";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Option } from "@polkadot/types";
-import { AccountId, ContractInfo, Hash, StorageData } from "@polkadot/types/interfaces";
+import { Address, ContractInfo, Hash, StorageData } from "@polkadot/types/interfaces";
 import { u8aToHex } from "@polkadot/util";
 import BN from "bn.js";
 import fs from "fs";
@@ -56,7 +56,7 @@ export async function instantiate(
   inputData: any,
   endowment: BN,
   gasRequired: number = GAS_REQUIRED
-): Promise<AccountId> {
+): Promise<Address> {
   const tx = api.tx.contracts.instantiate(
     endowment,
     gasRequired,
@@ -69,20 +69,20 @@ export async function instantiate(
   if (!record) {
     console.error("ERROR: No new instantiated contract");
   }
-  // Return the AccountId of instantiated contract.
+  // Return the Address of instantiated contract.
   return record.event.data[1];
 }
 
 export async function callContract(
   api: ApiPromise,
   signer: KeyringPair,
-  contractAccountId: AccountId,
+  contractAddress: Address,
   inputData: any,
   gasRequired: number = GAS_REQUIRED,
   endowment: number = 0
 ): Promise<void> {
   const tx = api.tx.contracts.call(
-    contractAccountId,
+    contractAddress,
     endowment,
     gasRequired,
     inputData
@@ -93,11 +93,11 @@ export async function callContract(
 
 export async function getContractStorage(
   api: ApiPromise,
-  contractAccountId: AccountId,
+  contractAddress: Address,
   storageKey: Uint8Array
 ): Promise<StorageData> {
   const contractInfo = await api.query.contracts.contractInfoOf(
-    contractAccountId
+    contractAddress
   );
 
   // Return the value of the contracts storage
