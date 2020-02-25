@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ev
 
 cd lib/ink/examples/lang2/flipper
 cargo contract build
