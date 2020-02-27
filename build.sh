@@ -3,7 +3,7 @@
 set -ev
 
 cd lib/ink/examples/flipper
-cargo contract build
+cargo +nightly contract build
 cargo contract generate-metadata
 cd -
 
