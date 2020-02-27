@@ -4,7 +4,7 @@ set -ev
 
 cd lib/ink/examples/flipper
 cargo +nightly contract build
-cargo contract generate-metadata
+cargo +nightly contract generate-metadata
 cd -
 
 cd contracts/rust/raw-incrementer
