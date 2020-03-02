@@ -61,7 +61,7 @@ beforeEach(
 
 describe("Rust Smart Contracts", () => {
   test("Flip contract", async (done): Promise<void> => {
-    const meta = require("../lib/ink/examples/lang2/flipper/target/metadata.json");
+    const meta = require("../lib/ink/examples/flipper/target/metadata.json");
 
     // The storage key `0x0000000000000000000000000000000000000000000000000000000000000000` is copied over from the generated ink! contract metadata
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
@@ -70,7 +70,7 @@ describe("Rust Smart Contracts", () => {
     const codeHash: Hash = await putCode(
       api,
       testAccount,
-      "../lib/ink/examples/lang2/flipper/target/flipper.wasm"
+      "../lib/ink/examples/flipper/target/flipper.wasm"
     );
     expect(codeHash).toBeDefined();
 

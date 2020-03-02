@@ -2,9 +2,9 @@
 
 set -ev
 
-cd lib/ink/examples/lang2/flipper
-cargo contract build
-cargo contract generate-metadata
+cd lib/ink/examples/flipper
+cargo +nightly contract build
+cargo +nightly contract generate-metadata
 cd -
 
 cd contracts/rust/raw-incrementer

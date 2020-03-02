@@ -58,7 +58,7 @@ Then make sure that you built all artifacts required for running the tests by in
 To run the tests, launch the substrate node locally and run
 
 ```
-yarn && yarn test
+yarn && yarn upgrade && yarn test
 ```
 
 ## Using a Docker image of Substrate for testing
