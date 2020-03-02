@@ -40,14 +40,21 @@ For running this test suite you would need to have:
     build it yourself.
 
     Please see https://github.com/WebAssembly/wabt for details.
+ 
+5. JavaScript test environment
+
+    To install all depenmdencies used by the Jest testing suite, run the following command:
+    
+    ```yarn && yarn upgrade```
+    
+6. Initialize submodules
+    This repo depends on submomdules, make sure you have them:
+
+    ```
+    git submodule update --init
+    ```
 
 # Running
-
-This repo depends on submomdules, make sure you have them:
-
-```
-git submodule update --init
-```
 
 Then make sure that you built all artifacts required for running the tests by invoking
 
@@ -58,7 +65,7 @@ Then make sure that you built all artifacts required for running the tests by in
 To run the tests, launch the substrate node locally and run
 
 ```
-yarn && yarn upgrade && yarn test
+yarn test
 ```
 
 ## Using a Docker image of Substrate for testing
