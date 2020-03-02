@@ -48,11 +48,12 @@ For running this test suite you would need to have:
     ```yarn && yarn upgrade```
     
 6. Initialize submodules
-    This repo depends on submomdules, make sure you have them:
 
-    ```
-    git submodule update --init
-    ```
+   This repo depends on submomdules, make sure you have them:
+
+   ```
+   git submodule update --init
+   ```
 
 # Running
 
