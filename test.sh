@@ -21,6 +21,8 @@ echo "_____Spinning up the substrate node in background_____"
 $SUBSTRATE_PATH --dev &
 SUBSTRATE_PID=$!
 
+echo "_____Updating PolkadotJS API_____"
+yarn upgrade --pattern @polkadot
 echo "_____Executing tests_____"
 yarn && yarn test
 
