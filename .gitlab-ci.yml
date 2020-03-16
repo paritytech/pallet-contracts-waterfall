@@ -1,6 +1,6 @@
 # .gitlab-ci.yml
 #
-# scontracts-waterfall
+# pallet-contracts-waterfall
 #
 # pipelines can be triggered manually in the web
 # setting DEPLOY_TAG will only deploy the tagged image
@@ -9,19 +9,16 @@ stages:
   - build
 
 variables:
-  GIT_STRATEGY: fetch
-  GIT_SUBMODULE_STRATEGY: recursive
-  GIT_DEPTH: 3
-  CARGO_INCREMENTAL: 0
-  CARGO_HOME: "/ci-cache/${CI_PROJECT_NAME}/cargo/${CI_JOB_NAME}"
-  REGISTRY: registry.parity.io/parity/infrastructure/scripts
+  GIT_STRATEGY:                    fetch
+  GIT_SUBMODULE_STRATEGY:          recursive
+  GIT_DEPTH:                       100
+  CARGO_INCREMENTAL:               0
+  CARGO_HOME:                      "/ci-cache/${CI_PROJECT_NAME}/cargo/${CI_JOB_NAME}"
+  REGISTRY:                        "registry.parity.io/parity/infrastructure/scripts"
 
-.docker-env: &docker-env
-  image: ${REGISTRY}/contracts-ci-linux:latest
-  before_script:
-    - rustup show
-    - cargo --version
-    - sccache -s
+
+.docker-env:                       &docker-env
+  image:                           ${REGISTRY}/contracts-ci-linux:latest
   only:
     - master
     - /^v[0-9]+\.[0-9]+.*$/ # i.e. v1.0, v2.1rc1
@@ -44,34 +41,28 @@ variables:
 build-and-test:
   stage: build
   <<: *docker-env
+  variables:
+    SUBSTRATE_PATH:                "./substrate"
   before_script:
     # upstream CI can override global vars here
     - unset CARGO_TARGET_DIR
+    - rustup +nightly show
+    - cargo --version
+    - yarn --version
+    - npm --version
+    - wasm-prune -V
+    - sccache -s
     # `cargo install` returns an error if there is nothing to update, so have to supress it here temporarily
     - cargo contract -V
-    - cargo install --git https://github.com/paritytech/cargo-contract || echo $?
+    - cargo install --git https://github.com/paritytech/cargo-contract --branch master || echo $?
     - cargo contract -V
   script:
     - echo "_____Building contracts_____"
     - ./build.sh
     - echo "_____Downloading the latest nightly Substrate_____"
-    # CI passes with this and below versions until the issue is solved: https://github.com/paritytech/pallet-contracts-waterfall/issues/27
-    # - curl https://releases.parity.io/substrate/x86_64-debian:stretch/2.0.0-21e4f08/substrate/substrate --output substrate --location
     # master from gitlab
     # - curl "https://gitlab.parity.io/parity/substrate/-/jobs/artifacts/master/download?job=build-linux-substrate" --output artifacts.zip --location
     # published master
     - curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
     - chmod +x ./substrate
-    - export SUBSTRATE_PATH="./substrate"
-    - $SUBSTRATE_PATH --version
-    - echo "_____Running dev node and tests_____"
-    # - ./test.sh
-    - echo "_____Purging dev chain_____"
-    - $SUBSTRATE_PATH purge-chain --dev -y
-    - echo "_____Spinning up the substrate node in background_____"
-    - $SUBSTRATE_PATH --dev &
-    - SUBSTRATE_PID=$!
-    - echo "_____Executing tests_____"
-    - yarn && yarn upgrade && yarn test
-    - echo "_____Kill the spawned substrate node_____"
-    - kill -9 $SUBSTRATE_PID
+    - ./test.sh
