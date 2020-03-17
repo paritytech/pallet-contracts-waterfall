@@ -7,12 +7,13 @@
 
 source utils.sh
 
-set -evu
+set -e
 
 echo "_____Running dev node and tests_____"
+# We are good only with explicitly specified or containerized Substrate
 if not-initialized "$SUBSTRATE_PATH"; then
     provide-container \
-        "parity/substrate:latest" \
+        "docker.io/parity/substrate:latest" \
         "Please specify the path to substrate in the SUBSTRATE_PATH environment variable"
 
     SUBSTRATE_PATH=""
@@ -27,14 +28,15 @@ if [ -z $SUBSTRATE_HTTP_PORT ]; then
     SUBSTRATE_HTTP_PORT=9933
 fi
 
+echo "_____Updating PolkadotJS API_____"
+yarn upgrade --pattern @polkadot
 
-# Purge dev chain and then spin up the substrate node in background
 if [ -z "$SUBSTRATE_PATH" ]; then
     echo "_____Spinning up fresh substrate container in background_____"
     SUBSTRATE_CID=$($DOCKER run -dt --rm \
       -p $SUBSTRATE_WS_PORT:9944 \
       -p $SUBSTRATE_HTTP_PORT:9933 \
-      substrate:latest --dev \
+      parity/substrate:latest --dev \
       --ws-external --rpc-external)
 else
     echo "_____Purging dev chain_____"
@@ -48,14 +50,26 @@ else
     SUBSTRATE_PID=$!
 fi
 
-echo "_____Updating PolkadotJS API_____"
-yarn upgrade --pattern @polkadot
-echo "_____Executing tests_____"
-yarn && yarn test
+function stop_substrate {
+    if [ -z "$SUBSTRATE_PID" ]; then
+        if [ ! -z "$SUBSTRATE_CID" ]; then 
+            echo "_____Stopping the launched substrate container_____"
+            $DOCKER stop $SUBSTRATE_CID
+            SUBSTRATE_CID=""
+        fi
+    else
+        echo "_____Killing the spawned substrate process_____"
+        kill -9 $SUBSTRATE_PID
+    fi
+}
 
-echo "_____Kill the spawned substrate node_____"
-if [ -z "$SUBSTRATE_PATH" ]; then
-    $DOCKER stop $SUBSTRATE_CID 
-else
-    kill -9 $SUBSTRATE_PID
-fi
+function ctrl_c_handler {
+    stop_substrate $path
+}
+
+trap ctrl_c_handler INT
+
+echo "_____Executing tests_____"
+yarn && yarn test -w 2 $@
+
+stop_substrate

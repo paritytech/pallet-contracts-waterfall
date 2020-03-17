@@ -1,2 +1,2 @@
 #!/bin/bash
-solang *.sol
+solang flipper.sol
