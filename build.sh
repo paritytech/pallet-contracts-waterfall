@@ -5,12 +5,13 @@ source utils.sh
 set -ev
 
 provide-parity-tools
-provide-wabt
 
 cd lib/ink/examples/flipper
 cargo +nightly contract build
 cargo +nightly contract generate-metadata
 cd -
+
+provide-wabt
 
 cd contracts/rust/raw-incrementer
 ./build.sh
