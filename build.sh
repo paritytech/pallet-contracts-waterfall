@@ -1,6 +1,11 @@
 #!/bin/bash
 
+source utils.sh
+
 set -ev
+
+provide-parity-tools
+provide-wabt
 
 cd lib/ink/examples/flipper
 cargo +nightly contract build
@@ -33,5 +38,11 @@ cd contracts/assemblyscript/erc20
 rm -rf build
 yarn
 yarn build
+./build.sh
+cd -
+
+provide-solang
+
+cd contracts/solidity/flipper
 ./build.sh
 cd -
