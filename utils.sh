@@ -4,7 +4,7 @@ function provide-container {
     if which podman; then
         export DOCKER="podman"
     elif which docker; then
-        "Docker detected, consider installing Podman to avoid typing a password"
+        echo "Docker detected, consider installing Podman to avoid typing a password"
         export DOCKER="sudo docker"
     else
         >&2 echo "$2"
