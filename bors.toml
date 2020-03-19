@@ -1,5 +1,5 @@
 status = [
-  "ci/gitlab/%",
+  "ci/gitlab/gitlab.parity.io",
   "continuous-integration/gitlab-build-and-test"
 ]
 # The default is one hour.
