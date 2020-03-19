@@ -1,0 +1,16 @@
+status = [
+  "ci/gitlab/%",
+  "continuous-integration/gitlab-build-and-test"
+]
+# The default is one hour.
+timeout_sec = 600
+
+# Do not allow pull requests with these labels to be merged.
+block_labels = [
+    "question"
+]
+
+# If turned on, the Pull Request will be Squashed before merging. 
+use_squash_merge = true
+required_approvals = 1
+# use_codeowners also may be needed

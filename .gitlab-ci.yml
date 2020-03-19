@@ -25,6 +25,7 @@ variables:
     - schedules
     - web
     - /^[0-9]+$/ # PRs
+    - branches
   retry:
     max: 2
     when:
