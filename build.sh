@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export WABT_PATH
+export SOLANG_PATH
 source utils.sh
 
 set -ev
