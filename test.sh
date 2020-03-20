@@ -7,38 +7,33 @@
 
 source utils.sh
 
-set -e
+set -evu
 
-echo "_____Running dev node and tests_____"
-# We are good only with explicitly specified or containerized Substrate
-if not-initialized "$SUBSTRATE_PATH"; then
-    provide-container \
-        "docker.io/parity/substrate:latest" \
-        "Please specify the path to substrate in the SUBSTRATE_PATH environment variable"
-
-    SUBSTRATE_PATH=""
-else
-    $SUBSTRATE_PATH --version
-fi
-
-if [ -z $SUBSTRATE_WS_PORT ]; then
-    SUBSTRATE_WS_PORT=9944
-fi
-if [ -z $SUBSTRATE_HTTP_PORT ]; then
-    SUBSTRATE_HTTP_PORT=9933
-fi
+: ${SUBSTRATE_HTTP_PORT:=9933}
+: ${SUBSTRATE_WS_PORT:=9944}
 
 echo "_____Updating PolkadotJS API_____"
 yarn upgrade --pattern @polkadot
 
-if [ -z "$SUBSTRATE_PATH" ]; then
+echo "_____Running dev node_____"
+# We are good only with explicitly specified or containerized Substrate
+if not-initialized "${SUBSTRATE_PATH:+$SUBSTRATE_PATH}"; then
     echo "_____Spinning up fresh substrate container in background_____"
+
+    provide-container \
+        "docker.io/parity/substrate:latest" \
+        "Please specify the path to substrate in the SUBSTRATE_PATH environment variable"
+
     SUBSTRATE_CID=$($DOCKER run -dt --rm \
       -p $SUBSTRATE_WS_PORT:9944 \
       -p $SUBSTRATE_HTTP_PORT:9933 \
       parity/substrate:latest --dev \
       --ws-external --rpc-external)
+
+    SUBSTRATE_PID=""
 else
+    $SUBSTRATE_PATH --version
+
     echo "_____Purging dev chain_____"
     $SUBSTRATE_PATH purge-chain --dev -y
 
@@ -47,10 +42,12 @@ else
       --ws-port $SUBSTRATE_WS_PORT \
       --rpc-port $SUBSTRATE_HTTP_PORT \
       &> substrate.log &
+
     SUBSTRATE_PID=$!
 fi
 
 function stop_substrate {
+    echo "_____Quitting test system_____"
     if [ -z "$SUBSTRATE_PID" ]; then
         if [ ! -z "$SUBSTRATE_CID" ]; then 
             echo "_____Stopping the launched substrate container_____"
@@ -63,13 +60,8 @@ function stop_substrate {
     fi
 }
 
-function ctrl_c_handler {
-    stop_substrate $path
-}
-
-trap ctrl_c_handler INT
+# in bash, EXIT includes INT (ctr+c), but it is not the case in sh
+trap stop_substrate EXIT
 
 echo "_____Executing tests_____"
 yarn && yarn test -w 2 $@
-
-stop_substrate
