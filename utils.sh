@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 function provide-container {
     if which podman; then
         export DOCKER="podman"
