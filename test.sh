@@ -9,8 +9,9 @@ source utils.sh
 
 set -evu
 
-: ${SUBSTRATE_HTTP_PORT:=9933}
-: ${SUBSTRATE_WS_PORT:=9944}
+# defaults
+: "${SUBSTRATE_HTTP_PORT:=9933}"
+: "${SUBSTRATE_WS_PORT:=9944}"
 
 echo "_____Updating PolkadotJS API_____"
 yarn upgrade --pattern @polkadot
@@ -49,9 +50,9 @@ fi
 function stop_substrate {
     echo "_____Quitting test system_____"
     if [ -z "$SUBSTRATE_PID" ]; then
-        if [ ! -z "$SUBSTRATE_CID" ]; then 
+        if [ -n "$SUBSTRATE_CID" ]; then 
             echo "_____Stopping the launched substrate container_____"
-            $DOCKER stop $SUBSTRATE_CID
+            $DOCKER stop "$SUBSTRATE_CID"
             SUBSTRATE_CID=""
         fi
     else
@@ -64,4 +65,4 @@ function stop_substrate {
 trap stop_substrate EXIT
 
 echo "_____Executing tests_____"
-yarn && yarn test -w 2 $@
+yarn && yarn test -w 2 "$@"

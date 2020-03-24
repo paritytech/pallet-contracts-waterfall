@@ -14,13 +14,13 @@ function provide-container {
         exit 1
     fi
 
-    if ! $DOCKER image exists $1; then
-        $DOCKER image pull $1
+    if ! $DOCKER image exists "$1"; then
+        $DOCKER image pull "$1"
     fi
 }
 
 function not-initialized {
-    if [ ! -z "$1" ] && [ ! -f "$1" ]; then
+    if [ -n "$1" ] && [ ! -f "$1" ]; then
         >&2 echo "$1 doesn't exist"
         exit 2 # user pretends to know what he is doing,
                # but the path is incorrect
@@ -42,13 +42,13 @@ function provide-wabt {
             export wabt_image="docker.io/kirillt/wabt:latest"
             couldnt_find_message="Please specify the path to WABT in the WABT_PATH environment variable"
 
-            provide-container $wabt_image $couldnt_find_message
+            provide-container $wabt_image "$couldnt_find_message"
 
-            function wasm2wat { $DOCKER run -it --rm -v $PWD:/x:z -w /x $wabt_image wasm2wat $@; }
-            function wat2wasm { $DOCKER run -it --rm -v $PWD:/x:z -w /x $wabt_image wat2wasm $@; }
+            function wasm2wat { $DOCKER run -it --rm -v "$PWD":/x:z -w /x $wabt_image wasm2wat "$@"; }
+            function wat2wasm { $DOCKER run -it --rm -v "$PWD":/x:z -w /x $wabt_image wat2wasm "$@"; }
         else
-            function wasm2wat { $WABT_PATH/bin/wasm2wat $@; }
-            function wat2wasm { $WABT_PATH/bin/wat2wasm $@; }
+            function wasm2wat { "$WABT_PATH"/bin/wasm2wat "$@"; }
+            function wat2wasm { "$WABT_PATH"/bin/wat2wasm "$@"; }
         fi
 
         export -f wasm2wat
@@ -62,11 +62,11 @@ function provide-solang {
         export solang_image="docker.io/hyperledgerlabs/solang:latest"
         couldnt_find_message="Please specify the path to Solang in the SOLANG_PATH environment variable"
 
-        provide-container $solang_image $couldnt_find_message
+        provide-container $solang_image "$couldnt_find_message"
 
-        function solang { $DOCKER run -it --rm -v $PWD:/x:z -w /x $solang_image $@; }
+        function solang { $DOCKER run -it --rm -v "$PWD":/x:z -w /x $solang_image "$@"; }
     else
-        function solang { $SOLANG_PATH $@; }
+        function solang { $SOLANG_PATH "$@"; }
     fi
 
     export -f solang
