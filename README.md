@@ -15,6 +15,7 @@ For running this test suite you would need to have:
     rustup toolchain install nightly
     rustup update
     rustup target add wasm32-unknown-unknown --toolchain nightly
+    rustup component add rust-src --toolchain nightly
     ```
 
     Also, you might need to put cargo's bin directory on PATH. You can typically do it by executing:
@@ -23,37 +24,44 @@ For running this test suite you would need to have:
     source ~/.cargo/env
     ```
 
-2. yarn.
+2. Yarn.
 
     Read on how to install it [here](https://yarnpkg.com/lang/en/docs/install/).
 
-
-3. wasm-prune
-
-    ```shell
-    cargo install pwasm-utils-cli --bin wasm-prune
-    ```
-
-4. wabt
-
-    You can try to look it up in the package manager for your system or
-    build it yourself.
-
-    Please see https://github.com/WebAssembly/wabt for details.
- 
-5. JavaScript test environment
+3. JavaScript test environment
 
     To install all depenmdencies used by the Jest testing suite, run the following command:
     
     ```yarn && yarn upgrade```
-    
-6. Initialize submodules
+
+4. Initialize submodules
 
    This repo depends on submomdules, make sure you have them:
 
    ```
    git submodule update --init
    ```
+
+5. Optionally, WABT.
+
+    In case you don't have it installed and you have Docker (or better Podman)
+    the test system will download it for you.
+
+    If you want, you can try to look it up in the package manager for your system or
+    build it yourself, for better performance. The test system will catch it up
+    from your `$PATH` or from `$WABT_PATH` variables.
+
+    Please see https://github.com/WebAssembly/wabt for details.
+
+6. Optionally, Solang.
+
+    In case you don't have it installed and you have Docker (or better Podman)
+    the test system will download it for you.
+
+    If you want to test smart contracts against specific version of Solang,
+    provide `$SOLANG_PATH` environment variable with it.
+
+    Please see https://github.com/hyperledger-labs/solang for details.
 
 # Running
 
