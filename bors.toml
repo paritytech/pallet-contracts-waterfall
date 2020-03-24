@@ -6,5 +6,3 @@ status = [
 timeout_sec = 600
 # If turned on, the Pull Request will be Squashed before merging. 
 use_squash_merge = true
-# Amount of approvals required to merge.
-required_approvals = 1
