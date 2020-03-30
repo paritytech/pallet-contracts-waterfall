@@ -31,7 +31,11 @@ For running this test suite you would need to have:
 
    To install all depenmdencies used by the Jest testing suite, run the following command:
 
-   `yarn && yarn upgrade`
+   `yarn`
+
+   To upgrade to the latest versions of the Polkadot JS dependencies, run the following command:
+
+   `yarn upgrade --pattern @polkadot`
 
 4. Initialize submodules
 
