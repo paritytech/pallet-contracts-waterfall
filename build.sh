@@ -44,8 +44,11 @@ yarn build
 ./build.sh
 cd -
 
-provide-solang
-
-cd contracts/solidity/flipper
-./build.sh
-cd -
+if which podman || docker info; then
+    provide-wabt
+    provide-solang
+    cd contracts/solidity/flipper
+    ./build.sh
+    cd -; 
+else echo "Please install and run Docker or Podman if you want to compile the Solang contracts and succesfully run their tests.";
+fi
