@@ -41,23 +41,23 @@ For running this test suite you would need to have:
    git submodule update --init
    ```
 
-Optional components:
+## Optional components:
 
-5. Optionally, WABT.
+If you're running Docker or Podman on your computer, these optional components will be automatically made available by running the `build.sh` script.
+Alternatively you can also install each of the components manually on your local machine.
 
-   In case you don't have it installed and you have Docker or Podman
-   the test system will download it for you.
+5. WABT
 
-   If you want, you can try to look it up in the package manager for your system or
+   You can look it up in the package manager for your system or
    build it yourself, for better performance. The test system will catch it up
    from your `$PATH` or from `$WABT_PATH` variables.
 
    Please see https://github.com/WebAssembly/wabt for details.
 
-6. Optionally, Solang.
+6. Solang Tests
 
-   In case you don't have it installed and you have Docker or Podman
-   the test system will download it for you.
+   To compile the provided Solang test contracts, you need to have Docker or Podman installed and running.
+   Docker will ask for your sudo password before continuing the installation.
 
    If you want to test smart contracts against specific version of Solang,
    provide `$SOLANG_PATH` environment variable with it.
