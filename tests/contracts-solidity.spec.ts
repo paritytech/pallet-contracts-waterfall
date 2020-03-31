@@ -20,10 +20,8 @@ import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
-import BN from "bn.js";
-import sha256 from "@chainsafe/as-sha256";
  
-import { ALICE as ALICE_ADDRESS, BOB as BOB_ADDRESS, CREATION_FEE, WSURL } from "./consts";
+import { CHARLIE as CHARLIE_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -33,8 +31,7 @@ import {
 
 // This is a test account that is going to be created and funded before each test.
 const keyring = testKeyring({ type: "sr25519" });
-const ALICE = keyring.getPair(ALICE_ADDRESS);
-const BOB = keyring.getPair(BOB_ADDRESS);
+const BOB = keyring.getPair(CHARLIE);
 const randomSeed = randomAsU8a(32);
 let contractCreator: KeyringPair;
 let api: ApiPromise;
