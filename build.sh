@@ -8,7 +8,7 @@ set -ev
 
 provide-parity-tools
 
-if which podman || docker info; then
+if which podman || which docker; then
     provide-wabt
     provide-solang
     cd contracts/solidity/flipper
