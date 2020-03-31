@@ -6,7 +6,7 @@ function provide-container {
     if which podman; then
         export DOCKER="podman"
     elif which docker; then
-        echo "Docker detected, consider installing Podman to avoid typing a password"
+        echo "Docker detected"
         export DOCKER="sudo docker"
     else
         >&2 echo "$2"
@@ -79,9 +79,7 @@ function provide-parity-tools {
 
     export PATH=~/.cargo/bin:$PATH
 
-    if ! which cargo-contract; then
-        cargo install --git https://github.com/paritytech/cargo-contract.git
-    fi
+    cargo install --git https://github.com/paritytech/cargo-contract.git cargo-contract --force
 
     if ! which wasm-prune; then
         cargo install pwasm-utils-cli --bin wasm-prune

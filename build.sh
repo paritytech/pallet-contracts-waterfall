@@ -8,7 +8,18 @@ set -ev
 
 provide-parity-tools
 
-cd lib/ink/examples/flipper
+if which podman || docker info; then
+    provide-wabt
+    provide-solang
+    cd contracts/solidity/flipper
+    ./build.sh
+    cd -; 
+else echo "Please install and run Docker or Podman if you want to compile the Solang contracts and succesfully run their tests.";
+fi
+
+cd lib 
+git submodule foreach git pull origin master
+cd ink/examples/flipper
 cargo +nightly contract build
 cargo +nightly contract generate-metadata
 cd -
@@ -41,11 +52,5 @@ cd contracts/assemblyscript/erc20
 rm -rf build
 yarn
 yarn build
-./build.sh
-cd -
-
-provide-solang
-
-cd contracts/solidity/flipper
 ./build.sh
 cd -
