@@ -2,7 +2,6 @@
 
 import { u128 } from "as-bignum";
 import {
-  ext_clear_storage,
   ext_get_storage,
   ext_scratch_read,
   ext_scratch_size,
@@ -25,10 +24,6 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
     return arr;
   }
   assert(false);
-}
-
-export function clearStorage(key: Uint8Array): void {
-  ext_clear_storage(key.dataStart);
 }
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
