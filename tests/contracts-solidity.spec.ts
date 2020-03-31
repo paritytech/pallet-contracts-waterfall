@@ -31,7 +31,7 @@ import {
 
 // This is a test account that is going to be created and funded before each test.
 const keyring = testKeyring({ type: "sr25519" });
-const BOB = keyring.getPair(CHARLIE_ADDRESS);
+const CHARLIE = keyring.getPair(CHARLIE_ADDRESS);
 const randomSeed = randomAsU8a(32);
 let contractCreator: KeyringPair;
 let api: ApiPromise;
@@ -47,7 +47,7 @@ beforeEach(
 
     return api.tx.balances
       .transfer(contractCreator.address, CREATION_FEE.muln(5))
-      .signAndSend(BOB, (result: SubmittableResult): void => {
+      .signAndSend(CHARLIE, (result: SubmittableResult): void => {
         if (
           result.status.isInBlock &&
           result.findRecord("system", "ExtrinsicSuccess")
