@@ -17,7 +17,9 @@ if which podman || docker info; then
 else echo "Please install and run Docker or Podman if you want to compile the Solang contracts and succesfully run their tests.";
 fi
 
-cd lib/ink/examples/flipper
+cd lib 
+git submodule foreach git pull origin master
+cd ink/examples/flipper
 cargo +nightly contract build
 cargo +nightly contract generate-metadata
 cd -
