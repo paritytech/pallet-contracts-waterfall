@@ -31,7 +31,7 @@ export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
   const length = value ? value.length : 0;
   const valueNonNull = i32(value !== null);
 
-  ext_set_storage(key.dataStart, valueNonNull, pointer, length);
+  ext_set_storage(key.dataStart, pointer, length);
 }
 
 // check for length 32 bytes

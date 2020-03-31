@@ -19,7 +19,7 @@ use codec::{Encode, Decode};
 
 mod cabi {
     extern "C" {
-        pub fn ext_set_storage(key_ptr: u32, value_non_null: u32, value_ptr: u32, value_len: u32);
+        pub fn ext_set_storage(key_ptr: u32, value_ptr: u32, value_len: u32);
         pub fn ext_restore_to(
             dest_ptr: u32,
             dest_len: u32,
@@ -48,15 +48,13 @@ pub fn set_storage(key: &Key, value: Option<&[u8]>) {
     unsafe {
         let mut value_ptr = 0;
         let mut value_len = 0;
-        let value_non_null = if let Some(v) = value {
+        if let Some(v) = value {
             value_ptr = v.as_ptr() as u32;
             value_len = v.len() as u32;
-            1
-        } else {
-            0
         };
 
-        cabi::ext_set_storage(key.as_ptr() as u32, value_non_null, value_ptr, value_len);
+
+        cabi::ext_set_storage(key.as_ptr() as u32, value_ptr, value_len);
     }
 }
 

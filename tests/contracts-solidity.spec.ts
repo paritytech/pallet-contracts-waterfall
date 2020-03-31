@@ -20,10 +20,8 @@ import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
-import BN from "bn.js";
-import sha256 from "@chainsafe/as-sha256";
  
-import { ALICE as ALICE_ADDRESS, BOB as BOB_ADDRESS, CREATION_FEE, WSURL } from "./consts";
+import { CHARLIE as CHARLIE_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
@@ -33,8 +31,7 @@ import {
 
 // This is a test account that is going to be created and funded before each test.
 const keyring = testKeyring({ type: "sr25519" });
-const ALICE = keyring.getPair(ALICE_ADDRESS);
-const BOB = keyring.getPair(BOB_ADDRESS);
+const CHARLIE = keyring.getPair(CHARLIE_ADDRESS);
 const randomSeed = randomAsU8a(32);
 let contractCreator: KeyringPair;
 let api: ApiPromise;
@@ -50,7 +47,7 @@ beforeEach(
 
     return api.tx.balances
       .transfer(contractCreator.address, CREATION_FEE.muln(5))
-      .signAndSend(BOB, (result: SubmittableResult): void => {
+      .signAndSend(CHARLIE, (result: SubmittableResult): void => {
         if (
           result.status.isInBlock &&
           result.findRecord("system", "ExtrinsicSuccess")
@@ -62,7 +59,7 @@ beforeEach(
   }
 );
 
-describe("AssemblyScript Smart Contracts", () => {
+describe("Solang Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
     // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract

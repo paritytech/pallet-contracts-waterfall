@@ -46,9 +46,8 @@ export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
   if(key.length === 32) {
     const pointer = value ? value!.dataStart : 0;
     const length = value ? value.length : 0;
-    const valueNonNull = i32(value !== null);
   
-    ext_set_storage(key.dataStart, valueNonNull, pointer, length);
+    ext_set_storage(key.dataStart, pointer, length);
   }
 }
 

@@ -8,7 +8,7 @@ set -ev
 
 provide-parity-tools
 
-if which podman || docker info; then
+if which podman || which docker || [ -n "$CI_JOB_ID" ]; then
     provide-wabt
     provide-solang
     cd contracts/solidity/flipper
@@ -16,10 +16,9 @@ if which podman || docker info; then
     cd -; 
 else echo "Please install and run Docker or Podman if you want to compile the Solang contracts and succesfully run their tests.";
 fi
-
-cd lib 
+ 
 git submodule foreach git pull origin master
-cd ink/examples/flipper
+cd lib/ink/examples/flipper
 cargo +nightly contract build
 cargo +nightly contract generate-metadata
 cd -
