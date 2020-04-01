@@ -15,3 +15,5 @@ export declare function ext_scratch_write(src_ptr: i32, len: i32): void;
 export declare function ext_set_rent_allowance(value_ptr: i32, value_len: i32): void;
 export declare function ext_set_storage(key_ptr: i32, value_ptr: i32, value_len: i32): void;
 export declare function ext_value_transferred(): void;
+export declare function ext_hash_sha2_256(input_ptr: i32, input_len: i32, output_ptr: i32): void;
+
