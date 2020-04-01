@@ -69,7 +69,7 @@ describe("Solang Smart Contracts", () => {
     const codeHash = await putCode(
       api,
       contractCreator,
-      "../contracts/solidity/flipper/flipper.wasm"
+      "../contracts/solidity/flipper/Flipper.wasm"
     );
     expect(codeHash).toBeDefined();
 
@@ -79,7 +79,7 @@ describe("Solang Smart Contracts", () => {
       api,
       contractCreator,
       codeHash,
-      "0xd531178600",
+      "0xf81e7e1a00",
       CREATION_FEE
     );
     expect(address).toBeDefined();
@@ -92,12 +92,12 @@ describe("Solang Smart Contracts", () => {
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, "0xa9efe4cd");
+    await callContract(api, contractCreator, address, "0xcde4efa9");
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
 
-    await callContract(api, contractCreator, address, "0xa9efe4cd");
+    await callContract(api, contractCreator, address, "0xcde4efa9");
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x00");

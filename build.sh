@@ -51,3 +51,7 @@ yarn
 yarn build
 ./build.sh
 cd -
+
+cd contracts/solidity/flipper
+./build.sh
+cd -
