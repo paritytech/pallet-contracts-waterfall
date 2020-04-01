@@ -5,6 +5,7 @@ import {
   ext_balance,
   ext_caller,
   ext_get_storage,
+  ext_hash_sha2_256,
   ext_println,
   ext_scratch_read,
   ext_scratch_size,
@@ -91,4 +92,10 @@ export function setScratchBuffer(data: Uint8Array): void {
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
   ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
+}
+
+export function hashSha256(value: Uint8Array): Uint8Array {
+  const sha256 = new Uint8Array(32);
+  ext_hash_sha2_256(value.dataStart, value.length, sha256.dataStart)
+  return sha256;
 }

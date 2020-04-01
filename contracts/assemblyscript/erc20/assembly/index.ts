@@ -1,5 +1,4 @@
 import { u128 } from "as-bignum";
-import { hash } from "../node_modules/@chainsafe/as-sha256/assembly";
 
 import {
   getCaller,
@@ -7,7 +6,6 @@ import {
   getStorage,
   getValueTransferred,
   printLine,
-  setRentAllowance,
   setScratchBuffer,
   setStorage
 } from "./lib";

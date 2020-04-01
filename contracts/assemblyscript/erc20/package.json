@@ -12,7 +12,6 @@
     "build": "rm -rf build && mkdir build && yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
-    "@chainsafe/as-sha256": "0.1.1",
     "as-bignum": "^0.1.5",
     "assemblyscript": "^0.9.2"
   },
