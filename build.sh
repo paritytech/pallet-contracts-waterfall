@@ -23,8 +23,6 @@ cargo +nightly contract build
 cargo +nightly contract generate-metadata
 cd -
 
-provide-wabt
-
 cd contracts/rust/raw-incrementer
 ./build.sh
 cd -
