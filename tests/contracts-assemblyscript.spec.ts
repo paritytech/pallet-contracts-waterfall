@@ -21,7 +21,8 @@ import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
 import BN from "bn.js";
-import sha256 from "@chainsafe/as-sha256";
+import sha256 from "fast-sha256";
+ 
  
 import { ALICE as ALICE_ADDRESS, BOB as BOB_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
@@ -256,9 +257,7 @@ describe("AssemblyScript Smart Contracts", () => {
     storageKeyApprove.set(FRANKIE.publicKey);
     storageKeyApprove.set(DAN.publicKey, 32);
 
-    let hash: Uint8Array;
- 
-    const storageKeyApprove32: Uint8Array = sha256(storageKeyApprove);
+    let storageKeyApprove32: Uint8Array = sha256(storageKeyApprove) // default export is hash
     let allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
 
     expect(allowanceRaw.toString()).toBe('0x' + approvedAmount);

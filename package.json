@@ -8,10 +8,10 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@chainsafe/as-sha256": "^0.1.3",
     "@polkadot/api": "beta",
     "@polkadot/api-contract": "beta",
     "blakejs": "^1.1.0",
+    "fast-sha256": "^1.3.0",
     "typescript": "^3.6.4"
   },
   "devDependencies": {
