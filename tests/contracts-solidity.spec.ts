@@ -16,7 +16,6 @@
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
 import testKeyring from "@polkadot/keyring/testing";
-import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
@@ -60,7 +59,8 @@ beforeEach(
 );
 
 describe("Solang Smart Contracts", () => {
-  test("Raw Flipper contract", async (done): Promise<void> => {
+  // skipped until test is fixed here: https://github.com/paritytech/pallet-contracts-waterfall/pull/66
+  test.skip("Raw Flipper contract", async (done): Promise<void> => {
     // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
 
