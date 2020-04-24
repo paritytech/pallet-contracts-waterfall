@@ -16,8 +16,13 @@ if which podman || which docker || [ -n "$CI_JOB_ID" ]; then
     cd -; 
 else echo "Please install and run Docker or Podman if you want to compile the Solang contracts and succesfully run their tests.";
 fi
- 
-git submodule foreach git pull origin master
+
+if [[ -d lib/ink ]]; then
+	git --git-dir lib/ink/.git pull
+else
+	git clone --depth=1 --branch=master https://github.com/paritytech/ink.git lib/ink
+fi
+
 cd lib/ink/examples/flipper
 cargo +nightly contract build
 cargo +nightly contract generate-metadata

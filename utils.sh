@@ -79,7 +79,7 @@ function provide-parity-tools {
 
     export PATH=~/.cargo/bin:$PATH
 
-    cargo install --git https://github.com/paritytech/cargo-contract.git cargo-contract --force
+    cargo install cargo-contract
 
     if ! which wasm-prune; then
         cargo install pwasm-utils-cli --bin wasm-prune

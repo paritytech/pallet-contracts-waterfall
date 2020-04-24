@@ -52,10 +52,6 @@ build-and-test:
     - npm --version
     - wasm-prune -V
     - sccache -s
-    # `cargo install` returns an error if there is nothing to update, so have to supress it here temporarily
-    - cargo contract -V
-    - cargo install --git https://github.com/paritytech/cargo-contract --branch master || echo $?
-    - cargo contract -V
   script:
     - echo "_____Building contracts_____"
     - ./build.sh
