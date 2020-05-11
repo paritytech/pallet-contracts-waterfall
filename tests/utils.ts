@@ -32,13 +32,12 @@ export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
 export async function putCode(
   api: ApiPromise,
   signer: KeyringPair,
-  fileName: string,
-  gasRequired: number = GAS_REQUIRED
+  fileName: string
 ): Promise<Hash> {
   const wasmCode = fs
     .readFileSync(path.join(__dirname, fileName))
     .toString("hex");
-  const tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
+  const tx = api.tx.contracts.putCode(`0x${wasmCode}`);
   const result: any = await sendAndReturnFinalized(signer, tx);
   const record = result.findRecord("contracts", "CodeStored");
 
