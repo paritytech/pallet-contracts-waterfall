@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 const blake = require('blakejs');
 
-import { MAX_GAS } from "./consts";
+import { GAS_REQUIRED } from "./consts";
 
 export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
@@ -54,7 +54,7 @@ export async function instantiate(
   codeHash: Hash,
   inputData: any,
   endowment: BN,
-  gasRequired: number = MAX_GAS
+  gasRequired: number = GAS_REQUIRED
 ): Promise<Address> {
   const tx = api.tx.contracts.instantiate(
     endowment,
@@ -77,7 +77,7 @@ export async function callContract(
   signer: KeyringPair,
   contractAddress: Address,
   inputData: any,
-  gasRequired: number = MAX_GAS,
+  gasRequired: number = GAS_REQUIRED,
   endowment: number = 0
 ): Promise<void> {
   const tx = api.tx.contracts.call(
