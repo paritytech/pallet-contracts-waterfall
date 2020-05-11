@@ -8,7 +8,7 @@ import fs from "fs";
 import path from "path";
 const blake = require('blakejs');
 
-import { GAS_REQUIRED } from "./consts";
+import { MAX_GAS } from "./consts";
 
 export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
@@ -32,13 +32,12 @@ export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
 export async function putCode(
   api: ApiPromise,
   signer: KeyringPair,
-  fileName: string,
-  gasRequired: number = GAS_REQUIRED
+  fileName: string
 ): Promise<Hash> {
   const wasmCode = fs
     .readFileSync(path.join(__dirname, fileName))
     .toString("hex");
-  const tx = api.tx.contracts.putCode(gasRequired, `0x${wasmCode}`);
+  const tx = api.tx.contracts.putCode(`0x${wasmCode}`);
   const result: any = await sendAndReturnFinalized(signer, tx);
   const record = result.findRecord("contracts", "CodeStored");
 
@@ -55,7 +54,7 @@ export async function instantiate(
   codeHash: Hash,
   inputData: any,
   endowment: BN,
-  gasRequired: number = GAS_REQUIRED
+  gasRequired: number = MAX_GAS
 ): Promise<Address> {
   const tx = api.tx.contracts.instantiate(
     endowment,
@@ -78,7 +77,7 @@ export async function callContract(
   signer: KeyringPair,
   contractAddress: Address,
   inputData: any,
-  gasRequired: number = GAS_REQUIRED,
+  gasRequired: number = MAX_GAS,
   endowment: number = 0
 ): Promise<void> {
   const tx = api.tx.contracts.call(
