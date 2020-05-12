@@ -18,7 +18,7 @@ else echo "Please install and run Docker or Podman if you want to compile the So
 fi
 
 if [[ -d lib/ink ]]; then
-	git --git-dir lib/ink/.git pull
+	git --git-dir lib/ink/.git pull origin master
 else
 	git clone --depth=1 --branch=master https://github.com/paritytech/ink.git lib/ink
 fi
