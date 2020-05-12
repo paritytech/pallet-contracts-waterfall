@@ -19,7 +19,7 @@ import testKeyring from "@polkadot/keyring/testing";
 import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { Address } from "@polkadot/types/interfaces";
+import { Address, ContractInfo, Hash, StorageData } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import sha256 from "fast-sha256";
  
@@ -70,7 +70,7 @@ describe("AssemblyScript Smart Contracts", () => {
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(2);
     // Deploy contract code on chain and retrieve the code hash
-    const codeHash = await putCode(
+    const codeHash: Hash = await putCode(
       api,
       contractCreator,
       "../contracts/assemblyscript/flipper/build/flipper-pruned.wasm"
@@ -88,7 +88,7 @@ describe("AssemblyScript Smart Contracts", () => {
     );
     expect(address).toBeDefined();
 
-    const initialValue: Uint8Array = await getContractStorage(
+    const initialValue: StorageData = await getContractStorage(
       api,
       address,
       STORAGE_KEY

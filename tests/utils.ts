@@ -14,7 +14,7 @@ export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
   return new Promise(function(resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
       if (result.status.isInBlock) {
-        // Return result of the submittable extrinsic after the transfer is finalized
+        // Return the result of the submittable extrinsic after the transfer is finalized
         resolve(result as SubmittableResult);
       }
       if (
@@ -68,7 +68,7 @@ export async function instantiate(
   if (!record) {
     console.error("ERROR: No new instantiated contract");
   }
-  // Return the Address of instantiated contract.
+  // Return the Address of  the instantiated contract.
   return record.event.data[1];
 }
 
@@ -98,16 +98,17 @@ export async function getContractStorage(
   const contractInfo = await api.query.contracts.contractInfoOf(
     contractAddress
   );
-
   // Return the value of the contracts storage
   const childStorageKey = (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId;
-  const childInfo = childStorageKey.subarray(childStorageKey.byteLength -32, childStorageKey.byteLength);
-  const storageKeyBlake2b = blake.blake2bHex(storageKey, null, 32);
+  // Add the default child_storage key prefix `:child_storage:default:` to the storage key
+  const prefixedStorageKey = '0x3a6368696c645f73746f726167653a64656661756c743a' + u8aToHex(childStorageKey,-1,false);
+  console.log(prefixedStorageKey)
+  const storageKeyBlake2b = '0x' + blake.blake2bHex(storageKey, null, 32);
 
-  return await api.rpc.state.getChildStorage(
-    u8aToHex(childStorageKey), // trieId
-    u8aToHex(childInfo), // trieId without `:child_storage:` prefix
-    1, // substrate default value `1`
-    '0x' + storageKeyBlake2b // hashed storageKey
-  );
+  const result =  await api.rpc.childstate.getStorage(
+    prefixedStorageKey, // childStorageKey || prefixed trieId of the contract
+    storageKeyBlake2b // hashed storageKey
+  ) as Option<StorageData>;
+  console.log(result.unwrap())
+  return result.unwrap();
 }
