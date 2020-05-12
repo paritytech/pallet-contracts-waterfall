@@ -12,18 +12,18 @@ as-bignum@^0.1.7:
   resolved "https://registry.yarnpkg.com/as-bignum/-/as-bignum-0.1.7.tgz#e580d25089d392fb67d321d44b8fed36b7c475dc"
   integrity sha512-HqCW9HSKTVLxAebu8ctg52o2+F/xN07GofXzjALlABYxayi241zxrKDU7Mmu/ArKQkAuftSaP+nx2HIzvaC3TA==
 
-assemblyscript@^0.9.4:
-  version "0.9.4"
-  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.9.4.tgz#d535ad6e9299c9d3b9881ff08c3101298d53cb1a"
-  integrity sha512-GabjIxYt5uI3nyZNYzw6VtHyZcjVtcw8tbtEbXGvbrp3+A5p3zQ2yrU03tSiRR+WTeGx2aS8c6T+y2gGfjyvqw==
+assemblyscript@^0.9.4-nightly.20200510:
+  version "0.9.4-nightly.20200510"
+  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.9.4-nightly.20200510.tgz#09b4b22780151609b8fe2f8fae8467290ba3e4fa"
+  integrity sha512-mRJvyS79exDNxuTrwgFG8pgRbxMUwh7zK9NYDptJU5OwE7VbaSDOpJ/WpcZ4oecvHMJm0Zp78m3TG8AYhr0GIQ==
   dependencies:
-    binaryen "91.0.0-nightly.20200310"
+    binaryen "92.0.0-nightly.20200426"
     long "^4.0.0"
 
-binaryen@91.0.0-nightly.20200310:
-  version "91.0.0-nightly.20200310"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-91.0.0-nightly.20200310.tgz#f2c60020fef1fb5ac0e436b9a0e01b25c484c0b4"
-  integrity sha512-MmDzq267aa61HdEQeYiz+7guJlsYk2/6NxWC8I4w1jijqDwoqyZZxi7UYnTH7QvfLrNdMjweEgfT7FHjkvkPmQ==
+binaryen@92.0.0-nightly.20200426:
+  version "92.0.0-nightly.20200426"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-92.0.0-nightly.20200426.tgz#06001c7284e261dff808753a631b06eef87636e0"
+  integrity sha512-e9aKrfV8MBFjLBITaY89/ulGhZ0AQ9RDb0B4ZGg7Qe3fM445JNiQh6Dc2k0+wTAU95oUAY0uGnNEIGUtEnirag==
 
 long@^4.0.0:
   version "4.0.0"

@@ -7,13 +7,13 @@
   "types": "build/index.d.ts",
   "license": "Apache-2.0",
   "scripts": {
-    "build:optimized": "asc assembly/index.ts -b build/erc20.wasm -t build/erc20.wat --importMemory --noAssert --use abort= --validate --optimize",
+    "build:optimized": "asc assembly/index.ts -b build/erc20.wasm -t build/erc20.wat --runtime half --importMemory --noAssert --use abort= --optimize",
     "build:tsd": "asc assembly/index.ts -d build/index.d.ts",
     "build": "rm -rf build && mkdir build && yarn build:optimized && yarn build:tsd"
   },
   "dependencies": {
     "as-bignum": "^0.1.7",
-    "assemblyscript": "^0.9.4"
+    "assemblyscript": "^0.9.4-nightly.20200510"
   },
   "devDependencies": {
     "@types/node": "^12.12.17",
