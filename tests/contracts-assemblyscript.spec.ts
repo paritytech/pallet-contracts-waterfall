@@ -19,7 +19,7 @@ import testKeyring from "@polkadot/keyring/testing";
 import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { Address, ContractInfo, Hash, StorageData } from "@polkadot/types/interfaces";
+import { Address, Hash, StorageData } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import sha256 from "fast-sha256";
  
