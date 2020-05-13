@@ -102,6 +102,7 @@ export async function getContractStorage(
   const childStorageKey = (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId;
   // Add the default child_storage key prefix `:child_storage:default:` to the storage key
   const prefixedStorageKey = '0x3a6368696c645f73746f726167653a64656661756c743a' + u8aToHex(childStorageKey,-1,false);
+
   console.log(prefixedStorageKey)
   const storageKeyBlake2b = '0x' + blake.blake2bHex(storageKey, null, 32);
 
@@ -109,6 +110,6 @@ export async function getContractStorage(
     prefixedStorageKey, // childStorageKey || prefixed trieId of the contract
     storageKeyBlake2b // hashed storageKey
   ) as Option<StorageData>;
-  console.log(result.unwrap())
-  return result.unwrap();
+  console.log(result.unwrapOrDefault())
+  return result.unwrapOrDefault();
 }

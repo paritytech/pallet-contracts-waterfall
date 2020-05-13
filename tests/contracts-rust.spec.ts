@@ -60,7 +60,7 @@ beforeEach(
 );
 
 describe("Rust Smart Contracts", () => {
-  test.only("Flip contract", async (done): Promise<void> => {
+  test("Flip contract", async (done): Promise<void> => {
     // The storage key `0x0000000000000000000000000000000000000000000000000000000000000000` is copied over from the generated ink! contract metadata
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
 
