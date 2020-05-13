@@ -43,12 +43,12 @@ function handle(input: Uint8Array): Uint8Array {
       return toBytes(totalSupplyValue);
     case Action.BalanceOf: { // first byte: 0x01
       // Returns the account balance of the account with the address 'owner'.
-      const owner = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 32);
+      const owner = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart as i32), 1, 32);
       return getBalanceOrZero(owner);
     }
     case Action.Transfer: { // first byte: 0x02
       // Transfers 'value' amount of tokens to address 'to'
-      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart as i32), 1, 48);
       const to = parameters.subarray(0,32);
       const value = u128.from(parameters.subarray(32,48));
       const CALLER = getCaller();
@@ -63,7 +63,7 @@ function handle(input: Uint8Array): Uint8Array {
     }
     case Action.TransferFrom: { // first byte: 0x03
       // Transfers 'value' amount of tokens from address 'owner' to address 'to'
-      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 80);
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart as i32), 1, 80);
       const owner: Uint8Array = parameters.subarray(0,32);
       const to: Uint8Array = parameters.subarray(32, 64);
       const value: u128 = u128.from(parameters.subarray(64,80));
@@ -84,7 +84,7 @@ function handle(input: Uint8Array): Uint8Array {
     }
     case Action.Approve: { // first byte: 0x04
       // Allows 'spender' to withdraw from a callers account multiple times, up to the 'value' amount
-      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 48);
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart as i32), 1, 48);
       const spender: Uint8Array = parameters.subarray(0,32);
       const amount: Uint8Array = parameters.subarray(32,48);
       const CALLER = getCaller();
@@ -96,7 +96,7 @@ function handle(input: Uint8Array): Uint8Array {
     }
     case Action.Allowance: { // first byte: 0x05
       // Returns the amount which 'spender' is still allowed to withdraw from 'owner'
-      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart), 1, 64);
+      const parameters = Uint8Array.wrap(changetype<ArrayBuffer>(input.dataStart as i32), 1, 64);
       const owner: Uint8Array = parameters.subarray(0,32);
       const spender: Uint8Array = parameters.subarray(32,64);
 

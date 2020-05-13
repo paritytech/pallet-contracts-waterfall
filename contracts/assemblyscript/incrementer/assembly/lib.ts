@@ -20,18 +20,17 @@ export function toBytes<T>(num: T, le: boolean = true): Uint8Array {
   // accept only integers and booleans
   if (isInteger<T>()) {
     const arr = new Uint8Array(sizeof<T>());
-    store<T>(arr.dataStart, le ? num : bswap(num));
+    store<T>(arr.dataStart as i32, le ? num : bswap(num));
     return arr;
   }
   assert(false);
 }
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
-  const pointer = value ? value!.dataStart : 0;
-  const length = value ? value.length : 0;
-  const valueNonNull = i32(value !== null);
+  const pointer: i32 = value ? (value.dataStart as i32 as i32): 0;
+  const length: i32 = value ? value.length : 0;
 
-  ext_set_storage(key.dataStart, pointer, length);
+  ext_set_storage(key.dataStart as i32 as i32, pointer, length);
 }
 
 // check for length 32 bytes
@@ -40,7 +39,7 @@ export function getStorage(key: Uint8Array): Uint8Array {
   // If there is an entry at the given location then this function will return 0,
   // if not it will return 1 and clear the scratch buffer.
 
-  const result = ext_get_storage(key.dataStart); // pointer to key 32 bytes in static WASM memory
+  const result = ext_get_storage(key.dataStart as i32); // pointer to key 32 bytes in static WASM memory
 
   let value = new Uint8Array(0);
 
@@ -53,7 +52,7 @@ export function getStorage(key: Uint8Array): Uint8Array {
       // create empty array (Vec in Rust)
       value = new Uint8Array(size);
       // call
-      ext_scratch_read(value.dataStart, 0, size);
+      ext_scratch_read(value.dataStart as i32 as i32, 0, size);
     }
   }
   return value;
@@ -67,16 +66,16 @@ export function getScratchBuffer(): Uint8Array {
   if (size > 0) {
     value = new Uint8Array(size);
     // copy data from scratch buffer
-    ext_scratch_read(value.dataStart, 0, size);
+    ext_scratch_read(value.dataStart as i32, 0, size);
   }
   return value;
 }
 
 export function setScratchBuffer(data: Uint8Array): void {
-  ext_scratch_write(data.dataStart, data.length);
+  ext_scratch_write(data.dataStart as i32, data.length);
 }
 
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
-  ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
+  ext_set_rent_allowance(valueBuffer.dataStart as i32, valueBuffer.length);
 }

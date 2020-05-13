@@ -19,7 +19,7 @@ import testKeyring from "@polkadot/keyring/testing";
 import { hexToBn, u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
-import { Address } from "@polkadot/types/interfaces";
+import { Address, Hash, StorageData } from "@polkadot/types/interfaces";
 import BN from "bn.js";
 import sha256 from "fast-sha256";
  
@@ -70,7 +70,7 @@ describe("AssemblyScript Smart Contracts", () => {
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(2);
     // Deploy contract code on chain and retrieve the code hash
-    const codeHash = await putCode(
+    const codeHash: Hash = await putCode(
       api,
       contractCreator,
       "../contracts/assemblyscript/flipper/build/flipper-pruned.wasm"
@@ -88,7 +88,7 @@ describe("AssemblyScript Smart Contracts", () => {
     );
     expect(address).toBeDefined();
 
-    const initialValue: Uint8Array = await getContractStorage(
+    const initialValue: StorageData = await getContractStorage(
       api,
       address,
       STORAGE_KEY
@@ -163,7 +163,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const OSCAR = keyring.addFromSeed(randomAsU8a(32));
 
     await api.tx.balances
-      .transfer(DAN.address, CREATION_FEE.muln(5))
+      .transfer(DAN.address, CREATION_FEE.muln(10))
       .signAndSend(ALICE, (result: SubmittableResult): void => {
         if (result.status.isInBlock && result.findRecord("system", "ExtrinsicSuccess")) {
           console.log("DANs account is now funded.");
@@ -245,7 +245,7 @@ describe("AssemblyScript Smart Contracts", () => {
     // 16 bytes: Amount of tokens to transfer as u128 little endian hex (5000000000000000 in decimal)) value
     const approvedAmount = '0080e03779c311000000000000000000';
     const paramsApprove = 
-    '0x04' // 1 byte: First byte Action.Transfer
+   '0x04' // 1 byte: First byte Action.Transfer
     + u8aToHex(DAN.publicKey, -1, false) // 32 bytes: Hex encoded new spender account address as u256
     + approvedAmount;
 
@@ -259,9 +259,7 @@ describe("AssemblyScript Smart Contracts", () => {
 
     let storageKeyApprove32: Uint8Array = sha256(storageKeyApprove) // default export is hash
     let allowanceRaw = await getContractStorage(api, address, storageKeyApprove32);
-
     expect(allowanceRaw.toString()).toBe('0x' + approvedAmount);
-
 
     /**
     *  6. Use the transferFrom function to let DAN transfer 10000000 ERC20 tokens from FRANKIE to OSCAR
@@ -322,6 +320,6 @@ describe("AssemblyScript Smart Contracts", () => {
    allowance = hexToBn(allowanceRaw.toString(), true);
    expect(allowanceOld.toString()).toBe(allowance.toString());
 
-    done();
+     done();
   });
 });

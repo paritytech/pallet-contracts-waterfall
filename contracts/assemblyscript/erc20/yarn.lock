@@ -3,27 +3,27 @@
 
 
 "@types/node@^12.12.17":
-  version "12.12.24"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.24.tgz#d4606afd8cf6c609036b854360367d1b2c78931f"
-  integrity sha512-1Ciqv9pqwVtW6FsIUKSZNB82E5Cu1I2bBTj1xuIHXLe/1zYLl3956Nbhg2MzSYHVfl9/rmanjbQIb7LibfCnug==
+  version "12.12.38"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.12.38.tgz#58841a382f231ad005dbb935c36d44aa1118a26b"
+  integrity sha512-75eLjX0pFuTcUXnnWmALMzzkYorjND0ezNEycaKesbUBg9eGZp4GHPuDmkRc4mQQvIpe29zrzATNRA6hkYqwmA==
 
-as-bignum@^0.1.5:
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/as-bignum/-/as-bignum-0.1.5.tgz#e97a46a175644c277ecfe17d3850a63b6e55ac44"
-  integrity sha512-lv0ZOxtBReuCq6wpXUtjm6Mrj7CQn+qdSgF/O7yh553aH4FRrRaUXp/ywfSNMoiPK7AJ47f9gcKs0Toi5H84iA==
+as-bignum@^0.1.7:
+  version "0.1.7"
+  resolved "https://registry.yarnpkg.com/as-bignum/-/as-bignum-0.1.7.tgz#e580d25089d392fb67d321d44b8fed36b7c475dc"
+  integrity sha512-HqCW9HSKTVLxAebu8ctg52o2+F/xN07GofXzjALlABYxayi241zxrKDU7Mmu/ArKQkAuftSaP+nx2HIzvaC3TA==
 
-assemblyscript@^0.9.2:
-  version "0.9.2"
-  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.9.2.tgz#dd254370b8436bd997d14bb7e867535180907995"
-  integrity sha512-eqPbxS323ivXdUclGJjvihxEEMBaXcNYHLb17j3j3UaYvkqVPNSrNuJ/H1r7G/UwmQnFQ8NDrQ9BncOFCGmahg==
+assemblyscript@^0.9.4-nightly.20200510:
+  version "0.9.4-nightly.20200510"
+  resolved "https://registry.yarnpkg.com/assemblyscript/-/assemblyscript-0.9.4-nightly.20200510.tgz#09b4b22780151609b8fe2f8fae8467290ba3e4fa"
+  integrity sha512-mRJvyS79exDNxuTrwgFG8pgRbxMUwh7zK9NYDptJU5OwE7VbaSDOpJ/WpcZ4oecvHMJm0Zp78m3TG8AYhr0GIQ==
   dependencies:
-    binaryen "90.0.0-nightly.20200214"
+    binaryen "92.0.0-nightly.20200426"
     long "^4.0.0"
 
-binaryen@90.0.0-nightly.20200214:
-  version "90.0.0-nightly.20200214"
-  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-90.0.0-nightly.20200214.tgz#c2f46314dda59ef359c5fa24c0b6180b0ba2f00b"
-  integrity sha512-ZHajaPd2aP6kDrM9q77afnA402Ufsuw9yLUxtAfgmIglP1JMB2XSRmaXc5pgCELaX53PWJIdcH07LL8uNfTBRw==
+binaryen@92.0.0-nightly.20200426:
+  version "92.0.0-nightly.20200426"
+  resolved "https://registry.yarnpkg.com/binaryen/-/binaryen-92.0.0-nightly.20200426.tgz#06001c7284e261dff808753a631b06eef87636e0"
+  integrity sha512-e9aKrfV8MBFjLBITaY89/ulGhZ0AQ9RDb0B4ZGg7Qe3fM445JNiQh6Dc2k0+wTAU95oUAY0uGnNEIGUtEnirag==
 
 long@^4.0.0:
   version "4.0.0"
@@ -31,6 +31,6 @@ long@^4.0.0:
   integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
 
 typescript@^3.2.2:
-  version "3.7.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
-  integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
+  version "3.8.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.3.tgz#409eb8544ea0335711205869ec458ab109ee1061"
+  integrity sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==

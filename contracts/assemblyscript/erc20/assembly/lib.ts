@@ -39,22 +39,22 @@ export function getValueTransferred(): Uint8Array {
 export function printLine(value: string): void {
   const string = String.UTF8.encode(value);
   const stringArray = Uint8Array.wrap(string);
-  ext_println(stringArray.dataStart, string.byteLength);
+  ext_println(stringArray.dataStart as i32, string.byteLength);
 }
 
 
 export function setStorage(key: Uint8Array, value: Uint8Array | null): void {
   if(key.length === 32) {
-    const pointer = value ? value!.dataStart : 0;
-    const length = value ? value.length : 0;
+    const pointer: i32 = value ? value.dataStart as i32 : 0;
+    const length: i32 = value ? value.length : 0;
   
-    ext_set_storage(key.dataStart, pointer, length);
+    ext_set_storage(key.dataStart as i32, pointer, length);
   }
 }
 
 // check for length 32 bytes
 export function getStorage(key: Uint8Array): Uint8Array {
-  const result = ext_get_storage(key.dataStart);
+  const result = ext_get_storage(key.dataStart as i32);
   let value = new Uint8Array(0);
 
   // if value is found
@@ -66,7 +66,7 @@ export function getStorage(key: Uint8Array): Uint8Array {
       // create empty array (Vec in Rust)
       value = new Uint8Array(size);
       // call
-      ext_scratch_read(value.dataStart, 0, size);
+      ext_scratch_read(value.dataStart as i32, 0, size);
     }
   }
   return value;
@@ -80,22 +80,22 @@ export function getScratchBuffer(): Uint8Array {
   if (size > 0) {
     value = new Uint8Array(size);
     // copy data from scratch buffer
-    ext_scratch_read(value.dataStart, 0, size);
+    ext_scratch_read(value.dataStart as i32, 0, size);
   }
   return value;
 }
 
 export function setScratchBuffer(data: Uint8Array): void {
-  ext_scratch_write(data.dataStart, data.length);
+  ext_scratch_write(data.dataStart as i32, data.length);
 }
 
 export function setRentAllowance(value: u128): void {
   const valueBuffer = value.toUint8Array();
-  ext_set_rent_allowance(valueBuffer.dataStart, valueBuffer.length);
+  ext_set_rent_allowance(valueBuffer.dataStart as i32, valueBuffer.length);
 }
 
 export function hashSha256(value: Uint8Array): Uint8Array {
   const sha256 = new Uint8Array(32);
-  ext_hash_sha2_256(value.dataStart, value.length, sha256.dataStart)
+  ext_hash_sha2_256(value.dataStart as i32, value.length, sha256.dataStart as i32)
   return sha256;
 }

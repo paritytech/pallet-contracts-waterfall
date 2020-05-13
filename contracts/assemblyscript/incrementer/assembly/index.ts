@@ -9,11 +9,7 @@ import {
   toBytes
 } from "./lib";
 
-const COUNTER_KEY = (new Uint8Array(32)).fill(1); // [1,1,1, ... 1]
-
-// Inc(648) => 0088020000
-// decimal: [0,136,2,0,0]
-// Hex: 0x00000288
+const COUNTER_KEY = (new Uint8Array(32)).fill(1);
 
 enum Action {
   Inc,
@@ -36,7 +32,7 @@ function handle(input: Uint8Array): Uint8Array {
   switch (input[0]) {
     case Action.Inc:
       // read 4 bytes (u32) from storageBuffer with offset 1
-      const by = load<u32>(input.dataStart, 1);
+      const by = load<u32>(input.dataStart as i32, 1);
       const newCounter = toBytes(counterValue + by);
       setStorage(COUNTER_KEY, newCounter);
       break;
