@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export NODE_OPTIONS="--max-old-space-size=8192"
 export WABT_PATH
 export SOLANG_PATH
 source utils.sh
@@ -9,14 +8,14 @@ set -ev
 
 provide-parity-tools
 
-if which podman || which docker || [ -n "$CI_JOB_ID" ]; then
+
+
     provide-wabt
     provide-solang
     cd contracts/solidity/flipper
     ./build.sh
     cd -; 
-else echo "Please install and run Docker or Podman if you want to compile the Solang contracts and succesfully run their tests.";
-fi
+    fi
 
 if [[ -d lib/ink ]]; then
 	git --git-dir lib/ink/.git pull origin master
