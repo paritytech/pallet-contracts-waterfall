@@ -100,7 +100,6 @@ export async function getContractStorage(
   );
   // Return the value of the contracts storage
   const childStorageKey = (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId;
-  console.log(childStorageKey)
   // Add the default child_storage key prefix `:child_storage:default:` to the storage key
   const prefixedStorageKey = '0x3a6368696c645f73746f726167653a64656661756c743a' + u8aToHex(childStorageKey,-1,false);
 
