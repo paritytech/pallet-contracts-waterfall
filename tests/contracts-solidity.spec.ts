@@ -63,10 +63,12 @@ describe("Solang Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
     // The next three lines are a not so pretty workaround until the new metadata format has been fully implemented
     const metadata = require("../contracts/solidity/flipper/flipper.json");
+    console.log('metadata.contract');
+    console.log(metadata.contract);
     const selector = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.constructors[0].selector)));
     // const flipAction = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.messages[0].selector)));
     console.log("Selector", selector)
-    console.log("FlipAction", metadata.contract.messages[0].selector))
+    console.log("FlipAction", metadata.contract.messages[0].selector)
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
