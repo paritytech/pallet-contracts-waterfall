@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export NODE_OPTIONS="--max-old-space-size=8192"
 export WABT_PATH
 export SOLANG_PATH
 source utils.sh
