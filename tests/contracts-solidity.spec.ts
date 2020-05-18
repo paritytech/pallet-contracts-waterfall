@@ -60,7 +60,7 @@ beforeEach(
 
 describe("Solang Smart Contracts", () => {
   // skipped until test is fixed here: https://github.com/paritytech/pallet-contracts-waterfall/pull/66
-  test.skip("Raw Flipper contract", async (done): Promise<void> => {
+  test("Raw Flipper contract", async (done): Promise<void> => {
     // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
 
@@ -71,17 +71,18 @@ describe("Solang Smart Contracts", () => {
       contractCreator,
       "../contracts/solidity/flipper/flipper.wasm"
     );
+   
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // Call contract with Action: 0x00 = Action::Flip()
     const address: Address = await instantiate(
       api,
       contractCreator,
       codeHash,
-      "0xd531178600",
+      "0xF81E7E1A01", // contract.constructors[0].selector 0xF81E7E1A + default value bool 0x01
       CREATION_FEE
     );
+
     expect(address).toBeDefined();
 
     const initialValue: Uint8Array = await getContractStorage(
@@ -90,17 +91,18 @@ describe("Solang Smart Contracts", () => {
       STORAGE_KEY
     );
     expect(initialValue).toBeDefined();
-    expect(initialValue.toString()).toEqual("0x00");
-
-    await callContract(api, contractCreator, address, "0xa9efe4cd");
+    expect(initialValue.toString()).toEqual("0x01");
+    
+    // Call contract with Action: 0xCDE4EFA9 = Action::Flip()
+    await callContract(api, contractCreator, address, "0xCDE4EFA9");
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
-    expect(newValue.toString()).toEqual("0x01");
+    expect(newValue.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, "0xa9efe4cd");
+    await callContract(api, contractCreator, address, "0xCDE4EFA9");
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
-    expect(flipBack.toString()).toEqual("0x00");
+    expect(flipBack.toString()).toEqual("0x01");
 
     done();
   });
