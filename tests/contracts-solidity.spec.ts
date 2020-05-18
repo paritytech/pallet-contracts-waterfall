@@ -19,6 +19,7 @@ import testKeyring from "@polkadot/keyring/testing";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
+import { u8aToHex } from "@polkadot/util"
  
 import { CHARLIE as CHARLIE_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
@@ -59,10 +60,11 @@ beforeEach(
 );
 
 describe("Solang Smart Contracts", () => {
-  // skipped until test is fixed here: https://github.com/paritytech/pallet-contracts-waterfall/pull/66
   test("Raw Flipper contract", async (done): Promise<void> => {
-    // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
-    // how to get the STORAGE_KEY of an instantiated contract
+    // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
+    const metadata = require("../contracts/solidity/flipper/flipper.json");
+    const selector = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.constructors[0].selector)));
+    console.log(selector)
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
@@ -79,7 +81,7 @@ describe("Solang Smart Contracts", () => {
       api,
       contractCreator,
       codeHash,
-      "0xF81E7E1A01", // contract.constructors[0].selector 0xF81E7E1A + default value bool 0x01
+      selector + "01", // selector + default value bool 0x01
       CREATION_FEE
     );
 
