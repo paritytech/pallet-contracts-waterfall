@@ -9,13 +9,12 @@ set -ev
 provide-parity-tools
 
 
-
     provide-wabt
     provide-solang
     cd contracts/solidity/flipper
     ./build.sh
     cd -; 
-    fi
+
 
 if [[ -d lib/ink ]]; then
 	git --git-dir lib/ink/.git pull origin master
