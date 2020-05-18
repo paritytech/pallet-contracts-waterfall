@@ -65,6 +65,8 @@ describe("Solang Smart Contracts", () => {
     const metadata = require("../contracts/solidity/flipper/flipper.json");
     const selector = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.constructors[0].selector)));
     const flipAction = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.messages[0].selector)));
+    console.log("Selector", selector)
+    console.log("FlipAction", flipAction)
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
