@@ -64,18 +64,13 @@ describe("Solang Smart Contracts", () => {
     // The next three lines are a not so pretty workaround until the new metadata format has been fully implemented
     const metadata = require("../contracts/solidity/flipper/flipper.json");
     console.log(metadata.contract);
-    console.log(metadata.contract.constructors[0].selector)
-    console.log(metadata.contract.messages[0])
 
     const selector = u8aToHex(new Uint8Array(
       JSON.parse(metadata.contract.constructors[0].selector)
     ));
-    // const flipAction = u8aToHex(new Uint8Array(
-    //  JSON.parse(metadata.contract.messages[0].selector)
-    // ));
-    const flipAction = '0xCDE4EFA9'
-    console.log("Selector", selector)
-    //console.log("FlipAction", JSON.parse(metadata.contract.messages[0]))
+    const flipAction = u8aToHex(new Uint8Array(
+     JSON.parse(metadata.contract.messages[0].selector)
+    ));
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
@@ -88,34 +83,34 @@ describe("Solang Smart Contracts", () => {
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // const address: Address = await instantiate(
-    //   api,
-    //   contractCreator,
-    //   codeHash,
-    //   selector + "01", // selector + default value bool 0x01
-    //   CREATION_FEE
-    // );
+    const address: Address = await instantiate(
+      api,
+      contractCreator,
+      codeHash,
+      selector + "01", // selector + default value bool 0x01
+      CREATION_FEE
+    );
 
-    // expect(address).toBeDefined();
+    expect(address).toBeDefined();
 
-    // const initialValue: Uint8Array = await getContractStorage(
-    //   api,
-    //   address,
-    //   STORAGE_KEY
-    // );
-    // expect(initialValue).toBeDefined();
-    // expect(initialValue.toString()).toEqual("0x01");
+    const initialValue: Uint8Array = await getContractStorage(
+      api,
+      address,
+      STORAGE_KEY
+    );
+    expect(initialValue).toBeDefined();
+    expect(initialValue.toString()).toEqual("0x01");
     
-    // // Call contract with Action: 0xCDE4EFA9 = Action::Flip()
-    // await callContract(api, contractCreator, address, flipAction);
+    // Call contract with Action: 0xCDE4EFA9 = Action::Flip()
+    await callContract(api, contractCreator, address, flipAction);
 
-    // const newValue = await getContractStorage(api, address, STORAGE_KEY);
-    // expect(newValue.toString()).toEqual("0x00");
+    const newValue = await getContractStorage(api, address, STORAGE_KEY);
+    expect(newValue.toString()).toEqual("0x00");
 
-    // await callContract(api, contractCreator, address, flipAction);
+    await callContract(api, contractCreator, address, flipAction);
 
-    // const flipBack = await getContractStorage(api, address, STORAGE_KEY);
-    // expect(flipBack.toString()).toEqual("0x01");
+    const flipBack = await getContractStorage(api, address, STORAGE_KEY);
+    expect(flipBack.toString()).toEqual("0x01");
 
     done();
   });
