@@ -19,6 +19,7 @@ import testKeyring from "@polkadot/keyring/testing";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
+import { u8aToHex } from "@polkadot/util"
  
 import { CHARLIE as CHARLIE_ADDRESS, CREATION_FEE, WSURL } from "./consts";
 import {
@@ -59,10 +60,15 @@ beforeEach(
 );
 
 describe("Solang Smart Contracts", () => {
-  // skipped until test is fixed here: https://github.com/paritytech/pallet-contracts-waterfall/pull/66
-  test.skip("Raw Flipper contract", async (done): Promise<void> => {
-    // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
-    // how to get the STORAGE_KEY of an instantiated contract
+  test("Raw Flipper contract", async (done): Promise<void> => {
+    // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
+    const metadata = require("../contracts/solidity/flipper/flipper.json");
+    const selector = u8aToHex(new Uint8Array(
+      JSON.parse(metadata.contract.constructors[0].selector)
+    ));
+    const flipAction = u8aToHex(new Uint8Array(
+     JSON.parse(metadata.contract.messages[0].selector)
+    ));
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
@@ -71,17 +77,18 @@ describe("Solang Smart Contracts", () => {
       contractCreator,
       "../contracts/solidity/flipper/flipper.wasm"
     );
+   
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
-    // Call contract with Action: 0x00 = Action::Flip()
     const address: Address = await instantiate(
       api,
       contractCreator,
       codeHash,
-      "0xd531178600",
+      selector + "01", // selector + default value bool 0x01
       CREATION_FEE
     );
+
     expect(address).toBeDefined();
 
     const initialValue: Uint8Array = await getContractStorage(
@@ -90,17 +97,18 @@ describe("Solang Smart Contracts", () => {
       STORAGE_KEY
     );
     expect(initialValue).toBeDefined();
-    expect(initialValue.toString()).toEqual("0x00");
-
-    await callContract(api, contractCreator, address, "0xa9efe4cd");
+    expect(initialValue.toString()).toEqual("0x01");
+    
+    // Call contract with Action: 0xCDE4EFA9 = Action::Flip()
+    await callContract(api, contractCreator, address, flipAction);
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
-    expect(newValue.toString()).toEqual("0x01");
+    expect(newValue.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, "0xa9efe4cd");
+    await callContract(api, contractCreator, address, flipAction);
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
-    expect(flipBack.toString()).toEqual("0x00");
+    expect(flipBack.toString()).toEqual("0x01");
 
     done();
   });
