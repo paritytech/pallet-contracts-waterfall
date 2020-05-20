@@ -3,9 +3,7 @@
 set -e
 
 function provide-container {
-    if which podman; then
-        export DOCKER="podman"
-    elif which docker; then
+    if which docker; then
         echo "Docker detected"
         export DOCKER="sudo docker"
     else
@@ -36,30 +34,24 @@ function not-initialized {
 }
 
 function provide-wabt {
-    # we are good with any WABT
     if ! which wasm2wat && ! which wat2wasm; then
-        if not-initialized "$WABT_PATH"; then
-            export wabt_image="docker.io/kirillt/wabt:latest"
-            couldnt_find_message="Please specify the path to WABT in the WABT_PATH environment variable"
-
-            provide-container $wabt_image "$couldnt_find_message"
-
-            function wasm2wat { $DOCKER run -it --rm -v "$PWD":/x:z -w /x $wabt_image wasm2wat "$@"; }
-            function wat2wasm { $DOCKER run -it --rm -v "$PWD":/x:z -w /x $wabt_image wat2wasm "$@"; }
+        if [[ -d lib/wabt ]]; then
+            git --git-dir lib/wabt/.git pull origin master
         else
-            function wasm2wat { "$WABT_PATH"/bin/wasm2wat "$@"; }
-            function wat2wasm { "$WABT_PATH"/bin/wat2wasm "$@"; }
+            git clone --recursive --branch=master https://github.com/WebAssembly/wabt.git lib/wabt
+            cd lib/wabt
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build .
         fi
-
-        export -f wasm2wat
-        export -f wat2wasm
     fi
 }
 
 function provide-solang {
     # we are good only with the latest or explicitly specified Solang
     if not-initialized "$SOLANG_PATH"; then
-        export solang_image="docker.io/hyperledgerlabs/solang:latest"
+        export solang_image="docker.io/hyperledgerlabs/solang:m6"
         couldnt_find_message="Please specify the path to Solang in the SOLANG_PATH environment variable"
 
         provide-container $solang_image "$couldnt_find_message"
