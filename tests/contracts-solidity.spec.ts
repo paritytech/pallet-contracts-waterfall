@@ -61,10 +61,10 @@ beforeEach(
 
 describe("Solang Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
-    // The next three lines are a not so pretty workaround until the new metadata format has been fully implemented
+    // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
     const metadata = require("../contracts/solidity/flipper/flipper.json");
     const selector = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.constructors[0].selector)));
-    const flipAction = u8aToHex(new Uint8Array(JSON.parse(metadata.contract.messages[0].selector)));
+    console.log(selector)
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
@@ -96,12 +96,12 @@ describe("Solang Smart Contracts", () => {
     expect(initialValue.toString()).toEqual("0x01");
     
     // Call contract with Action: 0xCDE4EFA9 = Action::Flip()
-    await callContract(api, contractCreator, address, flipAction);
+    await callContract(api, contractCreator, address, "0xCDE4EFA9");
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, flipAction);
+    await callContract(api, contractCreator, address, "0xCDE4EFA9");
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x01");
