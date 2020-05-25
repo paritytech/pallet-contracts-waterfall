@@ -2,18 +2,9 @@
 
 # You can set following variables:
 # SUBSTRATE_PATH for running your local Substrate instead of the containerized one
-# SUBSTRATE_WS_PORT to change WebSockets port if it is already occupied
-# SUBSTRATE_HTTP_PORT to change HTTP port if it is already occupied
-
-source utils.sh
-
 set -evu
 
-# defaults
-: "${SUBSTRATE_HTTP_PORT:=9933}"
-: "${SUBSTRATE_WS_PORT:=9944}"
-
-echo "_____Updating PolkadotJS API_____"
+echo "_____Updating PolkadotJS packages_____"
 yarn upgrade --pattern @polkadot
 
 echo "_____Running dev node_____"
@@ -26,8 +17,6 @@ if not-initialized "${SUBSTRATE_PATH:+$SUBSTRATE_PATH}"; then
         "Please specify the path to substrate in the SUBSTRATE_PATH environment variable"
 
     SUBSTRATE_CID=$($DOCKER run -dt --rm \
-      -p $SUBSTRATE_WS_PORT:9944 \
-      -p $SUBSTRATE_HTTP_PORT:9933 \
       parity/substrate:latest --dev \
       --ws-external --rpc-external)
 
@@ -40,8 +29,6 @@ else
 
     echo "_____Spinning up the substrate node in background_____"
     $SUBSTRATE_PATH --dev \
-      --ws-port $SUBSTRATE_WS_PORT \
-      --rpc-port $SUBSTRATE_HTTP_PORT \
       &> substrate.log &
 
     SUBSTRATE_PID=$!

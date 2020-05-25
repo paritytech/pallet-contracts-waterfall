@@ -8,7 +8,7 @@ function provide-container {
         export DOCKER="sudo docker"
     else
         >&2 echo "$2"
-        >&2 echo "OR install Docker (you can also use Podman with DOCKER=podman)"
+        >&2 echo "OR install Docker"
         exit 1
     fi
 
@@ -66,6 +66,7 @@ function provide-solang {
 
 function provide-parity-tools {
     if ! which cargo ; then
+        curl https://sh.rustup.rs -sSf --default-toolchain | sh
         >&2 echo "Cargo is necessary for compiling these contracts"
     fi
 
