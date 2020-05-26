@@ -1,36 +1,21 @@
 #!/bin/bash
 
-set -e
+set -ev
 
-function provide-container {
-    if which docker; then
-        echo "Docker detected"
-        export DOCKER="sudo docker"
-    else
-        >&2 echo "$2"
-        >&2 echo "OR install Docker"
-        exit 1
+
+function provide-parity-tools {
+    if ! which cargo ; then
+        curl https://sh.rustup.rs -sSf --default-toolchain | sh
+        >&2 echo "Cargo is necessary for compiling these contracts"
     fi
 
-    if ! $DOCKER image exists "$1"; then
-        $DOCKER image pull "$1"
-    fi
-}
+    export PATH=~/.cargo/bin:$PATH
 
-function not-initialized {
-    if [ -n "$1" ] && [ ! -f "$1" ]; then
-        >&2 echo "$1 doesn't exist"
-        exit 2 # user pretends to know what he is doing,
-               # but the path is incorrect
-    fi
+    cargo install cargo-contract
 
-    if [ -z "$1" ]; then
-        # we can perform auto-initialization
-        return 0
+    if ! which wasm-prune; then
+        cargo install pwasm-utils-cli --bin wasm-prune
     fi
-
-    # the variable is correctly initialized
-    return 125 
 }
 
 function provide-wabt {
@@ -48,33 +33,28 @@ function provide-wabt {
     fi
 }
 
+function provide-container {
+    if which docker; then
+        echo "Docker detected"
+    else
+        echo "Please install and run Docker to successfully run this script"
+        exit 1
+    fi
+
+    if ! docker image exists "$1"; then
+        docker image pull "$1"
+    fi
+}
+
 function provide-solang {
     # we are good only with the latest or explicitly specified Solang
     if not-initialized "$SOLANG_PATH"; then
-        export solang_image="docker.io/hyperledgerlabs/solang:m6"
-        couldnt_find_message="Please specify the path to Solang in the SOLANG_PATH environment variable"
-
-        provide-container $solang_image "$couldnt_find_message"
-
-        function solang { $DOCKER run -it --rm -v "$PWD":/x:z -w /x $solang_image "$@"; }
+        solang_image="docker.io/hyperledgerlabs/solang:m6"
+        provide-container $solang_image
+        function solang { docker run -it --rm -v "$PWD":/x:z -w /x $solang_image; }
     else
-        function solang { $SOLANG_PATH "$@"; }
+        function solang { $SOLANG_PATH; }
     fi
 
     export -f solang
-}
-
-function provide-parity-tools {
-    if ! which cargo ; then
-        curl https://sh.rustup.rs -sSf --default-toolchain | sh
-        >&2 echo "Cargo is necessary for compiling these contracts"
-    fi
-
-    export PATH=~/.cargo/bin:$PATH
-
-    cargo install cargo-contract
-
-    if ! which wasm-prune; then
-        cargo install pwasm-utils-cli --bin wasm-prune
-    fi
 }

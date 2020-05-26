@@ -1,12 +1,13 @@
 #!/bin/bash
 source utils.sh
 
-set -ev
+set -evu
 
 provide-parity-tools
 provide-wabt
 
 ## Solang Tests
+## Solang installation depends on docker locally and is pre-installed in the CI
 if which docker || [ -n "$CI_JOB_ID" ]; then
     provide-solang
     cd contracts/solidity/flipper

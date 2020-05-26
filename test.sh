@@ -2,6 +2,8 @@
 
 # You can set following variables:
 # SUBSTRATE_PATH for running your local Substrate instead of the containerized one
+# SUBSTRATE_WS_PORT to change WebSockets port if it is already occupied
+
 set -evu
 
 echo "_____Updating PolkadotJS packages_____"
@@ -13,10 +15,9 @@ if not-initialized "${SUBSTRATE_PATH:+$SUBSTRATE_PATH}"; then
     echo "_____Spinning up fresh substrate container in background_____"
 
     provide-container \
-        "docker.io/parity/substrate:latest" \
-        "Please specify the path to substrate in the SUBSTRATE_PATH environment variable"
+        "docker.io/parity/substrate:latest"
 
-    SUBSTRATE_CID=$($DOCKER run -dt --rm \
+    SUBSTRATE_CID=$(docker run -dt --rm \
       parity/substrate:latest --dev \
       --ws-external --rpc-external)
 
@@ -52,4 +53,4 @@ function stop_substrate {
 trap stop_substrate EXIT
 
 echo "_____Executing tests_____"
-yarn && yarn test -w 2 "$@"
+yarn && yarn test
