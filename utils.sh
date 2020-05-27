@@ -2,6 +2,22 @@
 
 set -ev
 
+function not-initialized {
+    if [ -n "$1" ] && [ ! -f "$1" ]; then
+        >&2 echo "$1 doesn't exist"
+        # the path is incorrect
+        exit 2 
+    fi
+
+    if [ -z "$1" ]; then
+        # we can perform auto-initialization
+        return 0
+    fi
+
+    # the variable is correctly initialized
+    return 125 
+}
+
 
 function provide-parity-tools {
     if ! which cargo ; then
@@ -39,12 +55,12 @@ function provide-wabt {
 function provide-solang {
     # we are good only with the latest Solang
     # https://hub.docker.com/r/hyperledgerlabs/solang/tags
-    if [ -z "$SOLANG_PATH" ]; then
-        solang_image="docker.io/hyperledgerlabs/solang:latest"
-        docker pull $solang_image
-        function solang { docker run -it --rm -v "$PWD":/x:z -w /x $solang_image; }
+    if not-initialized "$SOLANG_PATH"; then
+        export solang_image="docker.io/hyperledgerlabs/solang:latest"
+        docker image pull $solang_image
+        function solang { docker run -it --rm -v "$PWD":/x:z -w /x $solang_image "$@"; }
     else
-        function solang { $SOLANG_PATH; }
+        function solang { $SOLANG_PATH "$@"; }
     fi
 
     export -f solang
