@@ -42,7 +42,6 @@ build-and-test:
   variables:
     SUBSTRATE_PATH: "./substrate"
     SOLANG_PATH: "/usr/local/cargo/bin/solang"
-    NODE_OPTIONS: --max_old_space_size=8192
   before_script:
     # upstream CI can override global vars here
     - unset CARGO_TARGET_DIR

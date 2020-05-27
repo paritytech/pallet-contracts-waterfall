@@ -30,7 +30,6 @@
   },
   "scripts": {
     "test": "NODE_ENV=a yarn run jest",
-    "test:CI": "NODE_OPTIONS=--max_old_space_size=4096 NODE_ENV=a yarn run jest",
     "test:as": "yarn test tests/contracts-assemblyscript.spec.ts",
     "test:rust": "yarn test tests/contracts-rust.spec.ts",
     "test:solang": "yarn test tests/contracts-solidity.spec.ts"
