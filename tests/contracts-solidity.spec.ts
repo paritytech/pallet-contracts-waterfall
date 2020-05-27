@@ -62,7 +62,7 @@ beforeEach(
 describe("Solang Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
     // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
-    const metadata = require("../lib/ink/examples/flipper/target/metadata.json");
+    const metadata = require("../contracts/solidity/flipper/flipper.json");
     const selector = u8aToHex(new Uint8Array(
       JSON.parse(metadata.contract.constructors[0].selector)
     ));
@@ -75,7 +75,7 @@ describe("Solang Smart Contracts", () => {
     const codeHash = await putCode(
       api,
       contractCreator,
-      "../lib/ink/examples/flipper/target/flipper.wasm"
+      "../contracts/solidity/flipper/flipper.wasm"
     );
    
     expect(codeHash).toBeDefined();
