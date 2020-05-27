@@ -49,3 +49,13 @@ yarn build
 ./build.sh
 cd -
 
+echo "____Running Solang Tests____"
+## Solang installation depends on docker locally and is pre-installed in the CI
+if which docker || [ -n "$CI_JOB_ID" ]; then
+    provide-solang
+    cd contracts/solidity/flipper
+    ./build.sh
+    cd -; 
+else 
+    echo "Please install and run Docker if you want to compile the Solang contracts and succesfully run their tests."; 
+fi

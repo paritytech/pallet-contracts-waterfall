@@ -21,8 +21,7 @@ echo "_____Purging dev chain_____"
 $SUBSTRATE_PATH purge-chain --dev -y
 
 echo "_____Spinning up the substrate node in background_____"
-$SUBSTRATE_PATH --dev \
-
+#$SUBSTRATE_PATH --dev &
 SUBSTRATE_PID=$!
 
 echo "_____Updating PolkadotJS packages_____"

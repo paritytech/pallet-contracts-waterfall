@@ -37,7 +37,7 @@ function provide-wabt {
 
 function provide-solang {
     # we are good only with the latest or explicitly specified Solang
-    if ! -z "$SOLANG_PATH"; then
+    if [ -z "$SOLANG_PATH" ]; then
         solang_image="docker.io/hyperledgerlabs/solang:m6"
         if ! docker image exists $solang_image; then
             docker image pull $solang_image
