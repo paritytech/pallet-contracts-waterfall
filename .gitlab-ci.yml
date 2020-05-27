@@ -9,15 +9,14 @@ stages:
   - build
 
 variables:
-  GIT_STRATEGY:                    fetch
-  GIT_SUBMODULE_STRATEGY:          recursive
-  GIT_DEPTH:                       100
-  CARGO_INCREMENTAL:               0
-  REGISTRY:                        "registry.parity.io/parity/infrastructure/scripts"
+  GIT_STRATEGY: fetch
+  GIT_SUBMODULE_STRATEGY: recursive
+  GIT_DEPTH: 100
+  CARGO_INCREMENTAL: 0
+  REGISTRY: "registry.parity.io/parity/infrastructure/scripts"
 
-
-.docker-env:                       &docker-env
-  image:                           ${REGISTRY}/contracts-ci-linux:latest
+.docker-env: &docker-env
+  image: ${REGISTRY}/contracts-ci-linux:latest
   only:
     - master
     - /^v[0-9]+\.[0-9]+.*$/ # i.e. v1.0, v2.1rc1
@@ -41,8 +40,9 @@ build-and-test:
   stage: build
   <<: *docker-env
   variables:
-    SUBSTRATE_PATH:                "./substrate"
-    SOLANG_PATH:                   "/usr/local/cargo/bin/solang"
+    SUBSTRATE_PATH: "./substrate"
+    SOLANG_PATH: "/usr/local/cargo/bin/solang"
+    NODE_OPTIONS: --max_old_space_size=8192
   before_script:
     # upstream CI can override global vars here
     - unset CARGO_TARGET_DIR
