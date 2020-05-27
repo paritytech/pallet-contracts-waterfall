@@ -56,7 +56,7 @@ echo "____Building Solang Examples____"
 if which docker || [ -n "$CI_JOB_ID" ]; then
     provide-solang
     cd contracts/solidity/flipper
-    # ./build.sh
+    ./build.sh
     cd -; 
 else 
     echo "Please install and run Docker if you want to compile the Solang contracts and succesfully run their tests."; 
