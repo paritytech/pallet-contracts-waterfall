@@ -34,7 +34,6 @@ mod cabi {
         pub fn ext_scratch_size() -> u32;
         pub fn ext_scratch_read(dest_ptr: u32, offset: u32, len: u32);
         pub fn ext_scratch_write(src_ptr: u32, len: u32);
-        pub fn ext_println(ptr: u32, len: u32);
         pub fn ext_caller();
     }
 }
@@ -96,12 +95,6 @@ pub fn scratch_buf() -> Vec<u8> {
 pub fn scratch_buf_set(data: &[u8]) {
     unsafe {
         cabi::ext_scratch_write(data.as_ptr() as u32, data.len() as u32);
-    }
-}
-
-pub fn println(msg: &str) {
-    unsafe {
-        cabi::ext_println(msg.as_ptr() as u32, msg.len() as u32);
     }
 }
 
