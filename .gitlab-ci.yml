@@ -40,6 +40,7 @@ build-and-test:
   stage: build
   <<: *docker-env
   variables:
+    NODE_OPTIONS: --max_old_space_size=16384
     SUBSTRATE_PATH: "./substrate"
     SOLANG_PATH: "/usr/local/cargo/bin/solang"
   before_script:
