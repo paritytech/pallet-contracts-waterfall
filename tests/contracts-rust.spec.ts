@@ -61,7 +61,15 @@ beforeEach(
 
 describe("Rust Smart Contracts", () => {
   test("Flip contract", async (done): Promise<void> => {
-    // The storage key `0x0000000000000000000000000000000000000000000000000000000000000000` is copied over from the generated ink! contract metadata
+    // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
+    const metadata = require("../lib/ink/examples/flipper/target/metadata.json");
+    const selector = u8aToHex(new Uint8Array(
+      JSON.parse(metadata.contract.constructors[1].selector)
+    ));
+    const flipAction = u8aToHex(new Uint8Array(
+     JSON.parse(metadata.contract.messages[0].selector)
+    ));
+
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
 
     // Deploy contract code on chain and retrieve the code hash
@@ -78,7 +86,7 @@ describe("Rust Smart Contracts", () => {
       api,
       testAccount,
       codeHash,
-      "0x0222FF18",
+      selector,
       CREATION_FEE
     );
     expect(address).toBeDefined();
@@ -92,7 +100,7 @@ describe("Rust Smart Contracts", () => {
     expect(initialValue.toString()).toEqual("0x00");
 
     // The selector `0x8C97DB39` is copied over from the generated ink! contract metadata
-    await callContract(api, testAccount, address, '0x8C97DB39');
+    await callContract(api, testAccount, address, flipAction);
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x01");
