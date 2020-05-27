@@ -30,7 +30,7 @@ echo "_____Updating PolkadotJS packages_____"
 yarn upgrade --pattern @polkadot
 
 echo "_____Executing tests_____"
-node --max-old-space-size=4096 yarn && yarn test
+NODE_OPTIONS=--max_old_space_size=4096 yarn & yarn test
 
 echo "_____Kill the spawned substrate node_____"
 kill -9 $SUBSTRATE_PID
