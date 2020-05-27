@@ -6,18 +6,7 @@ set -evu
 provide-parity-tools
 provide-wabt
 
-## Solang Tests
-## Solang installation depends on docker locally and is pre-installed in the CI
-if which docker || [ -n "$CI_JOB_ID" ]; then
-    provide-solang
-    cd contracts/solidity/flipper
-    ./build.sh
-    cd -; 
-else 
-    echo "Please install and run Docker if you want to compile the Solang contracts and succesfully run their tests.";
-fi
-
-## ink! Tests
+echo "____Running ink! tests____"
 if [[ -d lib/ink ]]; then
 	git --git-dir lib/ink/.git pull origin master
 else
@@ -29,7 +18,7 @@ cargo +nightly contract build
 cargo +nightly contract generate-metadata
 cd -
 
-## Raw Rust Tests
+echo "____Running raw Rust Tests____"
 cd contracts/rust/raw-incrementer
 ./build.sh
 cd -
@@ -38,7 +27,7 @@ cd contracts/rust/restore-contract
 ./build.sh
 cd -
 
-## Raw AssemblyScript Tests
+echo "____Running Raw AssemblyScript Tests____"
 cd contracts/assemblyscript/flipper
 rm -rf build
 yarn
@@ -59,3 +48,14 @@ yarn
 yarn build
 ./build.sh
 cd -
+
+echo "____Running Solang Tests____"
+## Solang installation depends on docker locally and is pre-installed in the CI
+if which docker || [ -n "$CI_JOB_ID" ]; then
+    provide-solang
+    cd contracts/solidity/flipper
+    ./build.sh
+    cd -; 
+else 
+    echo "Please install and run Docker if you want to compile the Solang contracts and succesfully run their tests."; 
+fi

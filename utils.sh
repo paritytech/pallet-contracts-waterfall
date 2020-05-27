@@ -11,7 +11,9 @@ function provide-parity-tools {
 
     export PATH=~/.cargo/bin:$PATH
 
-    cargo install cargo-contract
+    if ! which cargo-contract; then
+        cargo install cargo-contract
+    fi
 
     if ! which wasm-prune; then
         cargo install pwasm-utils-cli --bin wasm-prune
@@ -33,24 +35,13 @@ function provide-wabt {
     fi
 }
 
-function provide-container {
-    if which docker; then
-        echo "Docker detected"
-    else
-        echo "Please install and run Docker to successfully run this script"
-        exit 1
-    fi
-
-    if ! docker image exists "$1"; then
-        docker image pull "$1"
-    fi
-}
-
 function provide-solang {
     # we are good only with the latest or explicitly specified Solang
-    if not-initialized "$SOLANG_PATH"; then
+    if ! -z "$SOLANG_PATH"; then
         solang_image="docker.io/hyperledgerlabs/solang:m6"
-        provide-container $solang_image
+        if ! docker image exists $solang_image; then
+            docker image pull $solang_image
+        fi
         function solang { docker run -it --rm -v "$PWD":/x:z -w /x $solang_image; }
     else
         function solang { $SOLANG_PATH; }
