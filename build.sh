@@ -10,6 +10,10 @@ set -evu
 provide-parity-tools
 provide-wabt
 
+curl -o foo.tar.gz https://nodejs.org/dist/v12.16.3/node-v12.16.3-linux-x64.tar.gz
+tar zxf foo.tar.gz
+export PATH=$(pwd)/node-v12.16.3-linux-x64/bin:$PATH
+
 echo "____Building Solang Examples____"
 ## Solang installation depends on docker locally and is pre-installed in the CI
 if which docker || [ -n "$CI_JOB_ID" ]; then

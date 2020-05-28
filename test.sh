@@ -4,6 +4,8 @@
 # SUBSTRATE_PATH is defined in the `.gitlab-ci.yml file`
 source utils.sh
 
+export PATH=$(pwd)/node-v12.16.3-linux-x64/bin:$PATH
+
 set -evu
 
 echo "_____Running dev node_____"
