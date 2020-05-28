@@ -1,5 +1,7 @@
 #!/bin/bash
 
+ulimit -a
+
 export SOLANG_PATH
 source utils.sh
 

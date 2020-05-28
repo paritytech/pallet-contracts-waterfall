@@ -49,6 +49,7 @@ build-and-test:
     - cargo --version
     - yarn --version
     - npm --version
+    - node --version
     - wasm-prune -V
     - sccache -s
   script:
