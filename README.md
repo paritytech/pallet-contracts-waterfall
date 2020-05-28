@@ -45,36 +45,25 @@ For running this test suite you would need to have:
    git submodule update --init
    ```
 
-## Optional components:
+# Compiling the examples
 
-If you're running Docker or Podman on your computer, these optional components will be automatically made available by running the `build.sh` script.
-Alternatively you can also install each of the components manually on your local machine.
-
-5. WABT
-
-   You can look it up in the package manager for your system or
-   build it yourself, for better performance. The test system will catch it up
-   from your `$PATH` or from `$WABT_PATH` variables.
-
-   Please see https://github.com/WebAssembly/wabt for details.
-
-6. Solang Tests
-
-   To compile the provided Solang test contracts, you need to have Docker or Podman installed and running.
-   Docker will ask for your sudo password before continuing the installation.
-
-   If you want to test smart contracts against specific version of Solang,
-   provide `$SOLANG_PATH` environment variable with it.
-
-   Please see https://github.com/hyperledger-labs/solang for details.
-
-# Running
-
-Then make sure that you built all artifacts required for running the tests by invoking
+To build all artifacts required for running the tests, you need to invoke
 
 ```
 ./build.sh
 ```
+
+This will also install https://github.com/WebAssembly/wabt on your computer.
+
+## Optional Solang test relying on Docker:
+
+The recommended way to install Solang is currently to use the latest docker image from https://hub.docker.com/r/hyperledgerlabs/solang/tags.
+For this reason, the Solang tests-cases will only be compiled by running the `build.sh` script if Docker is installed and running on your machine.
+Alternatively you can also install Solang manually on your local machine.
+
+Please see https://github.com/hyperledger-labs/solang for details.
+
+# Execute tests
 
 To run the tests, launch the substrate node locally and run
 
@@ -82,7 +71,18 @@ To run the tests, launch the substrate node locally and run
 yarn test
 ```
 
-## Using a Docker image of Substrate for testing
+## To only run a language specific subset of tests, the following commands are available:
+
+**Run AssemblyScript tests only:**
+`yarn test:as`
+
+**Run Rust and ink! tests only:**
+`yarn test:rust`
+
+**Run Solang tests only:**
+`yarn test:solang`
+
+# Using a Docker image of Substrate for testing
 
 To run this tests, you need to run a local Substrate on port `ws://127.0.0.1:9944`. The other alternative is to use one of the Docker images that are being automatically generated with every update to the master branch and published https://hub.docker.com/r/parity/substrate/.
 
