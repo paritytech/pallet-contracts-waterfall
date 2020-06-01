@@ -20,13 +20,16 @@ import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
 import { u8aToHex } from "@polkadot/util"
- 
-import { CHARLIE as CHARLIE_ADDRESS, CREATION_FEE, WSURL } from "./consts";
+import { Abi } from '@polkadot/api-contract';
+import BN from "bn.js";
+
+import { CHARLIE as CHARLIE_ADDRESS, DOT, CREATION_FEE, WSURL } from "./consts";
 import {
   callContract,
   instantiate,
   getContractStorage,
-  putCode
+  putCode,
+  rpcContract,
 } from "./utils";
 
 // This is a test account that is going to be created and funded before each test.
@@ -63,12 +66,7 @@ describe("Solang Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
     // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
     const metadata = require("../contracts/solidity/flipper/flipper.json");
-    const selector = u8aToHex(new Uint8Array(
-      JSON.parse(metadata.contract.constructors[0].selector)
-    ));
-    const flipAction = u8aToHex(new Uint8Array(
-     JSON.parse(metadata.contract.messages[0].selector)
-    ));
+    const abi = new Abi(api.registry, metadata);
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
@@ -77,7 +75,7 @@ describe("Solang Smart Contracts", () => {
       contractCreator,
       "../contracts/solidity/flipper/flipper.wasm"
     );
-   
+
     expect(codeHash).toBeDefined();
 
     // Instantiate a new contract instance and retrieve the contracts address
@@ -85,7 +83,7 @@ describe("Solang Smart Contracts", () => {
       api,
       contractCreator,
       codeHash,
-      selector + "01", // selector + default value bool 0x01
+      abi.constructors[0](1),
       CREATION_FEE
     );
 
@@ -98,17 +96,88 @@ describe("Solang Smart Contracts", () => {
     );
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x01");
-    
-    // Call contract with Action: 0xCDE4EFA9 = Action::Flip()
-    await callContract(api, contractCreator, address, flipAction);
+
+    await callContract(api, contractCreator, address, abi.messages.flip());
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, flipAction);
+    let res = await rpcContract(api, address, abi.messages.get());
+    expect(res.toString()).toEqual("0x00");
+
+    await callContract(api, contractCreator, address, abi.messages.flip());
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x01");
+
+    res = await rpcContract(api, address, abi.messages.get());
+    expect(res.toString()).toEqual("0x01");
+
+    done();
+  });
+
+  test("Raw Creator contract", async (done): Promise<void> => {
+    const metadata = require("../contracts/solidity/creator/creator.json");
+    const abi = new Abi(api.registry, metadata);
+
+    // Deploy contract code on chain and retrieve the code hash
+    const otherCodeHash = await putCode(
+      api,
+      contractCreator,
+      "../contracts/solidity/creator/other.wasm"
+    );
+
+    expect(otherCodeHash).toBeDefined();
+
+    // Deploy contract code on chain and retrieve the code hash
+    const codeHash = await putCode(
+      api,
+      contractCreator,
+      "../contracts/solidity/creator/creator.wasm"
+    );
+
+    expect(codeHash).toBeDefined();
+
+    // Instantiate a new contract instance and retrieve the contracts address
+    const address: Address = await instantiate(
+      api,
+      contractCreator,
+      codeHash,
+      abi.constructors[0](),
+      CREATION_FEE
+    );
+
+    expect(address).toBeDefined();
+
+    // what is the balance
+    let res = await rpcContract(api, address, abi.messages.balance());
+    let balance = new BN(res, 16, 'le');
+    // the balance should be less than the creation free
+    expect(balance.cmp(CREATION_FEE)).toBeLessThan(0);
+    // the balance should be 99% or more than the creation
+    expect(balance.cmp(CREATION_FEE.muln(99).divn(100))).toBeGreaterThan(0);
+
+    await callContract(api, contractCreator, address, abi.messages.createChild(DOT.muln(10)));
+
+    // what is the child balance
+    res = await rpcContract(api, address, abi.messages.childBalance());
+    balance = new BN(res, 16, 'le');
+
+    expect(balance.cmpn(10000000)).toBeGreaterThan(0);
+    expect(balance.cmp(DOT.muln(10))).toBeLessThan(0);
+
+    // do a call and send value along with it
+    await callContract(api, contractCreator, address, abi.messages.childSetVal(1024, DOT.muln(10)));
+
+    res = await rpcContract(api, address, abi.messages.childGetVal());
+
+    expect((new BN(res, 16, 'le')).toNumber()).toEqual(1024);
+
+    // what is the child balance
+    res = await rpcContract(api, address, abi.messages.childBalance());
+    let new_balance = new BN(res, 16, 'le');
+
+    expect(new_balance.cmp(balance)).toBeGreaterThan(0);
 
     done();
   });

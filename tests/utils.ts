@@ -8,10 +8,10 @@ import fs from "fs";
 import path from "path";
 const blake = require('blakejs');
 
-import { GAS_REQUIRED } from "./consts";
+import { GAS_LIMIT, GAS_REQUIRED } from "./consts";
 
 export async function sendAndReturnFinalized(signer: KeyringPair, tx: any) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     tx.signAndSend(signer, (result: SubmittableResult) => {
       if (result.status.isInBlock) {
         // Return the result of the submittable extrinsic after the transfer is finalized
@@ -90,6 +90,25 @@ export async function callContract(
   await sendAndReturnFinalized(signer, tx);
 }
 
+export async function rpcContract(
+  api: ApiPromise,
+  contractAddres: Address,
+  inputData: any,
+  gasLimit: number = GAS_LIMIT,
+): Promise<Uint8Array> {
+  const res = await api.rpc.contracts.call({
+    dest: contractAddres,
+    gasLimit,
+    inputData
+  });
+
+  if (!res.isSuccess) {
+    console.error("ERROR: rpc call did not succeed");
+  }
+
+  return res.asSuccess.data;
+}
+
 export async function getContractStorage(
   api: ApiPromise,
   contractAddress: Address,
@@ -101,12 +120,12 @@ export async function getContractStorage(
   // Return the value of the contracts storage
   const childStorageKey = (contractInfo as Option<ContractInfo>).unwrap().asAlive.trieId;
   // Add the default child_storage key prefix `:child_storage:default:` to the storage key
-  const prefixedStorageKey = '0x3a6368696c645f73746f726167653a64656661756c743a' + u8aToHex(childStorageKey,-1,false);
+  const prefixedStorageKey = '0x3a6368696c645f73746f726167653a64656661756c743a' + u8aToHex(childStorageKey, -1, false);
 
   console.log(prefixedStorageKey)
   const storageKeyBlake2b = '0x' + blake.blake2bHex(storageKey, null, 32);
 
-  const result =  await api.rpc.childstate.getStorage(
+  const result = await api.rpc.childstate.getStorage(
     prefixedStorageKey, // childStorageKey || prefixed trieId of the contract
     storageKeyBlake2b // hashed storageKey
   ) as Option<StorageData>;
