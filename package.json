@@ -6,7 +6,7 @@
     "Sergey Shulepov <sergei@parity.io>",
     "Stefanie Doll <stefie@parity.io>"
   ],
-  "license": "MIT",
+  "license": "GPL-3.0",
   "dependencies": {
     "@polkadot/api": "beta",
     "@polkadot/api-contract": "beta",
