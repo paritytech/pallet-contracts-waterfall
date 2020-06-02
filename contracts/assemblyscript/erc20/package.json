@@ -5,7 +5,7 @@
   "author": "Stefanie Doll",
   "main": "build/index.js",
   "types": "build/index.d.ts",
-  "license": "Apache-2.0",
+  "license": "GPL-3.0",
   "scripts": {
     "build:optimized": "asc assembly/index.ts -b build/erc20.wasm -t build/erc20.wat --runtime half --importMemory --noAssert --use abort= --optimize",
     "build:tsd": "asc assembly/index.ts -d build/index.d.ts",
