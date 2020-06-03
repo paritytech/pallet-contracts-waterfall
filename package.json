@@ -10,7 +10,6 @@
   "dependencies": {
     "@polkadot/api": "beta",
     "@polkadot/api-contract": "beta",
-    "as-substrate": "https://github.com/paritytech/as-substrate.git",
     "blakejs": "^1.1.0",
     "fast-sha256": "^1.3.0",
     "typescript": "^3.6.4"
