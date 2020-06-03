@@ -14,7 +14,10 @@ if which docker || [ -n "$CI_JOB_ID" ]; then
     provide-solang
     cd contracts/solidity/flipper
     ./build.sh
-    cd -; 
+    cd -;
+    cd contracts/solidity/creator
+    ./build.sh
+    cd -;
 else 
     echo "Please install and run Docker if you want to compile the Solang contracts and succesfully run their tests."; 
 fi
