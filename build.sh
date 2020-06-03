@@ -64,3 +64,11 @@ yarn
 yarn build
 ./build.sh
 cd -
+
+echo "____Building as-substrate examples____"
+cd contracts/as-substrate
+rm -rf build
+yarn
+yarn build
+./build.sh
+cd -

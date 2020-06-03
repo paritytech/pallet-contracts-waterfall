@@ -796,9 +796,9 @@ array-unique@^0.3.2:
   resolved "https://registry.yarnpkg.com/array-unique/-/array-unique-0.3.2.tgz#a894b75d4bc4f6cd679ef3244a9fd8f46ae2d428"
   integrity sha1-qJS3XUvE9s1nnvMkSp/Y9Gri1Cg=
 
-"as-substrate@https://github.com/Stefie/as-substrate.git/":
+"as-substrate@https://github.com/paritytech/as-substrate.git":
   version "0.0.1"
-  resolved "https://github.com/Stefie/as-substrate.git/#f0ccf9b55e22d3bfdd191da1b7d63ad73bddee53"
+  resolved "https://github.com/paritytech/as-substrate.git#1a1a2b07804ba082cdc5f5773216897ed82fee7f"
   dependencies:
     yarn "^1.21.1"
 
