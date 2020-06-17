@@ -63,12 +63,9 @@ describe("Rust Smart Contracts", () => {
   test("Flip contract", async (done): Promise<void> => {
     // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
     const metadata = require("../lib/ink/examples/flipper/target/metadata.json");
-    const selector = u8aToHex(new Uint8Array(
-      JSON.parse(metadata.contract.constructors[1].selector)
-    ));
-    const flipAction = u8aToHex(new Uint8Array(
-     JSON.parse(metadata.contract.messages[0].selector)
-    ));
+    
+    const selector = metadata.contract.constructors[1].selector;
+    const flipAction = metadata.contract.messages[0].selector;
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
 
