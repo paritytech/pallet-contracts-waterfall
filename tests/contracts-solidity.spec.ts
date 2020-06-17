@@ -19,7 +19,6 @@ import testKeyring from "@polkadot/keyring/testing";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
-import { u8aToHex } from "@polkadot/util"
 import { Abi } from '@polkadot/api-contract';
 import BN from "bn.js";
 
