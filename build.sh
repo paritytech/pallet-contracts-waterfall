@@ -44,7 +44,7 @@ cd contracts/rust/restore-contract
 cd -
 
 echo "____Building raw AssemblyScript Examples____"
-cd contracts/assemblyscript/flipper
+cd contracts/assemblyscript/raw-flipper
 rm -rf build
 yarn
 yarn build
