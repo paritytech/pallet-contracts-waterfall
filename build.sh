@@ -66,9 +66,14 @@ yarn build
 cd -
 
 echo "____Building as-substrate examples____"
-cd lib/as-substrate
-rm -rf build
+if [[ -d lib/as-substrate ]]; then
+	git --git-dir lib/as-substrate/.git pull origin master
+else
+	git clone --depth=1 --branch=master https://github.com/paritytech/as-substrate.git lib/as-substrate
+fi
+
+cd lib/as-substrate/contracts/incrementer
 yarn
+yarn run clean
 yarn build
-projects/test-contract/build.sh
 cd -

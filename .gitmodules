@@ -4,7 +4,6 @@
 [submodule "lib/as-substrate"]
 	path = lib/as-substrate
 	url = https://github.com/paritytech/as-substrate.git
-	branch = sd-fix-status-quo-contract-library
 [submodule "lib/wabt"]
 	path = lib/wabt
 	url = https://github.com/WebAssembly/wabt.git

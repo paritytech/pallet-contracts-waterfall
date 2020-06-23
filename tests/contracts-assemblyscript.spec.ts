@@ -109,14 +109,14 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test("Raw Incrementer contract", async (done): Promise<void> => {
+  test("AS-Substrate Incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
       contractCreator,
-      "../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm"
+      "../lib/as-substrate/contracts/incrementer/build/incrementer.wasm"
     );
     expect(codeHash).toBeDefined();
 
