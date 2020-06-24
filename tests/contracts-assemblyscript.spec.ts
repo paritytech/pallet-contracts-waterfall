@@ -73,7 +73,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const codeHash: Hash = await putCode(
       api,
       contractCreator,
-      "../contracts/assemblyscript/flipper/build/flipper-pruned.wasm"
+      "../lib/as-substrate/contracts/flipper/build/flipper.wasm"
     );
     expect(codeHash).toBeDefined();
 
