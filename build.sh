@@ -59,7 +59,7 @@ else
 fi
 
 cd lib/as-substrate
+yarn clean
 yarn
-yarn run clean
-yarn run build
+yarn build
 cd -
