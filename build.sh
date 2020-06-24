@@ -44,20 +44,6 @@ cd contracts/rust/restore-contract
 cd -
 
 echo "____Building raw AssemblyScript Examples____"
-cd contracts/assemblyscript/raw-flipper
-rm -rf build
-yarn
-yarn build
-./build.sh
-cd -
-
-cd contracts/assemblyscript/incrementer
-rm -rf build
-yarn
-yarn build
-./build.sh
-cd -
-
 cd contracts/assemblyscript/erc20
 rm -rf build
 yarn
@@ -65,15 +51,15 @@ yarn build
 ./build.sh
 cd -
 
-echo "____Building as-substrate examples____"
+echo "____Building AssemblyScript examples____"
 if [[ -d lib/as-substrate ]]; then
 	git --git-dir lib/as-substrate/.git pull origin master
 else
 	git clone --depth=1 --branch=master https://github.com/paritytech/as-substrate.git lib/as-substrate
 fi
 
-cd lib/as-substrate/contracts/incrementer
+cd lib/as-substrate
 yarn
 yarn run clean
-yarn build
+yarn run build
 cd -
