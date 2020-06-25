@@ -24,9 +24,10 @@ fi
 
 echo "____Building ink! Examples____"
 if [[ -d lib/ink ]]; then
-	git --git-dir lib/ink/.git pull origin master
+    cd lib/ink git pull origin master
+    cd -
 else
-	git clone --depth=1 --branch=master https://github.com/paritytech/ink.git lib/ink
+	git clone https://github.com/paritytech/ink.git lib/ink
 fi
 
 cd lib/ink/examples/flipper
@@ -45,9 +46,10 @@ cd -
 
 echo "____Building AssemblyScript examples____"
 if [[ -d lib/as-substrate ]]; then
-	git --git-dir lib/as-substrate/.git pull origin master
+    cd lib/as-substrate/ git pull origin master
+    cd -
 else
-	git clone --depth=1 --branch=master https://github.com/paritytech/as-substrate.git lib/as-substrate
+	git clone https://github.com/paritytech/as-substrate.git lib/as-substrate
 fi
 
 cd lib/as-substrate
