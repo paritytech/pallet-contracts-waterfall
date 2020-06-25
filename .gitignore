@@ -1,8 +1,5 @@
-/lib/ink
 /node_modules
 *.log
-/contracts/assemblyscript/**/node_modules
-/contracts/assemblyscript/**/build
 /contracts/rust/**/target
 /contracts/solidity/**/*.wasm
 /contracts/solidity/**/*.json
