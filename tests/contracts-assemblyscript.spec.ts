@@ -178,7 +178,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const codeHash = await putCode(
       api,
       FRANKIE,
-      "./lib/as-substrate/contracts/erc20/build/erc20.wasm"
+      "../lib/as-substrate/contracts/erc20/build/erc20.wasm"
     );
     expect(codeHash).toBeDefined();
 
