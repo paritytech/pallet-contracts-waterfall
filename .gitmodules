@@ -1,6 +1,3 @@
-[submodule "lib/ink"]
-	path = lib/ink
-	url = git@github.com:paritytech/ink.git
 [submodule "lib/as-substrate"]
 	path = lib/as-substrate
 	url = https://github.com/paritytech/as-substrate.git
