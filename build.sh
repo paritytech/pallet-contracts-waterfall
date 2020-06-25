@@ -43,14 +43,6 @@ cd contracts/rust/restore-contract
 ./build.sh
 cd -
 
-echo "____Building raw AssemblyScript Examples____"
-cd contracts/assemblyscript/erc20
-rm -rf build
-yarn
-yarn build
-./build.sh
-cd -
-
 echo "____Building AssemblyScript examples____"
 if [[ -d lib/as-substrate ]]; then
 	git --git-dir lib/as-substrate/.git pull origin master
