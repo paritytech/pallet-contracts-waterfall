@@ -64,7 +64,7 @@ beforeEach(
 );
 
 describe("AssemblyScript Smart Contracts", () => {
-  test("Raw Flipper contract", async (done): Promise<void> => {
+  test("Raw AssemblyScript Flipper contract", async (done): Promise<void> => {
     // See https://github.com/paritytech/pallet-contracts-waterfall/issues/6 for info about
     // how to get the STORAGE_KEY of an instantiated contract
 
@@ -73,7 +73,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const codeHash: Hash = await putCode(
       api,
       contractCreator,
-      "../contracts/assemblyscript/flipper/build/flipper-pruned.wasm"
+      "../lib/as-substrate/contracts/raw/flipper/build/flipper.wasm"
     );
     expect(codeHash).toBeDefined();
 
@@ -109,14 +109,14 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test("Raw Incrementer contract", async (done): Promise<void> => {
+  test("AS-Substrate Incrementer contract", async (done): Promise<void> => {
     const STORAGE_KEY = (new Uint8Array(32)).fill(1);
 
     // Deploy contract code on chain and retrieve the code hash
     const codeHash = await putCode(
       api,
       contractCreator,
-      "../contracts/assemblyscript/incrementer/build/incrementer-pruned.wasm"
+      "../lib/as-substrate/contracts/incrementer/build/incrementer.wasm"
     );
     expect(codeHash).toBeDefined();
 
@@ -140,7 +140,7 @@ describe("AssemblyScript Smart Contracts", () => {
     done();
   });
 
-  test("Raw Erc20 contract", async (done): Promise<void> => {
+  test("AS-Substrate ERC-20 contract", async (done): Promise<void> => {
     /**
     * 1. Deploy & instantiate the contract
     * 2. Test if the TOTAL_SUPPLY_STORAGE_KEY holds the CREATION_FEE as a value
@@ -178,7 +178,7 @@ describe("AssemblyScript Smart Contracts", () => {
     const codeHash = await putCode(
       api,
       FRANKIE,
-      "../contracts/assemblyscript/erc20/build/erc20-pruned.wasm"
+      "../lib/as-substrate/contracts/erc20/build/erc20.wasm"
     );
     expect(codeHash).toBeDefined();
 

@@ -45,6 +45,12 @@ For running this test suite you would need to have:
    git submodule update --init
    ```
 
+   If you were running this test suite before and want to update your local version to the latest master branches of the submodules, run:
+
+   ```
+   git submodule update --remote --merge
+   ```
+
 # Compiling the examples
 
 To build all artifacts required for running the tests, you need to invoke
