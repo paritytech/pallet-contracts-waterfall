@@ -2,6 +2,12 @@
 
 This repo hosts tests for `pallet-contracts`.
 
+It uses git submodules for some tests. To checkout the repository including the linked submodules, run the following command to clone it:
+
+```
+git clone --recursive https://github.com/paritytech/pallet-contracts-waterfall.git
+```
+
 # Preparations
 
 For running this test suite you would need to have:
@@ -37,9 +43,9 @@ For running this test suite you would need to have:
 
    `yarn upgrade --pattern @polkadot`
 
-4. Initialize submodules
+4. Initialize submodules manually
 
-   This repo depends on submomdules, make sure you have them:
+   If you cloned the repository without the `--recursive` parameter, you need to initialize the submodules manually:
 
    ```
    git submodule update --init

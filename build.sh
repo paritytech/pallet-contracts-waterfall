@@ -22,20 +22,6 @@ else
     echo "Please install and run Docker if you want to compile the Solang contracts and succesfully run their tests."; 
 fi
 
-echo "____Building ink! Examples____"
-if [[ -d lib/ink ]]; then
-    cd lib/ink
-    git pull origin master
-    cd -
-else
-	git clone https://github.com/paritytech/ink.git lib/ink
-fi
-
-cd lib/ink/examples/flipper
-cargo +nightly contract build
-cargo +nightly contract generate-metadata
-cd -
-
 echo "____Building raw Rust Examples____"
 cd contracts/rust/raw-incrementer
 ./build.sh
@@ -45,15 +31,17 @@ cd contracts/rust/restore-contract
 ./build.sh
 cd -
 
-echo "____Building AssemblyScript examples____"
-if [[ -d lib/as-substrate ]]; then
-    cd lib/as-substrate/
-    git pull origin master
-    cd -
-else
-	git clone https://github.com/paritytech/as-substrate.git lib/as-substrate
-fi
+echo "____Initialize and update git submodules to use latest ink! and as-substrate master____"
+git submodule update --init --recursive
 
+echo "____Building ink! Examples____"
+cd lib/ink/examples/flipper
+cargo +nightly contract build
+cargo +nightly contract generate-metadata
+cd -
+
+
+echo "____Building AssemblyScript examples____"
 cd lib/as-substrate
 yarn clean
 yarn
