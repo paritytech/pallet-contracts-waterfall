@@ -24,7 +24,7 @@ function provide-wabt {
         if [[ -d lib/wabt ]]; then
             git --git-dir lib/wabt/.git pull origin master
         else
-            git clone --recursive --branch=master https://github.com/WebAssembly/wabt.git lib/wabt
+            git clone --recursive https://github.com/WebAssembly/wabt.git lib/wabt
             cd lib/wabt
             mkdir build
             cd build
