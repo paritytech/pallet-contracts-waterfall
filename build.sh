@@ -24,7 +24,8 @@ fi
 
 echo "____Building ink! Examples____"
 if [[ -d lib/ink ]]; then
-    cd lib/ink git pull origin master
+    cd lib/ink
+    git pull origin master
     cd -
 else
 	git clone https://github.com/paritytech/ink.git lib/ink
@@ -46,7 +47,8 @@ cd -
 
 echo "____Building AssemblyScript examples____"
 if [[ -d lib/as-substrate ]]; then
-    cd lib/as-substrate/ git pull origin master
+    cd lib/as-substrate/
+    git pull origin master
     cd -
 else
 	git clone https://github.com/paritytech/as-substrate.git lib/as-substrate
