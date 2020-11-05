@@ -45,7 +45,7 @@ build-and-test:
   before_script:
     # upstream CI can override global vars here
     - unset CARGO_TARGET_DIR
-    - rustup +nightly show
+    - rustup show
     - cargo --version
     - yarn --version
     - npm --version
