@@ -36,8 +36,8 @@ git submodule update --init --recursive
 
 echo "____Building ink! Examples____"
 cd lib/ink/examples/flipper
-cargo +nightly-2020-10-01 contract build
-cargo +nightly-2020-10-01 contract generate-metadata
+cargo +nightly contract build
+cargo +nightly contract generate-metadata
 cd -
 
 
