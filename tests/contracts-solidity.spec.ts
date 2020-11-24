@@ -96,20 +96,20 @@ describe("Solang Smart Contracts", () => {
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x01");
 
-    await callContract(api, contractCreator, address, abi.messages.flip());
+    await callContract(api, contractCreator, address, abi.findMessage('flip'));
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x00");
 
-    let res = await rpcContract(api, address, abi.messages.get());
+    let res = await rpcContract(api, address, abi.findMessage('get'));
     expect(res.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, abi.messages.flip());
+    await callContract(api, contractCreator, address, abi.findMessage('flip'));
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x01");
 
-    res = await rpcContract(api, address, abi.messages.get());
+    res = await rpcContract(api, address, abi.findMessage('get'));
     expect(res.toString()).toEqual("0x01");
 
     done();
@@ -149,31 +149,31 @@ describe("Solang Smart Contracts", () => {
     expect(address).toBeDefined();
 
     // what is the balance
-    let res = await rpcContract(api, address, abi.messages.balance());
+    let res = await rpcContract(api, address, abi.findMessage('balance'));
     let balance = new BN(res, 16, 'le');
     // the balance should be less than the creation free
     expect(balance.cmp(CREATION_FEE)).toBeLessThan(0);
     // the balance should be 99% or more than the creation
     expect(balance.cmp(CREATION_FEE.muln(99).divn(100))).toBeGreaterThan(0);
 
-    await callContract(api, contractCreator, address, abi.messages.createChild(DOT.muln(10)));
+    await callContract(api, contractCreator, address, abi.findMessage('createChild')(DOT.muln(10)));
 
     // what is the child balance
-    res = await rpcContract(api, address, abi.messages.childBalance());
+    res = await rpcContract(api, address, abi.findMessage('childBalance'));
     balance = new BN(res, 16, 'le');
 
     expect(balance.cmpn(10000000)).toBeGreaterThan(0);
     expect(balance.cmp(DOT.muln(10))).toBeLessThan(0);
 
     // do a call and send value along with it
-    await callContract(api, contractCreator, address, abi.messages.childSetVal(1024, DOT.muln(10)));
+    await callContract(api, contractCreator, address, abi.findMessage('childSetVal')(1024, DOT.muln(10)));
 
-    res = await rpcContract(api, address, abi.messages.childGetVal());
+    res = await rpcContract(api, address, abi.findMessage('childGetVal'));
 
     expect((new BN(res, 16, 'le')).toNumber()).toEqual(1024);
 
     // what is the child balance
-    res = await rpcContract(api, address, abi.messages.childBalance());
+    res = await rpcContract(api, address, abi.findMessage('flip'));
     let new_balance = new BN(res, 16, 'le');
 
     expect(new_balance.cmp(balance)).toBeGreaterThan(0);
