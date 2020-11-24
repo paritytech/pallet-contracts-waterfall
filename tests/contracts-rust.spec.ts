@@ -15,7 +15,7 @@
 // along with Substrate. If not, see <http://www.gnu.org/licenses/>.
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
-import testKeyring from "@polkadot/keyring/testing";
+import { createTestKeyring } from "@polkadot/keyring/testing";
 import { u8aToHex } from "@polkadot/util";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
@@ -31,7 +31,7 @@ import {
 } from "./utils";
 
 // This is a test account that is going to be created and funded each test.
-const keyring = testKeyring({ type: "sr25519" });
+const keyring = createTestKeyring({ type: "sr25519" });
 const alicePair = keyring.getPair(ALICE);
 let testAccount: KeyringPair;
 let api: ApiPromise;
