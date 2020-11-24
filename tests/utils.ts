@@ -102,11 +102,11 @@ export async function rpcContract(
     inputData
   });
 
-  if (!res.isOk) {
+  if (!res.result.isOk) {
     console.error("ERROR: rpc call did not succeed");
   }
 
-  return res.asOk.data;
+  return res.result.asOk.data;
 }
 
 export async function getContractStorage(
