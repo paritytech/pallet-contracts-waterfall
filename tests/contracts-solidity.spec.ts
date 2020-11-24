@@ -65,7 +65,7 @@ describe("Solang Smart Contracts", () => {
   test("Raw Flipper contract", async (done): Promise<void> => {
     // The next two lines are a not so pretty workaround until the new metadata format has been fully implemented
     const metadata = require("../contracts/solidity/flipper/flipper.json");
-    const abi = new Abi(api.registry, metadata);
+    const abi = new Abi(metadata, api.registry.getChainProperties());
 
     const STORAGE_KEY = (new Uint8Array(32)).fill(0);
     // Deploy contract code on chain and retrieve the code hash
@@ -96,20 +96,20 @@ describe("Solang Smart Contracts", () => {
     expect(initialValue).toBeDefined();
     expect(initialValue.toString()).toEqual("0x01");
 
-    await callContract(api, contractCreator, address, abi.findMessage('flip'));
+    await callContract(api, contractCreator, address, abi.findMessage('flip').toU8a([]));
 
     const newValue = await getContractStorage(api, address, STORAGE_KEY);
     expect(newValue.toString()).toEqual("0x00");
 
-    let res = await rpcContract(api, address, abi.findMessage('get'));
+    let res = await rpcContract(api, address, abi.findMessage('get').toU8a([]));
     expect(res.toString()).toEqual("0x00");
 
-    await callContract(api, contractCreator, address, abi.findMessage('flip'));
+    await callContract(api, contractCreator, address, abi.findMessage('flip').toU8a([]));
 
     const flipBack = await getContractStorage(api, address, STORAGE_KEY);
     expect(flipBack.toString()).toEqual("0x01");
 
-    res = await rpcContract(api, address, abi.findMessage('get'));
+    res = await rpcContract(api, address, abi.findMessage('get').toU8a([]));
     expect(res.toString()).toEqual("0x01");
 
     done();
@@ -117,7 +117,7 @@ describe("Solang Smart Contracts", () => {
 
   test("Raw Creator contract", async (done): Promise<void> => {
     const metadata = require("../contracts/solidity/creator/creator.json");
-    const abi = new Abi(api.registry, metadata);
+    const abi = new Abi(metadata, api.registry.getChainProperties());
 
     // Deploy contract code on chain and retrieve the code hash
     const otherCodeHash = await putCode(
@@ -142,38 +142,38 @@ describe("Solang Smart Contracts", () => {
       api,
       contractCreator,
       codeHash,
-      abi.constructors[0](),
+      abi.constructors[0].toU8a([]),
       CREATION_FEE
     );
 
     expect(address).toBeDefined();
 
     // what is the balance
-    let res = await rpcContract(api, address, abi.findMessage('balance'));
+    let res = await rpcContract(api, address, abi.findMessage('balance').toU8a([]));
     let balance = new BN(res, 16, 'le');
     // the balance should be less than the creation free
     expect(balance.cmp(CREATION_FEE)).toBeLessThan(0);
     // the balance should be 99% or more than the creation
     expect(balance.cmp(CREATION_FEE.muln(99).divn(100))).toBeGreaterThan(0);
 
-    await callContract(api, contractCreator, address, abi.findMessage('createChild')(DOT.muln(10)));
+    await callContract(api, contractCreator, address, abi.findMessage('createChild').toU8a([DOT.muln(10)]));
 
     // what is the child balance
-    res = await rpcContract(api, address, abi.findMessage('childBalance'));
+    res = await rpcContract(api, address, abi.findMessage('childBalance').toU8a([]));
     balance = new BN(res, 16, 'le');
 
     expect(balance.cmpn(10000000)).toBeGreaterThan(0);
     expect(balance.cmp(DOT.muln(10))).toBeLessThan(0);
 
     // do a call and send value along with it
-    await callContract(api, contractCreator, address, abi.findMessage('childSetVal')(1024, DOT.muln(10)));
+    await callContract(api, contractCreator, address, abi.findMessage('childSetVal').toU8a([1024, DOT.muln(10)]));
 
-    res = await rpcContract(api, address, abi.findMessage('childGetVal'));
+    res = await rpcContract(api, address, abi.findMessage('childGetVal').toU8a([]));
 
     expect((new BN(res, 16, 'le')).toNumber()).toEqual(1024);
 
     // what is the child balance
-    res = await rpcContract(api, address, abi.findMessage('flip'));
+    res = await rpcContract(api, address, abi.findMessage('flip').toU8a([]));
     let new_balance = new BN(res, 16, 'le');
 
     expect(new_balance.cmp(balance)).toBeGreaterThan(0);
