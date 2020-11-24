@@ -15,7 +15,7 @@
 // along with Substrate. If not, see <http://www.gnu.org/licenses/>.
 
 import { ApiPromise, SubmittableResult, WsProvider } from "@polkadot/api";
-import testKeyring from "@polkadot/keyring/testing";
+import { createTestKeyring } from "@polkadot/keyring/testing";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import { KeyringPair } from "@polkadot/keyring/types";
 import { Address } from "@polkadot/types/interfaces";
@@ -32,7 +32,7 @@ import {
 } from "./utils";
 
 // This is a test account that is going to be created and funded before each test.
-const keyring = testKeyring({ type: "sr25519" });
+const keyring = createTestKeyring({ type: "sr25519" });
 const CHARLIE = keyring.getPair(CHARLIE_ADDRESS);
 const randomSeed = randomAsU8a(32);
 let contractCreator: KeyringPair;
@@ -82,7 +82,7 @@ describe("Solang Smart Contracts", () => {
       api,
       contractCreator,
       codeHash,
-      abi.constructors[0](1),
+      abi.constructors[0].toU8a([1]),
       CREATION_FEE
     );
 
