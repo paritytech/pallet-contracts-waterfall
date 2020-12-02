@@ -15,7 +15,7 @@ variables:                         &default-vars
   CARGO_INCREMENTAL:               0
 
 .docker-env:                       &docker-env
-  image:                           paritytech/contracts-ci-linux:solang-v0.1.2
+  image:                           paritytech/contracts-ci-linux:production
   only:
     - master
     - /^v[0-9]+\.[0-9]+.*$/ # i.e. v1.0, v2.1rc1
