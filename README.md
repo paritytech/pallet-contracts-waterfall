@@ -1,5 +1,11 @@
 # pallet-contracts test site
 
+⚠️ **This repository has been archived!** ⚠️
+
+It has been superseded by [`ink-waterfall`](https://github.com/paritytech/ink-waterfall).
+
+---
+
 This repo hosts tests for `pallet-contracts`.
 
 It uses git submodules for some tests. To checkout the repository including the linked submodules, run the following command to clone it:
